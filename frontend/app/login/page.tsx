@@ -168,7 +168,7 @@ export default function LoginPage() {
                   id="cedulaOrEmail"
                   type="text"
                   required
-                  placeholder="Ej: 1004567890 o docente@utn.edu.ec"
+                  placeholder="Ingrese su usuario (cédula o correo)"
                   value={cedulaOrEmail}
                   onChange={(e) => setCedulaOrEmail(e.target.value)}
                   className={`w-full pl-11 pr-4 py-3 border rounded-2xl transition-all font-medium text-sm focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 ${

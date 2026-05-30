@@ -2,76 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import type { UsuarioSession, HijoRel, EvaluacionCriterio, FichaMonitoreo, ActividadCasa } from "@/types/familia";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000/api";
-
-interface UsuarioSession {
-  user: {
-    id: string;
-    cedula: string;
-    email: string;
-    rol: "docente" | "familia";
-  };
-  perfil: {
-    id: string;
-    nombre: string;
-    apellido: string;
-    telefono?: string;
-  };
-}
-
-interface HijoRel {
-  parentesco: string;
-  estudiante: {
-    id: string;
-    cedula: string;
-    nombre: string;
-    apellido: string;
-    fecha_nacimiento: string;
-  };
-  grupo: {
-    id: string;
-    nombre: string;
-  };
-  docente: {
-    id: string;
-    nombre: string;
-    apellido: string;
-  };
-}
-
-interface EvaluacionCriterio {
-  id: string;
-  criterio_id: string;
-  nivel_logro_id: string;
-  unidad_didactica_id: string;
-  observaciones?: string;
-  criterios_evaluacion?: { nombre: string };
-  niveles_logro?: { nombre: string; codigo: string };
-  unidades_didacticas?: { titulo: string };
-}
-
-interface FichaMonitoreo {
-  id?: string;
-  clasificacion: string;
-  seriacion: string;
-  asimilacion_acomodacion: string;
-  justificacion_logica: string;
-  autorregulacion: string;
-  observaciones?: string;
-  acciones_apoyo?: string;
-}
-
-interface ActividadCasa {
-  id: string;
-  titulo: string;
-  descripcion: string;
-  recursos_enlaces?: { titulo: string; url: string }[];
-  unidad_titulo: string;
-  realizada: boolean;
-  fecha_realizacion?: string | null;
-  comentario_familia?: string | null;
-}
 
 export default function FamiliaDashboard() {
   const router = useRouter();
@@ -222,7 +155,7 @@ export default function FamiliaDashboard() {
 
       <div className="flex-1 flex flex-col md:flex-row">
         
-        {/* 2. BARRA LATERAL */}
+        {/* 2. BARRA LATERAL (CON LOS NUEVOS BOTONES MANTENIENDO TU ESTILO) */}
         <aside className="w-full md:w-64 bg-slate-950/50 md:border-r border-slate-800 p-4 space-y-2">
           <button
             onClick={() => setActiveTab("progreso")}
@@ -232,6 +165,16 @@ export default function FamiliaDashboard() {
           >
             <span>📈 Avance Cognitivo</span>
           </button>
+
+          <button
+            onClick={() => setActiveTab("historial")}
+            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
+              activeTab === "historial" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
+            }`}
+          >
+            <span>📊 Historial de Avance</span>
+          </button>
+
           <button
             onClick={() => setActiveTab("tareas")}
             className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
@@ -239,6 +182,15 @@ export default function FamiliaDashboard() {
             }`}
           >
             <span>🏠 Actividades en Casa</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab("perfil")}
+            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
+              activeTab === "perfil" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
+            }`}
+          >
+            <span>👦 Perfil del Estudiante</span>
           </button>
         </aside>
 
@@ -251,10 +203,16 @@ export default function FamiliaDashboard() {
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
               <div>
                 <h2 className="text-xl font-bold text-white">
-                  {activeTab === "progreso" ? "Avance Cognitivo de mi Hijo/a" : "Tareas y Actividades en Casa"}
+                  {activeTab === "progreso" && "Avance Cognitivo de mi Hijo/a"}
+                  {activeTab === "historial" && "Historial de Avance Temporal"}
+                  {activeTab === "tareas" && "Tareas y Actividades en Casa"}
+                  {activeTab === "perfil" && "Perfil del Estudiante"}
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
-                  {activeTab === "progreso" ? "Revisa el historial de evaluaciones del menor." : "Reporta el cumplimiento de las tareas escolares."}
+                  {activeTab === "progreso" && "Revisa el historial de evaluaciones del menor."}
+                  {activeTab === "historial" && "Línea de tiempo del progreso evolutivo unidad por unidad."}
+                  {activeTab === "tareas" && "Reporta el cumplimiento de las tareas escolares."}
+                  {activeTab === "perfil" && "Información general y datos de registro de la matrícula."}
                 </p>
               </div>
               
@@ -277,6 +235,21 @@ export default function FamiliaDashboard() {
                   </select>
                 </div>
               )}
+            </div>
+
+            {/* Botones de acciones del representante (visual, sin lógica) */}
+            <div className="py-4">
+              <h3 className="text-sm font-bold text-slate-300 mb-2">Acciones rápidas</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">📣 Reportar incidencia</button>
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">🏠 Reportar tarea</button>
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">📄 Ver informes</button>
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">✉️ Contactar docente</button>
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">📅 Solicitar reunión</button>
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">🔔 Notificaciones</button>
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">📚 Recursos</button>
+                <button className="py-3 px-3 bg-slate-900 border border-slate-800 rounded-xl text-xs font-bold text-white hover:bg-indigo-600/20">⚙️ Ajustes perfil</button>
+              </div>
             </div>
 
             {selectedHijo ? (
@@ -399,6 +372,34 @@ export default function FamiliaDashboard() {
                   </div>
                 )}
 
+                {/* CONTENIDO DE PESTAÑA NUEVA: HISTORIAL DE AVANCE (RF-F03) */}
+                {activeTab === "historial" && (
+                  <div className="bg-slate-950 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-6">
+                    <h3 className="text-base font-extrabold text-white border-b border-slate-900 pb-3">Línea de Tiempo del Progreso</h3>
+                    {hijoProgreso.length === 0 ? (
+                      <div className="text-center py-6 text-slate-500">
+                        <p className="text-xs font-semibold">No se encontraron registros de avance para graficar la evolución histórica.</p>
+                      </div>
+                    ) : (
+                      <div className="relative border-l border-slate-800 ml-4 pl-6 space-y-6">
+                        {hijoProgreso.map((prog) => (
+                          <div key={prog.id} className="relative">
+                            <div className="absolute -left-[29px] top-1 bg-indigo-600 rounded-full w-2.5 h-2.5" />
+                            <div className="bg-slate-900/60 border border-slate-850 p-4 rounded-xl space-y-1">
+                              <span className="text-[10px] text-slate-500 font-mono block">Evaluación de la Unidad</span>
+                              <h4 className="font-bold text-white text-sm">{prog.criterios_evaluacion?.nombre}</h4>
+                              <p className="text-xs text-indigo-400">{prog.unidades_didacticas?.titulo}</p>
+                              <div className="pt-2 flex items-center gap-4 text-xs">
+                                <p><span className="text-slate-500">Logro:</span> <strong className="text-emerald-400">{prog.niveles_logro?.nombre}</strong></p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 {/* CONTENIDO DE PESTAÑA: TAREAS EN CASA */}
                 {activeTab === "tareas" && (
                   <div className="space-y-6">
@@ -468,6 +469,25 @@ export default function FamiliaDashboard() {
                           ))}
                         </div>
                       )}
+                    </div>
+                  </div>
+                )}
+
+                {/* CONTENIDO DE PESTAÑA NUEVA: PERFIL DEL ESTUDIANTE (RF-F01) */}
+                {activeTab === "perfil" && (
+                  <div className="bg-slate-950 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+                    <h3 className="text-base font-extrabold text-white border-b border-slate-900 pb-3">Información del Estudiante</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                      <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-850 space-y-1">
+                        <p><span className="text-slate-500">Nombres:</span> <strong className="text-white">{selectedHijo.estudiante.nombre}</strong></p>
+                        <p><span className="text-slate-500">Apellidos:</span> <strong className="text-white">{selectedHijo.estudiante.apellido}</strong></p>
+                        <p><span className="text-slate-500">Cédula:</span> <strong className="text-white font-mono">{selectedHijo.estudiante.cedula}</strong></p>
+                      </div>
+                      <div className="bg-slate-900/60 p-4 rounded-xl border border-slate-850 space-y-1">
+                        <p><span className="text-slate-500">Semillero:</span> <strong className="text-white">{selectedHijo.grupo.nombre}</strong></p>
+                        <p><span className="text-slate-500">Parentesco:</span> <strong className="text-white">{selectedHijo.parentesco}</strong></p>
+                        <p><span className="text-slate-500">Fecha Nacimiento:</span> <strong className="text-white">{new Date(selectedHijo.estudiante.fecha_nacimiento).toLocaleDateString()}</strong></p>
+                      </div>
                     </div>
                   </div>
                 )}

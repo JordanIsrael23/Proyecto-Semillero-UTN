@@ -4,6 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { validarCedulaEcuatoriana } from "../utils/validation";
 import DashboardWelcome from "../components/DashboardWelcome";
+import DashboardShell from "../components/DashboardShell";
+
+const DOCENTE_NAV = [
+  { id: "inicio", label: "Inicio", icon: "home" },
+  { id: "alumnos", label: "Alumnos y Grupos", icon: "group" },
+  { id: "planificacion", label: "Planificación Didáctica", icon: "menu_book" },
+  { id: "evaluar", label: "Rejilla de Evaluación", icon: "grid_on" },
+  { id: "monitoreo", label: "Ficha de Monitoreo", icon: "assignment_turned_in" },
+  { id: "autoevaluacion", label: "Autoevaluación Docente", icon: "person_check" },
+  { id: "consolidado", label: "Métricas Colectivas", icon: "analytics" },
+] as const;
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000/api";
 
@@ -688,107 +699,25 @@ ${
 
   if (loadingSession) {
     return (
-      <div className="flex-1 h-screen flex items-center justify-center bg-slate-900 text-slate-400 font-sans">
-        <p className="text-lg font-semibold animate-pulse">Cargando sesión del docente...</p>
+      <div className="flex h-screen flex-1 items-center justify-center bg-background text-on-surface-variant font-sans">
+        <p className="animate-pulse text-lg font-semibold">Cargando sesión del docente...</p>
       </div>
     );
   }
 
+  const userFullName = `${session?.perfil.nombre ?? ""} ${session?.perfil.apellido ?? ""}`.trim();
+
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans">
-      
-      {/* 1. BARRA SUPERIOR */}
-      <header className="bg-slate-950 border-b border-slate-800 px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-4 z-10">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-500/10 border border-indigo-500/20 rounded-xl">
-            <svg className="w-6 h-6 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-            </svg>
-          </div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-white">Semilleros UTN &bull; Apoyo Pedagógico</h1>
-            <p className="text-xs text-slate-500 font-medium">Panel de Gestión Docente</p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="text-right">
-            <p className="text-sm font-bold text-white">{session?.perfil.nombre} {session?.perfil.apellido}</p>
-            <p className="text-xs text-indigo-400 font-bold uppercase tracking-wider">Docente</p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="py-2 px-4 border border-slate-700 bg-slate-900 hover:bg-red-500/10 hover:border-red-500/20 hover:text-red-400 rounded-xl text-xs font-bold transition-all cursor-pointer"
-          >
-            Cerrar Sesión
-          </button>
-        </div>
-      </header>
-
-      <div className="flex-1 flex flex-col md:flex-row">
-        
-        {/* 2. BARRA LATERAL (MENU DE SECCIONES) */}
-        <aside className="w-full md:w-64 bg-slate-950/50 md:border-r border-slate-800 p-4 space-y-2">
-          <button
-            onClick={() => setActiveTab("inicio")}
-            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
-              activeTab === "inicio" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
-            }`}
-          >
-            <span>🏠 Inicio</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("alumnos")}
-            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
-              activeTab === "alumnos" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
-            }`}
-          >
-            <span>👥 Alumnos y Grupos</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("planificacion")}
-            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
-              activeTab === "planificacion" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
-            }`}
-          >
-            <span>📅 Planificación Didáctica</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("evaluar")}
-            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
-              activeTab === "evaluar" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
-            }`}
-          >
-            <span>📝 Rejilla de Evaluación</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("monitoreo")}
-            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
-              activeTab === "monitoreo" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
-            }`}
-          >
-            <span>📊 Ficha de Monitoreo</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("autoevaluacion")}
-            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
-              activeTab === "autoevaluacion" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
-            }`}
-          >
-            <span>🍎 Autoevaluación Docente</span>
-          </button>
-          <button
-            onClick={() => setActiveTab("consolidado")}
-            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
-              activeTab === "consolidado" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
-            }`}
-          >
-            <span>📈 Métricas Colectivas</span>
-          </button>
-        </aside>
-
-        {/* 3. CONTENIDO DINÁMICO */}
-        <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
+    <DashboardShell
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      navItems={[...DOCENTE_NAV]}
+      userName={userFullName}
+      roleLabel="Docente"
+      panelSubtitle="Panel Docente"
+      onLogout={handleLogout}
+    >
+      <div className="overflow-y-auto">
 
           {/* TAB 0: INICIO / DASHBOARD DE BIENVENIDA */}
           {activeTab === "inicio" && (
@@ -797,76 +726,76 @@ ${
               role="docente"
               indicators={[
                 {
-                  icon: "👥",
+                  icon: "group",
                   label: "Estudiantes Matriculados",
                   value: estudiantes.length,
                   subtitle: "Alumnos registrados en el grupo activo",
-                  color: "indigo",
+                  color: "soft-blue",
                 },
                 {
-                  icon: "📁",
+                  icon: "folder",
                   label: "Grupos Asignados",
                   value: grupos.length,
                   subtitle: "Semilleros bajo tu responsabilidad",
-                  color: "emerald",
+                  color: "orange",
                 },
                 {
-                  icon: "📅",
+                  icon: "calendar_month",
                   label: "Unidades Didácticas",
                   value: unidades.length,
                   subtitle: "Planificaciones creadas o en curso",
-                  color: "amber",
+                  color: "primary",
                 },
                 {
-                  icon: "📝",
+                  icon: "task",
                   label: "Criterios de Evaluación",
                   value: criterios.length,
                   subtitle: "Criterios disponibles en la rúbrica",
-                  color: "cyan",
+                  color: "green",
                 },
               ]}
               actions={[
                 {
-                  icon: "👥",
+                  icon: "person_search",
                   label: "Gestionar Alumnos",
                   description: "Registra y vincula estudiantes con sus representantes",
                   tab: "alumnos",
-                  color: "indigo",
+                  color: "soft-blue",
                 },
                 {
-                  icon: "📅",
+                  icon: "edit_calendar",
                   label: "Planificación Didáctica",
                   description: "Crea unidades didácticas y actividades curriculares",
                   tab: "planificacion",
-                  color: "emerald",
+                  color: "primary",
                 },
                 {
-                  icon: "📝",
+                  icon: "rule",
                   label: "Evaluar Estudiantes",
                   description: "Registra evaluaciones cognitivas con la rúbrica",
                   tab: "evaluar",
-                  color: "amber",
+                  color: "green",
                 },
                 {
-                  icon: "📊",
+                  icon: "assignment",
                   label: "Ficha de Monitoreo",
                   description: "Completa fichas cualitativas individuales",
                   tab: "monitoreo",
-                  color: "pink",
+                  color: "orange",
                 },
                 {
-                  icon: "🍎",
+                  icon: "person_check",
                   label: "Autoevaluación Docente",
                   description: "Reflexiona sobre tu práctica pedagógica",
                   tab: "autoevaluacion",
-                  color: "violet",
+                  color: "secondary",
                 },
                 {
-                  icon: "📈",
+                  icon: "analytics",
                   label: "Métricas Colectivas",
                   description: "Visualiza el consolidado grupal de desempeño",
                   tab: "consolidado",
-                  color: "cyan",
+                  color: "tertiary",
                 },
               ]}
               onNavigate={setActiveTab}
@@ -876,16 +805,16 @@ ${
           {/* TAB 1: ALUMNOS Y GRUPOS */}
           {activeTab === "alumnos" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Alumnos y Grupos</h2>
-                  <p className="text-xs text-slate-400 mt-1">Registra estudiantes y vincula sus representantes.</p>
+                  <h2 className="font-headline text-xl font-bold text-on-surface">Alumnos y Grupos</h2>
+                  <p className="text-xs text-on-surface-variant mt-1">Registra estudiantes y vincula sus representantes.</p>
                 </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   <select
                     value={selectedGroup}
                     onChange={(e) => setSelectedGroup(e.target.value)}
-                    className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 w-full sm:w-[220px]"
+                    className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[220px]"
                   >
                     {grupos.map((g) => (
                       <option key={g.id} value={g.id}>
@@ -895,7 +824,7 @@ ${
                   </select>
                   <button
                     onClick={() => setShowStudentModal(true)}
-                    className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer shrink-0"
+                    className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
                   >
                     + Agregar Alumno
                   </button>
@@ -903,16 +832,16 @@ ${
               </div>
 
               {/* Listado de Estudiantes */}
-              <div className="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+              <div className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm">
                 {estudiantes.length === 0 ? (
-                  <div className="text-center py-16 text-slate-500 space-y-2">
+                  <div className="text-center py-16 text-on-surface-variant/80 space-y-2">
                     <span className="text-4xl block">👥</span>
                     <p className="font-bold text-sm">No hay alumnos registrados en este grupo.</p>
                   </div>
                 ) : (
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm">
-                      <thead className="bg-slate-900 border-b border-slate-800 text-slate-400 font-bold uppercase text-xs tracking-wider">
+                      <thead className="bg-surface-container-lowest border-b border-outline-variant/30 text-on-surface-variant font-bold uppercase text-xs tracking-wider">
                         <tr>
                           <th className="px-6 py-4">Cédula</th>
                           <th className="px-6 py-4">Nombre y Apellido</th>
@@ -921,28 +850,28 @@ ${
                           <th className="px-6 py-4 text-right">Acciones</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-850">
+                      <tbody className="divide-y divide-outline-variant/20">
                         {estudiantes.map((est) => {
                           const rep = est.familia_estudiante?.[0];
                           return (
-                            <tr key={est.id} className="hover:bg-slate-900/50 transition-colors">
-                              <td className="px-6 py-4 font-mono text-slate-300 font-bold">{est.cedula}</td>
-                              <td className="px-6 py-4 font-bold text-white">{est.apellido}, {est.nombre}</td>
-                              <td className="px-6 py-4 text-slate-400">{new Date(est.fecha_nacimiento).toLocaleDateString()}</td>
+                            <tr key={est.id} className="hover:bg-surface-container-lowest/50 transition-colors">
+                              <td className="px-6 py-4 font-mono text-on-surface-variant font-bold">{est.cedula}</td>
+                              <td className="px-6 py-4 font-bold text-on-surface">{est.apellido}, {est.nombre}</td>
+                              <td className="px-6 py-4 text-on-surface-variant">{new Date(est.fecha_nacimiento).toLocaleDateString()}</td>
                               <td className="px-6 py-4">
                                 {rep ? (
                                   <div>
-                                    <p className="text-white font-semibold">{rep.familias.nombre} {rep.familias.apellido}</p>
-                                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{rep.parentesco}</p>
+                                    <p className="text-on-surface font-semibold">{rep.familias.nombre} {rep.familias.apellido}</p>
+                                    <p className="text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider">{rep.parentesco}</p>
                                   </div>
                                 ) : (
-                                  <span className="text-slate-600 font-medium">Sin asignar</span>
+                                  <span className="text-on-surface-variant/80 font-medium">Sin asignar</span>
                                 )}
                               </td>
                               <td className="px-6 py-4 text-right space-x-2">
                                 <button
                                   onClick={() => handleDownloadInforme(est.id)}
-                                  className="py-1.5 px-3 bg-slate-900 hover:bg-indigo-600/10 hover:text-indigo-400 border border-slate-800 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-300"
+                                  className="py-1.5 px-3 bg-surface-container-lowest hover:bg-primary/10 hover:text-primary border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant"
                                 >
                                   Informe TXT
                                 </button>
@@ -954,7 +883,7 @@ ${
                                       setEstudiantes(await res.json());
                                     }
                                   }}
-                                  className="py-1.5 px-3 bg-slate-900 hover:bg-red-500/10 hover:text-red-400 border border-slate-800 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-500"
+                                  className="py-1.5 px-3 bg-surface-container-lowest hover:bg-red-500/10 hover:text-red-400 border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant/80"
                                 >
                                   Dar de Baja
                                 </button>
@@ -973,17 +902,17 @@ ${
           {/* TAB 2: PLANIFICACIÓN PEDAGÓGICA */}
           {activeTab === "planificacion" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Planificación de Actividades</h2>
-                  <p className="text-xs text-slate-400 mt-1">Gestiona unidades didácticas y asigna tareas.</p>
+                  <h2 className="font-headline text-xl font-bold text-on-surface">Planificación de Actividades</h2>
+                  <p className="text-xs text-on-surface-variant mt-1">Gestiona unidades didácticas y asigna tareas.</p>
                 </div>
                 <button
                   onClick={() => {
                     setUnitForm({ id: "", titulo: "", resumen: "", ambito: "Relaciones lógico-matemáticas", objetivos_generales: "", objetivos_aprendizaje: "", destrezas: "", semanas_previstas: 1, estado: "borrador" });
                     setShowUnitModal(true);
                   }}
-                  className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer"
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
                 >
                   + Nueva Unidad Didáctica
                 </button>
@@ -991,10 +920,10 @@ ${
 
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {unidades.map((unit) => (
-                  <div key={unit.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-all shadow-xl">
+                  <div key={unit.id} className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
                     <div className="space-y-4">
                       <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-extrabold uppercase bg-indigo-500/10 text-indigo-300 px-2 py-1 rounded-md border border-indigo-500/20 tracking-wider">
+                        <span className="text-[10px] font-extrabold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md border border-primary/20 tracking-wider">
                           {unit.ambito}
                         </span>
                         <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border tracking-wider ${
@@ -1002,28 +931,28 @@ ${
                             ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
                             : unit.estado === "borrador"
                             ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
-                            : "bg-slate-800 text-slate-400 border-slate-700"
+                            : "bg-surface-container text-on-surface-variant border-outline-variant/30"
                         }`}>
                           {unit.estado}
                         </span>
                       </div>
                       <div>
-                        <h3 className="text-lg font-bold text-white">{unit.titulo}</h3>
-                        <p className="text-xs text-slate-400 mt-2 leading-relaxed">{unit.resumen || "Sin descripción disponible."}</p>
+                        <h3 className="text-lg font-bold text-on-surface">{unit.titulo}</h3>
+                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{unit.resumen || "Sin descripción disponible."}</p>
                       </div>
-                      <div className="text-xs text-slate-500 font-semibold flex items-center gap-1.5">
+                      <div className="text-xs text-on-surface-variant/80 font-semibold flex items-center gap-1.5">
                         <span>🕒</span>
                         <span>Semanas previstas: {unit.semanas_previstas}</span>
                       </div>
 
                       {unit.actividades && unit.actividades.length > 0 && (
-                        <div className="border-t border-slate-900 pt-4 mt-4">
-                          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Actividades vinculadas:</p>
-                          <ul className="space-y-1.5 text-xs text-slate-300">
+                        <div className="border-t border-outline-variant/20 pt-4 mt-4">
+                          <p className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider mb-2">Actividades vinculadas:</p>
+                          <ul className="space-y-1.5 text-xs text-on-surface-variant">
                             {unit.actividades.map((act) => (
                               <li key={act.id} className="flex items-center gap-2">
                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                                  act.tipo === "casa" ? "bg-pink-500/10 text-pink-300" : "bg-indigo-500/10 text-indigo-300"
+                                  act.tipo === "casa" ? "bg-highlight-orange/10 text-highlight-orange" : "bg-primary/10 text-primary"
                                 }`}>
                                   {act.tipo}
                                 </span>
@@ -1035,7 +964,7 @@ ${
                       )}
                     </div>
 
-                    <div className="flex gap-2 border-t border-slate-900 pt-4 mt-6">
+                    <div className="flex gap-2 border-t border-outline-variant/20 pt-4 mt-6">
                       <button
                         onClick={() => {
                           setUnitForm({
@@ -1051,13 +980,13 @@ ${
                           });
                           setShowUnitModal(true);
                         }}
-                        className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        className="flex-1 py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
                       >
                         Editar
                       </button>
                       <button
                         onClick={() => handleCloneUnit(unit.id)}
-                        className="flex-1 py-2 bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        className="flex-1 py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
                       >
                         Clonar
                       </button>
@@ -1067,7 +996,7 @@ ${
                           setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [] });
                           setShowActivityModal(true);
                         }}
-                        className="py-2 px-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all cursor-pointer"
+                        className="py-2 px-3 bg-primary hover:brightness-110 text-on-primary rounded-xl text-xs font-bold transition-all cursor-pointer"
                       >
                         + Actividad
                       </button>
@@ -1081,15 +1010,15 @@ ${
           {/* TAB 3: REJILLA DE EVALUACIÓN */}
           {activeTab === "evaluar" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Registro de Evaluaciones</h2>
-                  <p className="text-xs text-slate-400 mt-1">Evalúa de forma ágil mediante la rúbrica cognitiva.</p>
+                  <h2 className="font-headline text-xl font-bold text-on-surface">Registro de Evaluaciones</h2>
+                  <p className="text-xs text-on-surface-variant mt-1">Evalúa de forma ágil mediante la rúbrica cognitiva.</p>
                 </div>
                 <select
                   value={selectedUnit}
                   onChange={(e) => setSelectedUnit(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 w-full sm:w-[250px]"
+                  className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
                 >
                   <option value="">-- Selecciona Unidad --</option>
                   {unidades.filter(u => u.estado === 'activo').map((u) => (
@@ -1108,8 +1037,8 @@ ${
                     onClick={() => setSelectedStudent(est)}
                     className={`py-2 px-4 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
                       selectedStudent?.id === est.id
-                        ? "bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-600/20"
-                        : "bg-slate-950 border-slate-850 text-slate-400 hover:bg-slate-900 hover:text-white"
+                        ? "bg-primary border-primary text-on-surface shadow-lg shadow-primary/20"
+                        : "bg-surface-container-low border-outline-variant/20 text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
                     }`}
                   >
                     {est.apellido}, {est.nombre}
@@ -1119,14 +1048,14 @@ ${
 
               {selectedStudent && selectedUnit ? (
                 <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-950 border border-slate-800 p-6 rounded-2xl gap-4">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-surface-container-low border border-outline-variant/30 p-6 rounded-2xl gap-4">
                     <div>
-                      <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Estudiante Evaluado</p>
-                      <h3 className="text-lg font-bold text-white mt-1">{selectedStudent.nombre} {selectedStudent.apellido}</h3>
+                      <p className="text-xs text-on-surface-variant/80 font-bold uppercase tracking-wider">Estudiante Evaluado</p>
+                      <h3 className="text-lg font-bold text-on-surface mt-1">{selectedStudent.nombre} {selectedStudent.apellido}</h3>
                     </div>
                     <button
                       onClick={handleSaveEvaluaciones}
-                      className="py-3 px-5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer w-full sm:w-auto"
+                      className="py-3 px-5 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer w-full sm:w-auto"
                     >
                       Guardar Todas las Evaluaciones
                     </button>
@@ -1136,17 +1065,17 @@ ${
                     {criterios.map((crit) => {
                       const selection = evaluacionesActive[crit.id] || { nivelId: "", obs: "" };
                       return (
-                        <div key={crit.id} className="bg-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between hover:border-slate-700 transition-all shadow-xl">
+                        <div key={crit.id} className="bg-surface-container-low border border-outline-variant/30 p-6 rounded-2xl flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
                           <div>
-                            <h4 className="text-base font-bold text-white">{crit.nombre}</h4>
-                            <p className="text-xs text-slate-400 mt-1 leading-relaxed">{crit.descripcion}</p>
+                            <h4 className="text-base font-bold text-on-surface">{crit.nombre}</h4>
+                            <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">{crit.descripcion}</p>
                           </div>
                           
                           <div className="mt-6 space-y-4">
                             <div className="grid grid-cols-3 gap-2">
                               {niveles.map((niv) => {
                                 const isActive = selection.nivelId === niv.id;
-                                let activeClass = "bg-slate-900 border-slate-800 text-slate-400 hover:bg-slate-850 hover:text-white";
+                                let activeClass = "bg-surface-container-lowest border-outline-variant/30 text-on-surface-variant hover:bg-surface-container hover:text-on-surface";
                                 if (isActive) {
                                   if (niv.codigo === "I") activeClass = "bg-red-500/20 border-red-500 text-red-300 shadow-md shadow-red-500/5";
                                   if (niv.codigo === "EP") activeClass = "bg-amber-500/20 border-amber-500 text-amber-300 shadow-md shadow-amber-500/5";
@@ -1167,7 +1096,7 @@ ${
                               placeholder="Observaciones de logro..."
                               value={selection.obs}
                               onChange={(e) => handleGradeObsChange(crit.id, e.target.value)}
-                              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 h-[60px] resize-none"
+                              className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-2 text-xs text-on-surface focus:outline-none focus:border-primary h-[60px] resize-none"
                             />
                           </div>
                         </div>
@@ -1176,7 +1105,7 @@ ${
                   </div>
                 </div>
               ) : (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl text-center py-20 text-slate-500">
+                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
                   <span className="text-4xl block mb-3">📝</span>
                   <p className="text-sm font-bold">Por favor, selecciona una Unidad Activa y un Estudiante para iniciar la evaluación.</p>
                 </div>
@@ -1187,10 +1116,10 @@ ${
           {/* TAB 4: FICHA DE MONITOREO */}
           {activeTab === "monitoreo" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Ficha de Monitoreo Individual</h2>
-                  <p className="text-xs text-slate-400 mt-1">Registra análisis cualitativos de los procesos cognitivos.</p>
+                  <h2 className="font-headline text-xl font-bold text-on-surface">Ficha de Monitoreo Individual</h2>
+                  <p className="text-xs text-on-surface-variant mt-1">Registra análisis cualitativos de los procesos cognitivos.</p>
                 </div>
                 <select
                   value={selectedStudent?.id || ""}
@@ -1198,7 +1127,7 @@ ${
                     const est = estudiantes.find((es) => es.id === e.target.value);
                     if (est) setSelectedStudent(est);
                   }}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 w-full sm:w-[250px]"
+                  className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
                 >
                   <option value="">-- Selecciona Estudiante --</option>
                   {estudiantes.map((est) => (
@@ -1210,94 +1139,94 @@ ${
               </div>
 
               {selectedStudent ? (
-                <form onSubmit={handleSaveFicha} className="bg-slate-950 border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6 shadow-2xl">
-                  <h3 className="text-lg font-bold text-white border-b border-slate-900 pb-3">
-                    Estudiante: <span className="text-indigo-400">{selectedStudent.nombre} {selectedStudent.apellido}</span>
+                <form onSubmit={handleSaveFicha} className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8 space-y-6">
+                  <h3 className="text-lg font-bold text-on-surface border-b border-outline-variant/20 pb-3">
+                    Estudiante: <span className="text-primary">{selectedStudent.nombre} {selectedStudent.apellido}</span>
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Clasificación</label>
+                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Clasificación</label>
                       <textarea
                         required
                         value={fichaMonitoreo.clasificacion}
                         onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, clasificacion: e.target.value })}
                         placeholder="Descripción sobre cómo agrupa objetos según atributos (forma, color, etc.)"
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[100px]"
+                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Seriación</label>
+                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Seriación</label>
                       <textarea
                         required
                         value={fichaMonitoreo.seriacion}
                         onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, seriacion: e.target.value })}
                         placeholder="Descripción sobre la habilidad de ordenar elementos de manera secuencial."
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[100px]"
+                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Asimilación y Acomodación</label>
+                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Asimilación y Acomodación</label>
                       <textarea
                         required
                         value={fichaMonitoreo.asimilacion_acomodacion}
                         onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, asimilacion_acomodacion: e.target.value })}
                         placeholder="Descripción de la apropiación y reestructuración de esquemas mentales."
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[100px]"
+                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Justificación Lógica</label>
+                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Justificación Lógica</label>
                       <textarea
                         required
                         value={fichaMonitoreo.justificacion_logica}
                         onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, justificacion_logica: e.target.value })}
                         placeholder="Cómo expresa lógicamente la causa o razón de sus respuestas y acciones."
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[100px]"
+                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Autorregulación</label>
+                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Autorregulación</label>
                       <textarea
                         required
                         value={fichaMonitoreo.autorregulacion}
                         onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, autorregulacion: e.target.value })}
                         placeholder="Capacidad del menor de guiar y coordinar sus propias conductas."
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[100px]"
+                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Observaciones del Docente</label>
+                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Observaciones del Docente</label>
                       <textarea
                         value={fichaMonitoreo.observaciones || ""}
                         onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, observaciones: e.target.value })}
                         placeholder="Notas adicionales e incidencias observadas."
-                        className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[100px]"
+                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">Acciones de Apoyo Recomendadas (Para Docente y Familia)</label>
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Acciones de Apoyo Recomendadas (Para Docente y Familia)</label>
                     <textarea
                       value={fichaMonitoreo.acciones_apoyo || ""}
                       onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, acciones_apoyo: e.target.value })}
                       placeholder="Dinámicas sugeridas de apoyo escolar que deben implementarse en el aula y en casa."
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[80px]"
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[80px]"
                     />
                   </div>
 
-                  <div className="flex justify-end border-t border-slate-900 pt-5 mt-4">
+                  <div className="flex justify-end border-t border-outline-variant/20 pt-5 mt-4">
                     <button
                       type="submit"
-                      className="py-3 px-6 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer"
+                      className="py-3 px-6 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
                     >
                       Guardar Ficha de Monitoreo
                     </button>
                   </div>
                 </form>
               ) : (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl text-center py-20 text-slate-500">
+                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
                   <span className="text-4xl block mb-3">📊</span>
                   <p className="text-sm font-bold">Por favor, selecciona un Estudiante para llenar la Ficha de Monitoreo.</p>
                 </div>
@@ -1308,15 +1237,15 @@ ${
           {/* TAB 5: AUTOEVALUACIÓN DOCENTE */}
           {activeTab === "autoevaluacion" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Autoevaluación Docente</h2>
-                  <p className="text-xs text-slate-400 mt-1">Reflexiona y evalúa tu práctica en la unidad didáctica.</p>
+                  <h2 className="font-headline text-xl font-bold text-on-surface">Autoevaluación Docente</h2>
+                  <p className="text-xs text-on-surface-variant mt-1">Reflexiona y evalúa tu práctica en la unidad didáctica.</p>
                 </div>
                 <select
                   value={selectedUnit}
                   onChange={(e) => setSelectedUnit(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 w-full sm:w-[250px]"
+                  className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
                 >
                   <option value="">-- Selecciona Unidad --</option>
                   {unidades.map((u) => (
@@ -1328,8 +1257,8 @@ ${
               </div>
 
               {selectedUnit ? (
-                <form onSubmit={handleSaveAutoevaluacion} className="bg-slate-950 border border-slate-800 p-6 sm:p-8 rounded-2xl space-y-6 shadow-2xl">
-                  <h3 className="text-lg font-bold text-white border-b border-slate-900 pb-3">
+                <form onSubmit={handleSaveAutoevaluacion} className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8 space-y-6">
+                  <h3 className="text-lg font-bold text-on-surface border-b border-outline-variant/20 pb-3">
                     Formulario Pedagógico de Autoevaluación
                   </h3>
 
@@ -1343,11 +1272,11 @@ ${
                       { num: 6, text: "6. ¿Se implementaron las adecuaciones curriculares necesarias?" }
                     ].map((q) => (
                       <div key={q.num} className="space-y-2">
-                        <span className="text-xs font-bold text-slate-300 block">{q.text}</span>
+                        <span className="text-xs font-bold text-on-surface-variant block">{q.text}</span>
                         <select
                           value={autoevaluacionAnswers[q.num]}
                           onChange={(e) => setAutoevaluacionAnswers({ ...autoevaluacionAnswers, [q.num]: e.target.value as any })}
-                          className="bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-indigo-500 w-full"
+                          className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-primary w-full"
                         >
                           <option value="SI">Sí</option>
                           <option value="NO">No</option>
@@ -1358,27 +1287,27 @@ ${
                   </div>
 
                   <div className="space-y-2 pt-4">
-                    <label className="text-xs font-bold text-slate-300 block">Reflexión Pedagógica y Propuestas de Mejora</label>
+                    <label className="text-xs font-bold text-on-surface-variant block">Reflexión Pedagógica y Propuestas de Mejora</label>
                     <textarea
                       required
                       value={autoevaluacionReflexion}
                       onChange={(e) => setAutoevaluacionReflexion(e.target.value)}
                       placeholder="Escriba sus comentarios reflexivos pedagógicos..."
-                      className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-indigo-500 h-[100px]"
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
                     />
                   </div>
 
-                  <div className="flex justify-end border-t border-slate-900 pt-5 mt-4">
+                  <div className="flex justify-end border-t border-outline-variant/20 pt-5 mt-4">
                     <button
                       type="submit"
-                      className="py-3 px-6 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl shadow-lg shadow-indigo-600/20 transition-all cursor-pointer"
+                      className="py-3 px-6 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
                     >
                       Registrar Autoevaluación
                     </button>
                   </div>
                 </form>
               ) : (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl text-center py-20 text-slate-500">
+                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
                   <span className="text-4xl block mb-3">🍎</span>
                   <p className="text-sm font-bold">Por favor, selecciona una Unidad para completar tu autoevaluación.</p>
                 </div>
@@ -1389,15 +1318,15 @@ ${
           {/* TAB 6: CONSOLIDADO GRUPAL */}
           {activeTab === "consolidado" && (
             <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-800 pb-5">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
                 <div>
-                  <h2 className="text-xl font-bold text-white">Métricas Colectivas</h2>
-                  <p className="text-xs text-slate-400 mt-1">Conteo consolidado de niveles de logro alcanzados por el grupo.</p>
+                  <h2 className="font-headline text-xl font-bold text-on-surface">Métricas Colectivas</h2>
+                  <p className="text-xs text-on-surface-variant mt-1">Conteo consolidado de niveles de logro alcanzados por el grupo.</p>
                 </div>
                 <select
                   value={selectedGroup}
                   onChange={(e) => setSelectedGroup(e.target.value)}
-                  className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 w-full sm:w-[220px]"
+                  className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[220px]"
                 >
                   {grupos.map((g) => (
                     <option key={g.id} value={g.id}>
@@ -1408,12 +1337,12 @@ ${
               </div>
 
               {metricasGrupales.length === 0 ? (
-                <div className="bg-slate-950 border border-slate-800 rounded-2xl text-center py-20 text-slate-500">
+                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
                   <span className="text-4xl block mb-3">📈</span>
                   <p className="text-sm font-bold">No se registran evaluaciones suficientes en este grupo para procesar métricas colectivas.</p>
                 </div>
               ) : (
-                <div className="space-y-6 bg-slate-950 border border-slate-800 p-6 sm:p-8 rounded-2xl shadow-2xl">
+                <div className="space-y-6 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
                   
                   {metricasGrupales.some(m => m.iniciado > m.logrado) && (
                     <div className="bg-amber-500/10 border border-amber-500/20 text-amber-200 p-4 rounded-xl text-xs font-bold flex items-center gap-2">
@@ -1430,9 +1359,9 @@ ${
                       const pctLogrado = total > 0 ? (met.logrado / total) * 100 : 0;
 
                       return (
-                        <div key={idx} className="space-y-2 border-b border-slate-900 pb-5 last:border-0 last:pb-0">
-                          <h4 className="text-sm font-bold text-white">{met.criterio}</h4>
-                          <div className="h-6 w-full bg-slate-900 rounded-full overflow-hidden flex text-[10px] font-extrabold text-white text-center">
+                        <div key={idx} className="space-y-2 border-b border-outline-variant/20 pb-5 last:border-0 last:pb-0">
+                          <h4 className="text-sm font-bold text-on-surface">{met.criterio}</h4>
+                          <div className="h-6 w-full bg-surface-container-lowest rounded-full overflow-hidden flex text-[10px] font-extrabold text-on-surface text-center">
                             {pctIniciado > 0 && (
                               <div className="bg-red-500 flex items-center justify-center transition-all" style={{ width: `${pctIniciado}%` }}>
                                 {met.iniciado} Iniciado ({Math.round(pctIniciado)}%)
@@ -1450,11 +1379,11 @@ ${
                             )}
                           </div>
                           
-                          <div className="flex gap-4 text-[10px] text-slate-500 font-bold uppercase tracking-wider">
+                          <div className="flex gap-4 text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider">
                             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-red-500 rounded-full" />Iniciado ({met.iniciado})</span>
                             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />En Proceso ({met.enProceso})</span>
                             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />Logrado ({met.logrado})</span>
-                            <span className="ml-auto text-slate-400">Total: {total} alumnos</span>
+                            <span className="ml-auto text-on-surface-variant">Total: {total} alumnos</span>
                           </div>
                         </div>
                       );
@@ -1465,7 +1394,6 @@ ${
             </div>
           )}
 
-        </main>
       </div>
 
       {/* ==================================================================
@@ -1474,13 +1402,13 @@ ${
 
       {/* Modal Agregar Alumno */}
       {showStudentModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center p-4 z-50 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+        <div className="ds-modal-overlay fixed inset-0 z-50 flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
+          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">Registrar Alumno</h3>
+              <h3 className="text-lg font-bold text-on-surface">Registrar Alumno</h3>
               <button
                 onClick={() => setShowStudentModal(false)}
-                className="text-slate-500 hover:text-white cursor-pointer font-bold"
+                className="text-on-surface-variant/80 hover:text-on-surface cursor-pointer font-bold"
               >
                 ✕
               </button>
@@ -1488,7 +1416,7 @@ ${
 
             <form onSubmit={handleCreateStudent} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Cédula del Niño (10 dígitos)</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Cédula del Niño (10 dígitos)</label>
                 <input
                   type="text"
                   required
@@ -1496,50 +1424,50 @@ ${
                   placeholder="Ej: 1005678901"
                   value={studentForm.cedula}
                   onChange={(e) => setStudentForm({ ...studentForm, cedula: e.target.value.replace(/\D/g, "") })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Nombre</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Nombre</label>
                 <input
                   type="text"
                   required
                   value={studentForm.nombre}
                   onChange={(e) => setStudentForm({ ...studentForm, nombre: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Apellido</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Apellido</label>
                 <input
                   type="text"
                   required
                   value={studentForm.apellido}
                   onChange={(e) => setStudentForm({ ...studentForm, apellido: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Fecha de Nacimiento</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Fecha de Nacimiento</label>
                 <input
                   type="date"
                   required
                   value={studentForm.fecha_nacimiento}
                   onChange={(e) => setStudentForm({ ...studentForm, fecha_nacimiento: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Vincular Representante (Familia)</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Vincular Representante (Familia)</label>
                 <div className="flex gap-2">
                   <select
                     value={studentForm.representante_id}
                     onChange={(e) => setStudentForm({ ...studentForm, representante_id: e.target.value })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                   >
                     <option value="">-- Ninguno --</option>
                     {familias.map((f) => (
@@ -1551,7 +1479,7 @@ ${
                   <button
                     type="button"
                     onClick={() => setShowRepresentativeModal(true)}
-                    className="px-3 border border-slate-800 bg-slate-950 hover:bg-slate-850 rounded-xl text-xs font-bold cursor-pointer text-indigo-400"
+                    className="px-3 border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container rounded-xl text-xs font-bold cursor-pointer text-primary"
                   >
                     + Nuevo
                   </button>
@@ -1559,11 +1487,11 @@ ${
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Parentesco</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Parentesco</label>
                 <select
                   value={studentForm.parentesco}
                   onChange={(e) => setStudentForm({ ...studentForm, parentesco: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 >
                   <option value="Padre">Padre</option>
                   <option value="Madre">Madre</option>
@@ -1571,17 +1499,17 @@ ${
                 </select>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-850">
+              <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
                 <button
                   type="button"
                   onClick={() => setShowStudentModal(false)}
-                  className="py-2.5 px-4 bg-slate-950 hover:bg-slate-850 text-slate-300 rounded-xl text-xs font-bold cursor-pointer"
+                  className="py-2.5 px-4 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer"
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Agregar Estudiante
                 </button>
@@ -1593,13 +1521,13 @@ ${
 
       {/* Modal Agregar Representante */}
       {showRepresentativeModal && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-sm flex justify-center items-center p-4 z-[60] animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+        <div className="ds-modal-overlay fixed inset-0 z-[60] flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
+          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">Registrar Representante</h3>
+              <h3 className="text-lg font-bold text-on-surface">Registrar Representante</h3>
               <button
                 onClick={() => setShowRepresentativeModal(false)}
-                className="text-slate-500 hover:text-white cursor-pointer font-bold"
+                className="text-on-surface-variant/80 hover:text-on-surface cursor-pointer font-bold"
               >
                 ✕
               </button>
@@ -1607,60 +1535,60 @@ ${
 
             <form onSubmit={handleCreateRepresentative} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Nombre</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Nombre</label>
                 <input
                   type="text"
                   required
                   value={representativeForm.nombre}
                   onChange={(e) => setRepresentativeForm({ ...representativeForm, nombre: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Apellido</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Apellido</label>
                 <input
                   type="text"
                   required
                   value={representativeForm.apellido}
                   onChange={(e) => setRepresentativeForm({ ...representativeForm, apellido: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Correo Electrónico</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Correo Electrónico</label>
                 <input
                   type="email"
                   required
                   placeholder="ejemplo@correo.com"
                   value={representativeForm.email}
                   onChange={(e) => setRepresentativeForm({ ...representativeForm, email: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Teléfono (Opcional)</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Teléfono (Opcional)</label>
                 <input
                   type="tel"
                   value={representativeForm.telefono}
                   onChange={(e) => setRepresentativeForm({ ...representativeForm, telefono: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-850">
+              <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
                 <button
                   type="button"
                   onClick={() => setShowRepresentativeModal(false)}
-                  className="py-2.5 px-4 bg-slate-950 hover:bg-slate-850 text-slate-300 rounded-xl text-xs font-bold cursor-pointer"
+                  className="py-2.5 px-4 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer"
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Crear Representante
                 </button>
@@ -1672,15 +1600,15 @@ ${
 
       {/* Modal Agregar / Editar Unidad Didáctica */}
       {showUnitModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center p-4 z-50 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+        <div className="ds-modal-overlay fixed inset-0 z-50 flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
+          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">
+              <h3 className="text-lg font-bold text-on-surface">
                 {unitForm.id ? "Editar Unidad Didáctica" : "Crear Unidad Didáctica"}
               </h3>
               <button
                 onClick={() => setShowUnitModal(false)}
-                className="text-slate-500 hover:text-white cursor-pointer font-bold"
+                className="text-on-surface-variant/80 hover:text-on-surface cursor-pointer font-bold"
               >
                 ✕
               </button>
@@ -1688,84 +1616,84 @@ ${
 
             <form onSubmit={handleSaveUnit} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Título de la Unidad</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Título de la Unidad</label>
                 <input
                   type="text"
                   required
                   placeholder="Ej: Unidad 1: Colores primarios"
                   value={unitForm.titulo}
                   onChange={(e) => setUnitForm({ ...unitForm, titulo: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Ámbito Cognitivo</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Ámbito Cognitivo</label>
                 <input
                   type="text"
                   required
                   placeholder="Ej: Relaciones lógico-matemáticas"
                   value={unitForm.ambito}
                   onChange={(e) => setUnitForm({ ...unitForm, ambito: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Resumen Pedagógico</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Resumen Pedagógico</label>
                 <textarea
                   placeholder="Resumen del ámbito a evaluar..."
                   value={unitForm.resumen}
                   onChange={(e) => setUnitForm({ ...unitForm, resumen: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 h-[60px]"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[60px]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Objetivos Generales</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Objetivos Generales</label>
                 <textarea
                   value={unitForm.objetivos_generales}
                   onChange={(e) => setUnitForm({ ...unitForm, objetivos_generales: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 h-[50px]"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[50px]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Objetivos de Aprendizaje</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Objetivos de Aprendizaje</label>
                 <textarea
                   value={unitForm.objetivos_aprendizaje}
                   onChange={(e) => setUnitForm({ ...unitForm, objetivos_aprendizaje: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 h-[50px]"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[50px]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Destrezas a Evaluar</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Destrezas a Evaluar</label>
                 <textarea
                   value={unitForm.destrezas}
                   onChange={(e) => setUnitForm({ ...unitForm, destrezas: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 h-[50px]"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[50px]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-400 block">Semanas Previstas</label>
+                  <label className="text-xs font-bold text-on-surface-variant block">Semanas Previstas</label>
                   <input
                     type="number"
                     min={1}
                     required
                     value={unitForm.semanas_previstas}
                     onChange={(e) => setUnitForm({ ...unitForm, semanas_previstas: Number(e.target.value) })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-slate-400 block">Estado</label>
+                  <label className="text-xs font-bold text-on-surface-variant block">Estado</label>
                   <select
                     value={unitForm.estado}
                     onChange={(e) => setUnitForm({ ...unitForm, estado: e.target.value as any })}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                   >
                     <option value="borrador">Borrador</option>
                     <option value="activo">Activo</option>
@@ -1774,17 +1702,17 @@ ${
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-850">
+              <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
                 <button
                   type="button"
                   onClick={() => setShowUnitModal(false)}
-                  className="py-2.5 px-4 bg-slate-950 hover:bg-slate-850 text-slate-300 rounded-xl text-xs font-bold cursor-pointer"
+                  className="py-2.5 px-4 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer"
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Guardar Planificación
                 </button>
@@ -1796,13 +1724,13 @@ ${
 
       {/* Modal Agregar Actividad */}
       {showActivityModal && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-sm flex justify-center items-center p-4 z-50 animate-fade-in">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-6 sm:p-8 space-y-6 shadow-2xl relative">
+        <div className="ds-modal-overlay fixed inset-0 z-50 flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
+          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
             <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-white">Añadir Actividad</h3>
+              <h3 className="text-lg font-bold text-on-surface">Añadir Actividad</h3>
               <button
                 onClick={() => setShowActivityModal(false)}
-                className="text-slate-500 hover:text-white cursor-pointer font-bold"
+                className="text-on-surface-variant/80 hover:text-on-surface cursor-pointer font-bold"
               >
                 ✕
               </button>
@@ -1810,34 +1738,34 @@ ${
 
             <form onSubmit={handleCreateActivity} className="space-y-4">
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Título de la Actividad</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Título de la Actividad</label>
                 <input
                   type="text"
                   required
                   placeholder="Ej: Pintar lámina con crayones"
                   value={activityForm.titulo}
                   onChange={(e) => setActivityForm({ ...activityForm, titulo: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Instrucciones</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Instrucciones</label>
                 <textarea
                   required
                   placeholder="Procedimiento detallado..."
                   value={activityForm.descripcion}
                   onChange={(e) => setActivityForm({ ...activityForm, descripcion: e.target.value })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500 h-[80px]"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[80px]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-400 block">Tipo de Actividad</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Tipo de Actividad</label>
                 <select
                   value={activityForm.tipo}
                   onChange={(e) => setActivityForm({ ...activityForm, tipo: e.target.value as any })}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-indigo-500"
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 >
                   <option value="clase">En Clase</option>
                   <option value="casa">En Casa (Extensión)</option>
@@ -1846,7 +1774,7 @@ ${
 
               {activityForm.tipo === "casa" && (
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-slate-400 block">Recursos Adicionales</label>
+                  <label className="text-xs font-bold text-on-surface-variant block">Recursos Adicionales</label>
                   <button
                     type="button"
                     onClick={() => {
@@ -1859,14 +1787,14 @@ ${
                         }));
                       }
                     }}
-                    className="w-full py-2 bg-slate-950 hover:bg-slate-850 border border-slate-800 rounded-xl text-xs font-bold cursor-pointer text-indigo-400"
+                    className="w-full py-2 bg-surface-container-low hover:bg-surface-container border border-outline-variant/30 rounded-xl text-xs font-bold cursor-pointer text-primary"
                   >
                     + Vincular Archivo/Vídeo Enlace
                   </button>
                   <div className="max-h-28 overflow-y-auto space-y-1.5">
                     {activityForm.recursos.map((rec, i) => (
-                      <div key={i} className="flex justify-between items-center bg-slate-950 border border-slate-800 p-2 rounded-lg text-xs">
-                        <span className="truncate max-w-[200px] text-white">📄 <strong>{rec.titulo}</strong></span>
+                      <div key={i} className="flex justify-between items-center bg-surface-container-low border border-outline-variant/30 p-2 rounded-lg text-xs">
+                        <span className="truncate max-w-[200px] text-on-surface">📄 <strong>{rec.titulo}</strong></span>
                         <button
                           type="button"
                           onClick={() => {
@@ -1885,17 +1813,17 @@ ${
                 </div>
               )}
 
-              <div className="flex justify-end gap-2 pt-4 border-t border-slate-850">
+              <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
                 <button
                   type="button"
                   onClick={() => setShowActivityModal(false)}
-                  className="py-2.5 px-4 bg-slate-950 hover:bg-slate-850 text-slate-300 rounded-xl text-xs font-bold cursor-pointer"
+                  className="py-2.5 px-4 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-xl cursor-pointer"
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Agregar Actividad
                 </button>
@@ -1905,6 +1833,6 @@ ${
         </div>
       )}
 
-    </div>
+    </DashboardShell>
   );
 }

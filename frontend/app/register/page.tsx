@@ -4,6 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { validarCedulaEcuatoriana } from "../utils/validation";
+import BrandLogo from "../components/BrandLogo";
+import MaterialIcon from "../components/MaterialIcon";
+import ThemeToggle from "../components/ThemeToggle";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000/api";
 
@@ -26,7 +29,6 @@ export default function RegisterPage() {
     setSuccess(false);
     setLoading(true);
 
-    // Validación de cédula ecuatoriana (módulo 10)
     if (!validarCedulaEcuatoriana(cedula)) {
       setError("La cédula ingresada no es válida para la República del Ecuador.");
       setLoading(false);
@@ -36,9 +38,7 @@ export default function RegisterPage() {
     try {
       const response = await fetch(`${BACKEND_URL}/auth/register`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           cedula,
           email,
@@ -51,236 +51,155 @@ export default function RegisterPage() {
       });
 
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.message || "Error al realizar el registro.");
       }
 
       setSuccess(true);
-      setTimeout(() => {
-        router.push("/");
-      }, 2500);
-    } catch (err: any) {
-      setError(err.message || "No se pudo conectar al servidor.");
+      setTimeout(() => router.push("/"), 2500);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "No se pudo conectar al servidor.";
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="flex-1 min-h-screen flex flex-col justify-center items-center bg-radial from-[#1e1b4b] via-[#0f172a] to-[#020617] px-4 py-12 relative overflow-hidden font-sans">
-      
-      {/* Elementos decorativos en el fondo */}
-      <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-500/10 blur-[120px] pointer-events-none animate-pulse"></div>
-      <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-pink-500/10 blur-[120px] pointer-events-none animate-pulse"></div>
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background px-4 py-12 font-sans">
+      <div className="pointer-events-none absolute -left-[10%] -top-[10%] h-[40%] w-[40%] animate-pulse rounded-full bg-primary/10 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-[10%] -right-[10%] h-[40%] w-[40%] animate-pulse rounded-full bg-highlight-orange/10 blur-[120px]" />
 
-      <div className="w-full max-w-lg z-10">
-        
-        {/* Cabecera / Marca */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-extrabold text-white tracking-tight sm:text-3xl">
-            Crea tu Cuenta
-          </h1>
-          <p className="text-sm text-slate-400 mt-2 font-medium">
-            Forma parte del Sistema de Apoyo Pedagógico &bull; Semilleros UTN
+      <div className="absolute right-5 top-5 z-50">
+        <ThemeToggle />
+      </div>
+
+      <div className="z-10 w-full max-w-lg">
+        <div className="mb-8 flex flex-col items-center text-center">
+          <BrandLogo size={88} showText={false} className="mb-4 justify-center" />
+          <h1 className="font-headline text-3xl font-extrabold text-on-surface">Crea tu Cuenta</h1>
+          <p className="mt-2 text-sm font-medium text-on-surface-variant">
+            Sistema de Apoyo Pedagógico · Semilleros UTN
           </p>
         </div>
 
-        {/* Tarjeta de Registro (Glassmorphism) */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl shadow-2xl p-8 sm:p-10">
-          
+        <div className="ds-card rounded-3xl p-8 sm:p-10">
           {success ? (
-            <div className="text-center py-8 space-y-4">
-              <div className="inline-flex items-center justify-center p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-full text-emerald-400 mb-2">
-                <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
+            <div className="space-y-4 py-8 text-center">
+              <div className="mb-2 inline-flex items-center justify-center rounded-full border border-highlight-green/30 bg-highlight-green/10 p-3 text-highlight-green">
+                <MaterialIcon name="check_circle" className="text-5xl" filled />
               </div>
-              <h3 className="text-2xl font-bold text-white">¡Registro Exitoso!</h3>
-              <p className="text-sm text-slate-400 max-w-xs mx-auto">
-                Tu cuenta ha sido creada con éxito. Redirigiéndote al inicio de sesión...
+              <h3 className="font-headline text-2xl font-bold text-on-surface">¡Registro exitoso!</h3>
+              <p className="mx-auto max-w-xs text-sm text-on-surface-variant">
+                Tu cuenta ha sido creada. Redirigiéndote al inicio de sesión...
               </p>
             </div>
           ) : (
             <>
               {error && (
-                <div className="mb-6 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-200 text-xs font-semibold flex items-center gap-2">
-                  <svg className="w-4 h-4 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
-                  </svg>
+                <div className="mb-6 flex items-center gap-2 rounded-2xl border border-error/30 bg-error/10 p-4 text-xs font-semibold text-error">
+                  <MaterialIcon name="error" className="shrink-0" />
                   <span>{error}</span>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-5">
-                
-                {/* Selector de Rol */}
                 <div className="space-y-2">
-                  <span className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                    Tipo de Cuenta
+                  <span className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    Tipo de cuenta
                   </span>
                   <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => setRol("familia")}
-                      className={`py-3 px-4 rounded-2xl font-bold text-sm border transition-all cursor-pointer text-center ${
-                        rol === "familia"
-                          ? "bg-indigo-600/20 border-indigo-500 text-indigo-300"
-                          : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
-                      }`}
-                    >
-                      Representante Familia
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setRol("docente")}
-                      className={`py-3 px-4 rounded-2xl font-bold text-sm border transition-all cursor-pointer text-center ${
-                        rol === "docente"
-                          ? "bg-indigo-600/20 border-indigo-500 text-indigo-300"
-                          : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
-                      }`}
-                    >
-                      Docente / Educador
-                    </button>
+                    {(
+                      [
+                        { id: "familia" as const, label: "Representante Familia" },
+                        { id: "docente" as const, label: "Docente / Educador" },
+                      ] as const
+                    ).map((opt) => (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setRol(opt.id)}
+                        className={`cursor-pointer rounded-2xl border px-4 py-3 text-center text-sm font-bold transition-all ${
+                          rol === opt.id
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-outline-variant/30 bg-surface-container-low text-on-surface-variant hover:border-primary/30"
+                        }`}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Campo Nombres */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label htmlFor="nombre" className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    <label htmlFor="nombre" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       Nombres
                     </label>
-                    <input
-                      id="nombre"
-                      type="text"
-                      required
-                      placeholder="Ej: Juan Carlos"
-                      value={nombre}
-                      onChange={(e) => setNombre(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all font-medium text-sm"
-                    />
+                    <input id="nombre" type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: Juan Carlos" />
                   </div>
-
-                  {/* Campo Apellidos */}
                   <div className="space-y-2">
-                    <label htmlFor="apellido" className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    <label htmlFor="apellido" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       Apellidos
                     </label>
-                    <input
-                      id="apellido"
-                      type="text"
-                      required
-                      placeholder="Ej: Pérez Gómez"
-                      value={apellido}
-                      onChange={(e) => setApellido(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all font-medium text-sm"
-                    />
+                    <input id="apellido" type="text" required value={apellido} onChange={(e) => setApellido(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: Pérez Gómez" />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Campo Cédula */}
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
-                    <label htmlFor="cedula" className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    <label htmlFor="cedula" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       Cédula (10 dígitos)
                     </label>
-                    <input
-                      id="cedula"
-                      type="text"
-                      required
-                      maxLength={10}
-                      placeholder="Ej: 1003456789"
-                      value={cedula}
-                      onChange={(e) => setCedula(e.target.value.replace(/\D/g, ""))}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all font-medium text-sm"
-                    />
+                    <input id="cedula" type="text" required maxLength={10} value={cedula} onChange={(e) => setCedula(e.target.value.replace(/\D/g, ""))} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: 1003456789" />
                   </div>
-
-                  {/* Campo Teléfono */}
                   <div className="space-y-2">
-                    <label htmlFor="telefono" className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                    <label htmlFor="telefono" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       Teléfono
                     </label>
-                    <input
-                      id="telefono"
-                      type="tel"
-                      placeholder="Ej: 0998765432"
-                      value={telefono}
-                      onChange={(e) => setTelefono(e.target.value)}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all font-medium text-sm"
-                    />
+                    <input id="telefono" type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: 0998765432" />
                   </div>
                 </div>
 
-                {/* Campo Correo */}
                 <div className="space-y-2">
-                  <label htmlFor="email" className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
-                    Correo Electrónico
+                  <label htmlFor="email" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
+                    Correo electrónico
                   </label>
-                  <input
-                    id="email"
-                    type="email"
-                    required
-                    placeholder="ejemplo@utn.edu.ec"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all font-medium text-sm"
-                  />
+                  <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="ejemplo@utn.edu.ec" />
                 </div>
 
-                {/* Campo Contraseña */}
                 <div className="space-y-2">
-                  <label htmlFor="password" className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                  <label htmlFor="password" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                     Contraseña
                   </label>
-                  <input
-                    id="password"
-                    type="password"
-                    required
-                    placeholder="Mínimo 6 caracteres"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all font-medium text-sm"
-                  />
+                  <input id="password" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="Mínimo 6 caracteres" />
                 </div>
 
-                {/* Botón de envío */}
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full mt-4 py-3.5 bg-indigo-600 hover:bg-indigo-500 active:scale-[0.98] text-white font-bold text-sm rounded-2xl shadow-lg shadow-indigo-600/30 transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-50"
-                >
+                <button type="submit" disabled={loading} className="ds-btn-primary mt-4 flex w-full cursor-pointer items-center justify-center gap-2 py-3.5 text-sm shadow-lg shadow-primary/20 disabled:opacity-50">
                   {loading ? (
                     <>
-                      <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      <span>Creando cuenta...</span>
+                      <MaterialIcon name="progress_activity" className="animate-spin text-xl" />
+                      Creando cuenta...
                     </>
                   ) : (
-                    <span>Registrarse</span>
+                    "Registrarse"
                   )}
                 </button>
               </form>
 
-              {/* Login link */}
-              <div className="mt-8 text-center border-t border-white/5 pt-6 text-sm text-slate-400">
+              <div className="mt-8 border-t border-outline-variant/20 pt-6 text-center text-sm text-on-surface-variant">
                 ¿Ya tienes una cuenta?{" "}
-                <Link href="/" className="font-bold text-indigo-400 hover:text-indigo-300 hover:underline transition-all">
+                <Link href="/" className="font-bold text-primary hover:underline">
                   Inicia sesión aquí
                 </Link>
               </div>
             </>
           )}
-
         </div>
 
-        {/* Footer */}
-        <div className="text-center mt-8 text-xs text-slate-500 font-medium">
-          &copy; {new Date().getFullYear()} Carrera de Software - UTN. Todos los derechos reservados.
-        </div>
+        <p className="mt-8 text-center text-xs font-medium text-on-surface-variant/70">
+          © {new Date().getFullYear()} Semilleros UTN · Sistema de Apoyo Pedagógico
+        </p>
       </div>
     </div>
   );

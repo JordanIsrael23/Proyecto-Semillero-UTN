@@ -1,11 +1,14 @@
 "use client";
 
+import Image from "next/image";
+import MaterialIcon from "./MaterialIcon";
+
 interface KpiIndicator {
   icon: string;
   label: string;
   value: string | number;
   subtitle: string;
-  color: "indigo" | "emerald" | "amber" | "pink" | "cyan" | "violet";
+  color: "soft-blue" | "orange" | "primary" | "green" | "secondary" | "tertiary";
 }
 
 interface QuickAction {
@@ -13,7 +16,7 @@ interface QuickAction {
   label: string;
   description: string;
   tab: string;
-  color: "indigo" | "emerald" | "amber" | "pink" | "cyan" | "violet";
+  color: "soft-blue" | "orange" | "primary" | "green" | "secondary" | "tertiary";
 }
 
 interface DashboardWelcomeProps {
@@ -25,67 +28,43 @@ interface DashboardWelcomeProps {
 }
 
 const colorMap = {
-  indigo: {
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-500/20",
-    text: "text-indigo-400",
-    glow: "shadow-indigo-500/10",
-    gradient: "from-indigo-500/20 to-indigo-600/5",
-    hoverBorder: "hover:border-indigo-400/40",
-    badge: "bg-indigo-500/15 text-indigo-300",
+  "soft-blue": {
+    bg: "bg-soft-blue/10",
+    text: "text-soft-blue",
+    hover: "group-hover:bg-soft-blue group-hover:text-white",
   },
-  emerald: {
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/20",
-    text: "text-emerald-400",
-    glow: "shadow-emerald-500/10",
-    gradient: "from-emerald-500/20 to-emerald-600/5",
-    hoverBorder: "hover:border-emerald-400/40",
-    badge: "bg-emerald-500/15 text-emerald-300",
+  orange: {
+    bg: "bg-highlight-orange/10",
+    text: "text-highlight-orange",
+    hover: "group-hover:bg-highlight-orange group-hover:text-on-surface",
   },
-  amber: {
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/20",
-    text: "text-amber-400",
-    glow: "shadow-amber-500/10",
-    gradient: "from-amber-500/20 to-amber-600/5",
-    hoverBorder: "hover:border-amber-400/40",
-    badge: "bg-amber-500/15 text-amber-300",
+  primary: {
+    bg: "bg-primary/10",
+    text: "text-primary",
+    hover: "group-hover:bg-primary group-hover:text-on-primary",
   },
-  pink: {
-    bg: "bg-pink-500/10",
-    border: "border-pink-500/20",
-    text: "text-pink-400",
-    glow: "shadow-pink-500/10",
-    gradient: "from-pink-500/20 to-pink-600/5",
-    hoverBorder: "hover:border-pink-400/40",
-    badge: "bg-pink-500/15 text-pink-300",
+  green: {
+    bg: "bg-highlight-green/10",
+    text: "text-highlight-green",
+    hover: "group-hover:bg-highlight-green group-hover:text-white",
   },
-  cyan: {
-    bg: "bg-cyan-500/10",
-    border: "border-cyan-500/20",
-    text: "text-cyan-400",
-    glow: "shadow-cyan-500/10",
-    gradient: "from-cyan-500/20 to-cyan-600/5",
-    hoverBorder: "hover:border-cyan-400/40",
-    badge: "bg-cyan-500/15 text-cyan-300",
+  secondary: {
+    bg: "bg-secondary-fixed-dim/20",
+    text: "text-secondary",
+    hover: "group-hover:bg-secondary group-hover:text-white",
   },
-  violet: {
-    bg: "bg-violet-500/10",
-    border: "border-violet-500/20",
-    text: "text-violet-400",
-    glow: "shadow-violet-500/10",
-    gradient: "from-violet-500/20 to-violet-600/5",
-    hoverBorder: "hover:border-violet-400/40",
-    badge: "bg-violet-500/15 text-violet-300",
+  tertiary: {
+    bg: "bg-tertiary-container/20",
+    text: "text-tertiary",
+    hover: "group-hover:bg-tertiary group-hover:text-white",
   },
 };
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Buenos días";
-  if (hour < 18) return "Buenas tardes";
-  return "Buenas noches";
+const EDUCATION_BG =
+  "https://lh3.googleusercontent.com/aida-public/AB6AXuBpaj4Pmr8NEE6L9VgElItMAX4H1g3cOFLLTGNooiWn6d6ThO7nbu2C3CL3ny-ou5aJURMrgY9OkeU0hJ0urMwxWdaZFMsOfS0LExb5XDCwiVQrCRHB_3Mk9kNMQUXkPviMvZc8bcBDIoN2b3mvYPMvw7yY-MtsDMndjfhXCTiQuW3QsaHrd1--mI7KTxHzDWn3ZXBGmGB4_QooQBOPGZoJ41gteYw2kQnxyfQmbK3N-0TAV03C7ekWuIzgPYnSm0VUrOLDWLlynQM";
+
+function getFirstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] || fullName;
 }
 
 function getFormattedDate(): string {
@@ -104,139 +83,143 @@ export default function DashboardWelcome({
   actions,
   onNavigate,
 }: DashboardWelcomeProps) {
-  const greeting = getGreeting();
+  const firstName = getFirstName(userName);
   const dateStr = getFormattedDate();
   const roleLabel = role === "docente" ? "Docente" : "Representante Familiar";
-  const accentColor = role === "docente" ? "indigo" : "pink";
+  const progress = role === "docente" ? 85 : 92;
+
+  const sesiones =
+    role === "docente"
+      ? [
+          {
+            hora: "08:30",
+            meridiano: "AM",
+            titulo: "Matemáticas - Grado 5",
+            detalle: "Unidad 4: Fracciones Avanzadas",
+            activa: true,
+          },
+          {
+            hora: "10:15",
+            meridiano: "AM",
+            titulo: "Ciencias Naturales",
+            detalle: "Laboratorio de Fotosíntesis",
+            activa: false,
+          },
+        ]
+      : [
+          {
+            hora: "Hoy",
+            meridiano: "",
+            titulo: "Revisar tareas en casa",
+            detalle: "Actividades pendientes del semillero",
+            activa: true,
+          },
+          {
+            hora: "Esta",
+            meridiano: "sem.",
+            titulo: "Consultar avance cognitivo",
+            detalle: "Últimas evaluaciones del docente",
+            activa: false,
+          },
+        ];
 
   return (
-    <section className="space-y-6 animate-[fadeIn_0.5s_ease-out]">
-      {/* ── Banner de Bienvenida ── */}
-      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-6 sm:p-8 shadow-2xl shadow-slate-950/60">
-        {/* Decorative blurs */}
-        <div className={`pointer-events-none absolute -top-20 -right-20 h-56 w-56 rounded-full blur-3xl opacity-30 ${role === "docente" ? "bg-indigo-600" : "bg-pink-600"}`} />
-        <div className={`pointer-events-none absolute -bottom-16 -left-16 h-44 w-44 rounded-full blur-3xl opacity-20 ${role === "docente" ? "bg-cyan-500" : "bg-amber-500"}`} />
-
-        <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          {/* Left: Avatar + Greeting */}
-          <div className="flex items-start gap-5">
-            <div className={`flex h-16 w-16 sm:h-20 sm:w-20 shrink-0 items-center justify-center rounded-2xl border text-2xl sm:text-3xl font-black uppercase tracking-widest shadow-xl ${colorMap[accentColor].bg} ${colorMap[accentColor].border} ${colorMap[accentColor].text} ${colorMap[accentColor].glow}`}>
-              {userName.charAt(0)}
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-[0.2em] ${colorMap[accentColor].badge}`}>
-                  {role === "docente" ? "📚" : "🏠"} {roleLabel}
-                </span>
-              </div>
-              <h1 className="mt-2 text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white leading-tight">
-                {greeting}, <span className={colorMap[accentColor].text}>{userName}</span>
-              </h1>
-              <p className="mt-2 text-sm text-slate-400 max-w-lg leading-relaxed">
-                {role === "docente"
-                  ? "Bienvenido al Sistema de Apoyo Pedagógico. Gestiona tus grupos, planifica y evalúa el desarrollo cognitivo de tus estudiantes."
-                  : "Bienvenido al Sistema de Apoyo Pedagógico. Consulta el progreso de tus hijos y las actividades asignadas para el hogar."}
-              </p>
-              <p className="mt-2 text-xs text-slate-500 font-medium capitalize">
-                📅 {dateStr}
-              </p>
-            </div>
+    <section className="animate-fade-in space-y-6">
+      {/* Welcome + Progress */}
+      <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-3">
+        <div className="relative flex items-center gap-8 overflow-hidden rounded-3xl border border-outline-variant/20 bg-surface-container-lowest p-8 shadow-sm lg:col-span-2 sm:p-10">
+          <div className="flex h-24 w-24 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+            <span className="font-headline text-5xl font-bold text-primary">{firstName.charAt(0).toUpperCase()}</span>
           </div>
-
-          {/* Right: Quick Stat Pill */}
-          <div className="shrink-0 flex flex-col items-center gap-2">
-            <div className={`rounded-2xl border bg-gradient-to-b ${colorMap[accentColor].gradient} ${colorMap[accentColor].border} px-6 py-5 text-center shadow-xl ${colorMap[accentColor].glow} min-w-[180px]`}>
-              <p className="text-[10px] font-extrabold uppercase tracking-[0.25em] text-slate-400">
-                {role === "docente" ? "Progreso Semanal" : "Avance General"}
-              </p>
-              <p className={`mt-3 text-4xl font-black ${colorMap[accentColor].text}`}>
-                {role === "docente" ? "85%" : "92%"}
-              </p>
-              <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-800">
-                <div
-                  className={`h-full rounded-full transition-all duration-1000 ease-out ${role === "docente" ? "bg-gradient-to-r from-indigo-500 via-cyan-400 to-emerald-400" : "bg-gradient-to-r from-pink-500 via-rose-400 to-amber-400"}`}
-                  style={{ width: role === "docente" ? "85%" : "92%" }}
-                />
-              </div>
-              <p className="mt-2 text-[10px] text-slate-500 font-semibold">
-                {role === "docente" ? "Evaluaciones completadas esta semana" : "Tareas y seguimiento al día"}
-              </p>
-            </div>
+          <div className="relative z-10 min-w-0 space-y-2">
+            <span className="rounded bg-primary/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+              {roleLabel}
+            </span>
+            <h1 className="font-headline text-3xl font-semibold leading-tight text-on-surface sm:text-[2.5rem] sm:leading-[3rem]">
+              ¡Hola, <span className="text-primary">{firstName}!</span> 👋
+            </h1>
+            <p className="max-w-xl text-base text-on-surface-variant">
+              {role === "docente"
+                ? "Bienvenido al Sistema de Apoyo Pedagógico. Gestiona tus grupos, planifica y evalúa el desarrollo cognitivo de tus estudiantes."
+                : "Bienvenido al Sistema de Apoyo Pedagógico. Consulta el progreso de tus hijos y las actividades asignadas para el hogar."}
+            </p>
+            <p className="flex items-center gap-1.5 pt-2 text-sm text-on-surface-variant/60">
+              <MaterialIcon name="calendar_today" className="text-base" />
+              <span className="capitalize">{dateStr}</span>
+            </p>
           </div>
+          <div className="pointer-events-none absolute -right-10 -top-10 h-64 w-64 rounded-full bg-primary/5 blur-3xl" />
+        </div>
+
+        <div className="flex flex-col justify-center rounded-3xl border border-outline-variant/20 bg-surface-container-lowest p-8 text-center shadow-sm">
+          <p className="mb-4 text-xs font-bold uppercase tracking-widest text-on-surface-variant/70">
+            {role === "docente" ? "Progreso Semanal" : "Avance General"}
+          </p>
+          <span className="font-headline mb-6 text-[3.5rem] font-bold leading-none text-primary">{progress}%</span>
+          <div className="mb-3 h-2 w-full rounded-full bg-surface-container-highest">
+            <div
+              className="h-full rounded-full bg-highlight-green transition-all duration-1000"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-xs text-on-surface-variant">
+            {role === "docente"
+              ? "Evaluaciones completadas esta semana"
+              : "Tareas y seguimiento al día"}
+          </p>
         </div>
       </div>
 
-      {/* ── KPI Indicators Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* KPI cards */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {indicators.map((kpi, idx) => {
-          const c = colorMap[kpi.color];
+          const c = colorMap[kpi.color] ?? colorMap.primary;
           return (
             <div
               key={idx}
-              className={`group relative overflow-hidden rounded-2xl border bg-slate-950/80 p-5 shadow-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl ${c.border} ${c.hoverBorder}`}
-              style={{ animationDelay: `${idx * 100}ms` }}
+              className="flex items-start justify-between rounded-3xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm"
             >
-              {/* Glow effect on hover */}
-              <div className={`pointer-events-none absolute -top-8 -right-8 h-24 w-24 rounded-full blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500 ${c.bg}`} />
-
-              <div className="relative z-10">
-                <div className="flex items-center justify-between">
-                  <span className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${c.bg} ${c.border} border`}>
-                    {kpi.icon}
-                  </span>
-                  <span className={`text-3xl font-black ${c.text}`}>
-                    {kpi.value}
-                  </span>
+              <div className="space-y-4">
+                <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${c.bg} ${c.text}`}>
+                  <MaterialIcon name={kpi.icon} filled className="text-2xl" />
                 </div>
-                <h3 className="mt-3 text-sm font-bold text-white">{kpi.label}</h3>
-                <p className="mt-1 text-xs text-slate-500 leading-relaxed">{kpi.subtitle}</p>
+                <div>
+                  <h3 className="text-sm font-semibold text-on-surface">{kpi.label}</h3>
+                  <p className="mt-1 text-xs text-on-surface-variant">{kpi.subtitle}</p>
+                </div>
               </div>
+              <span className="font-headline text-4xl text-secondary">{kpi.value}</span>
             </div>
           );
         })}
       </div>
 
-      {/* ── Quick Actions ── */}
-      <div>
-        <div className="flex items-center gap-3 mb-4">
-          <h2 className="text-base font-extrabold text-white">⚡ Acciones Rápidas</h2>
-          <div className="flex-1 h-px bg-slate-800" />
+      {/* Quick actions */}
+      <div className="space-y-6">
+        <div className="flex items-center gap-2 text-on-surface">
+          <MaterialIcon name="bolt" className="text-highlight-orange" />
+          <h2 className="font-headline text-2xl font-medium">Acciones Rápidas</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {actions.map((action, idx) => {
-            const c = colorMap[action.color];
+            const c = colorMap[action.color] ?? colorMap.primary;
             return (
               <button
                 key={idx}
+                type="button"
                 onClick={() => onNavigate(action.tab)}
-                className={`group relative overflow-hidden rounded-2xl border bg-slate-950/60 p-5 text-left shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl cursor-pointer ${c.border} ${c.hoverBorder}`}
+                className="group flex cursor-pointer items-center gap-5 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 text-left transition-all hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5"
               >
-                {/* Animated gradient on hover */}
-                <div className={`pointer-events-none absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 bg-gradient-to-br ${c.gradient}`} />
-
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3">
-                    <span className={`flex h-10 w-10 items-center justify-center rounded-xl text-lg ${c.bg} border ${c.border} group-hover:scale-110 transition-transform duration-300`}>
-                      {action.icon}
-                    </span>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-sm font-bold text-white group-hover:text-white truncate">
-                        {action.label}
-                      </h3>
-                      <p className="text-xs text-slate-500 group-hover:text-slate-400 transition-colors truncate">
-                        {action.description}
-                      </p>
-                    </div>
-                    {/* Arrow */}
-                    <svg
-                      className={`w-5 h-5 shrink-0 ${c.text} opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </div>
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-xl transition-colors ${c.bg} ${c.text} ${c.hover}`}
+                >
+                  <MaterialIcon name={action.icon} className="text-2xl" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-bold text-on-surface transition-colors group-hover:text-primary">
+                    {action.label}
+                  </p>
+                  <p className="mt-0.5 text-xs text-on-surface-variant">{action.description}</p>
                 </div>
               </button>
             );
@@ -244,19 +227,78 @@ export default function DashboardWelcome({
         </div>
       </div>
 
-      {/* Fade-in animation keyframe (injected inline) */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(12px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
+      {/* Próximas sesiones + Asistencia */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="rounded-3xl border border-outline-variant/20 bg-surface-container-lowest p-8 shadow-sm lg:col-span-2">
+          <div className="mb-6 flex items-center justify-between">
+            <h4 className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">
+              {role === "docente" ? "Próximas Sesiones" : "Recordatorios"}
+            </h4>
+            <MaterialIcon name="calendar_today" className="text-on-surface-variant" />
+          </div>
+          <div className="space-y-4">
+            {sesiones.map((sesion, i) => (
+              <div
+                key={i}
+                className={`flex items-center gap-5 rounded-2xl p-4 transition-colors ${
+                  sesion.activa
+                    ? "border border-primary/5 bg-primary/5 hover:bg-primary/10"
+                    : "bg-surface-container/50 opacity-70 hover:bg-surface-container"
+                }`}
+              >
+                <div
+                  className={`w-14 shrink-0 rounded-xl p-2.5 text-center text-xs font-bold shadow-sm ${
+                    sesion.activa
+                      ? "bg-primary text-on-primary"
+                      : "border border-soft-blue/10 bg-soft-blue/20 text-soft-blue"
+                  }`}
+                >
+                  {sesion.hora}
+                  {sesion.meridiano && (
+                    <>
+                      <br />
+                      {sesion.meridiano}
+                    </>
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-bold text-on-surface">{sesion.titulo}</p>
+                  <p className="mt-0.5 text-xs text-on-surface-variant">{sesion.detalle}</p>
+                </div>
+                {sesion.activa && role === "docente" && (
+                  <button
+                    type="button"
+                    className="rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-container-lowest"
+                    aria-label="Más opciones"
+                  >
+                    <MaterialIcon name="more_vert" />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative min-h-[240px] overflow-hidden rounded-3xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm">
+          <Image
+            src={EDUCATION_BG}
+            alt="Ambiente educativo"
+            fill
+            className="object-cover opacity-15"
+            unoptimized
+          />
+          <div className="relative z-10 flex h-full min-h-[240px] flex-col justify-end bg-gradient-to-t from-surface-container-lowest via-surface-container-lowest/80 to-transparent p-10">
+            <h4 className="font-headline text-2xl font-medium text-on-surface">
+              {role === "docente" ? "Asistencia" : "Seguimiento"}
+            </h4>
+            <p className="mt-2 text-base text-on-surface-variant">
+              {role === "docente"
+                ? "Hoy registraste el 100% de asistencia en tu grupo activo."
+                : "Mantén al día el reporte de actividades en casa de tu hijo/a."}
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

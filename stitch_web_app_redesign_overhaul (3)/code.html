@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Kimma | Dashboard Docente</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@400;500;600;700;800&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#446273",
+                    "surface-container-low": "#f3f3f3",
+                    "on-tertiary-fixed": "#0d1f10",
+                    "error-container": "#ffdad6",
+                    "on-tertiary": "#ffffff",
+                    "on-background": "#1a1c1c",
+                    "outline": "#72787f",
+                    "on-error": "#ffffff",
+                    "primary-container": "#84b1d9",
+                    "on-surface": "#1a1c1c",
+                    "on-error-container": "#93000a",
+                    "surface-tint": "#346286",
+                    "on-primary": "#ffffff",
+                    "error": "#ba1a1a",
+                    "secondary-fixed": "#c8e7fb",
+                    "surface-bright": "#f9f9f9",
+                    "primary": "#346286",
+                    "on-surface-variant": "#42474e",
+                    "secondary-fixed-dim": "#accbde",
+                    "on-primary-fixed": "#001d31",
+                    "primary-fixed": "#cce5ff",
+                    "outline-variant": "#c1c7cf",
+                    "surface-dim": "#dadada",
+                    "on-secondary-fixed-variant": "#2c4a5a",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "surface-container-highest": "#e2e2e2",
+                    "surface-container": "#eeeeee",
+                    "tertiary-fixed": "#d2e9d0",
+                    "on-primary-container": "#0b4466",
+                    "surface-container-high": "#e8e8e8",
+                    "inverse-on-surface": "#f1f1f1",
+                    "inverse-surface": "#2f3131",
+                    "primary-fixed-dim": "#9ecbf4",
+                    "surface": "#f9f9f9",
+                    "inverse-primary": "#9ecbf4",
+                    "background": "#f9f9f9",
+                    "surface-variant": "#e2e2e2",
+                    "tertiary": "#4f6350",
+                    "tertiary-fixed-dim": "#b6ccb5",
+                    "on-primary-fixed-variant": "#164a6d",
+                    "tertiary-container": "#9cb29b",
+                    "on-tertiary-fixed-variant": "#384b3a",
+                    "on-tertiary-container": "#324533",
+                    "secondary-container": "#c5e4f8",
+                    "on-secondary-fixed": "#001e2b",
+                    "on-secondary-container": "#496677",
+                    "highlight-orange": "#F2B885",
+                    "highlight-green": "#A9BFA8",
+                    "soft-blue": "#A7C6D9"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-desktop": "64px",
+                    "margin-mobile": "16px",
+                    "gutter": "24px",
+                    "unit": "8px",
+                    "container-max-width": "1280px",
+                    "sidebar-width": "280px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Work Sans"],
+                    "label-sm": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "headline-md": ["Work Sans"],
+                    "headline-lg-mobile": ["Work Sans"],
+                    "headline-xl": ["Work Sans"],
+                    "body-lg": ["Manrope"],
+                    "label-md": ["Manrope"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "600"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-nav-glow {
+            box-shadow: 0 4px 12px rgba(52, 98, 134, 0.15);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(114, 120, 127, 0.1);
+            box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.05);
+        }
+        body {
+            background-color: #f9f9f9;
+            color: #1a1c1c;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md overflow-x-hidden bg-background text-on-background">
+<!-- SideNavBar Shell -->
+<aside class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface-container-lowest flex flex-col h-full py-8 px-6 border-r border-outline-variant/30 z-50">
+<div class="flex items-center gap-3 mb-12 px-2">
+<img alt="Kimma Logo" class="h-10 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIFe7U4d8tfnMkNpOMKsftq4ZdJeerd3tPoYRVZ3ChnVszGVXIjMfMxQ91haQYm3Jtt09-i3c6RAMKTAZ8JTWi498K4A_Uv6vsnisEeKEMh_2I4Og2sTzr0QwX16eGHqPwQIbtGA-VU_nU0Ki664X5_S_6-l_XI7p6KFa4pECj7HZLxU1EulQfHwP_ifZkYzUvexiWo3Zm4BtaHocOmr9aMYv7S8ZFXS07d-dPlPIJHklb35ePfCeERO-4oCFB73C5XciwiEdKr7U"/>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold text-primary">Kimma</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant/70">Panel Docente</span>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3.5 bg-primary text-on-primary rounded-xl font-semibold transition-all active:scale-95 active-nav-glow" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Inicio</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3.5 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-md text-label-md">Alumnos y Grupos</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3.5 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Planificación Didáctica</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3.5 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">grid_on</span>
+<span class="font-label-md text-label-md">Rejilla de Evaluación</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3.5 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">assignment_turned_in</span>
+<span class="font-label-md text-label-md">Ficha de Monitoreo</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3.5 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">person_check</span>
+<span class="font-label-md text-label-md">Autoevaluación Docente</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3.5 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span class="font-label-md text-label-md">Métricas Colectivas</span>
+</a>
+</nav>
+<div class="mt-auto space-y-1 pt-6 border-t border-outline-variant/30">
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="font-label-md text-label-md">Ajustes</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors duration-200 rounded-xl" href="#">
+<span class="material-symbols-outlined text-[20px]">help</span>
+<span class="font-label-md text-label-md">Ayuda</span>
+</a>
+</div>
+</aside>
+<!-- Content Area -->
+<main class="ml-sidebar-width min-h-screen flex flex-col bg-background">
+<!-- TopAppBar Shell -->
+<header class="flex justify-between items-center w-full px-margin-desktop py-5 sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant/20">
+<div class="flex items-center bg-surface-container-low rounded-full px-5 py-2.5 w-96 border border-outline-variant/30 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all">
+<span class="material-symbols-outlined text-on-surface-variant mr-3">search</span>
+<input class="bg-transparent border-none focus:ring-0 text-label-sm w-full text-on-surface placeholder-on-surface-variant/50" placeholder="Buscar alumnos, planes..." type="text"/>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-4 items-center">
+<button class="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">dark_mode</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors relative p-2 rounded-full hover:bg-surface-container">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-highlight-orange rounded-full border-2 border-white"></span>
+</button>
+<div class="flex items-center gap-3 px-4 py-2 rounded-full bg-surface-container-high border border-outline-variant/10">
+<div class="text-right">
+<p class="font-label-md text-on-surface leading-none">Margarita Reascos</p>
+<p class="font-label-sm text-primary uppercase tracking-wider text-[10px] mt-1 font-bold">Docente</p>
+</div>
+<div class="w-10 h-10 rounded-full bg-soft-blue/20 flex items-center justify-center border border-soft-blue/30 overflow-hidden">
+<span class="material-symbols-outlined text-soft-blue">account_circle</span>
+</div>
+</div>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2.5 rounded-xl font-label-md transition-all active:scale-95 hover:brightness-110 shadow-sm shadow-primary/20">
+                Cerrar Sesión
+            </button>
+</div>
+</header>
+<!-- Main Dashboard Canvas -->
+<div class="p-margin-desktop space-y-gutter flex-1">
+<!-- Welcome Hero Section -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter items-stretch">
+<div class="lg:col-span-2 relative overflow-hidden rounded-3xl p-10 bg-white border border-outline-variant/20 shadow-sm flex items-center gap-8">
+<div class="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+<span class="font-headline-xl text-headline-xl font-bold">M</span>
+</div>
+<div class="space-y-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="bg-primary/10 text-primary text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider">Docente</span>
+</div>
+<h1 class="font-headline-xl text-headline-xl text-on-surface">
+                        ¡Hola, <span class="text-primary">Margarita!</span> 👋
+                    </h1>
+<p class="font-body-md text-on-surface-variant max-w-xl">
+                        Bienvenido al Sistema de Apoyo Pedagógico. Gestiona tus grupos, planifica y evalúa el desarrollo cognitivo de tus estudiantes.
+                    </p>
+<p class="text-on-surface-variant/60 font-label-sm flex items-center gap-1.5 pt-2">
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+                        Domingo, 31 de Mayo de 2024
+                    </p>
+</div>
+<!-- Abstract Background Ornament -->
+<div class="absolute -right-10 -top-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+</div>
+<!-- Progress Card Integration -->
+<div class="bg-white rounded-3xl p-8 border border-outline-variant/20 shadow-sm flex flex-col justify-center text-center">
+<p class="font-label-sm text-on-surface-variant/70 uppercase tracking-widest font-bold mb-4">Progreso Semanal</p>
+<div class="relative inline-flex items-center justify-center mb-6">
+<span class="font-headline-xl text-[56px] text-primary font-bold">85%</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-2 mb-3">
+<div class="bg-highlight-green h-full rounded-full transition-all duration-1000" style="width: 85%"></div>
+</div>
+<p class="text-[12px] text-on-surface-variant">Evaluaciones completadas esta semana</p>
+</div>
+</section>
+<!-- Summary Stat Cards -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
+<!-- Estudiantes -->
+<div class="bg-white p-6 rounded-3xl border border-outline-variant/20 shadow-sm flex justify-between items-start">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-soft-blue/10 flex items-center justify-center text-soft-blue">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+</div>
+<div>
+<h3 class="font-label-md text-on-surface">Estudiantes Matriculados</h3>
+<p class="text-[12px] text-on-surface-variant">Alumnos registrados en el grupo activo</p>
+</div>
+</div>
+<span class="font-headline-lg text-secondary text-4xl">2</span>
+</div>
+<!-- Grupos -->
+<div class="bg-white p-6 rounded-3xl border border-outline-variant/20 shadow-sm flex justify-between items-start">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-highlight-orange/10 flex items-center justify-center text-highlight-orange">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">folder</span>
+</div>
+<div>
+<h3 class="font-label-md text-on-surface">Grupos Asignados</h3>
+<p class="text-[12px] text-on-surface-variant">Semilleros bajo tu responsabilidad</p>
+</div>
+</div>
+<span class="font-headline-lg text-secondary text-4xl">1</span>
+</div>
+<!-- Unidades -->
+<div class="bg-white p-6 rounded-3xl border border-outline-variant/20 shadow-sm flex justify-between items-start">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+</div>
+<div>
+<h3 class="font-label-md text-on-surface">Unidades Didácticas</h3>
+<p class="text-[12px] text-on-surface-variant">Planificaciones creadas o en curso</p>
+</div>
+</div>
+<span class="font-headline-lg text-secondary text-4xl">1</span>
+</div>
+<!-- Criterios -->
+<div class="bg-white p-6 rounded-3xl border border-outline-variant/20 shadow-sm flex justify-between items-start">
+<div class="space-y-4">
+<div class="w-12 h-12 rounded-xl bg-highlight-green/10 flex items-center justify-center text-highlight-green">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">task</span>
+</div>
+<div>
+<h3 class="font-label-md text-on-surface">Criterios de Evaluación</h3>
+<p class="text-[12px] text-on-surface-variant">Criterios disponibles en la rúbrica</p>
+</div>
+</div>
+<span class="font-headline-lg text-secondary text-4xl">5</span>
+</div>
+</section>
+<!-- Quick Actions Section -->
+<section class="space-y-6">
+<div class="flex items-center gap-2 text-on-surface">
+<span class="material-symbols-outlined text-highlight-orange">bolt</span>
+<h2 class="font-headline-md text-headline-md">Acciones Rápidas</h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Action 1 -->
+<button class="group flex items-center gap-5 p-6 bg-white border border-outline-variant/20 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all text-left">
+<div class="w-12 h-12 rounded-xl bg-soft-blue/10 flex items-center justify-center text-soft-blue group-hover:bg-soft-blue group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">person_search</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface font-bold group-hover:text-primary transition-colors">Gestionar Alumnos</p>
+<p class="text-[12px] text-on-surface-variant">Registra y vincula estudiantes con sus representados</p>
+</div>
+</button>
+<!-- Action 2 -->
+<button class="group flex items-center gap-5 p-6 bg-white border border-outline-variant/20 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all text-left">
+<div class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">edit_calendar</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface font-bold group-hover:text-primary transition-colors">Planificación Didáctica</p>
+<p class="text-[12px] text-on-surface-variant">Crea unidades didácticas y actividades curriculares</p>
+</div>
+</button>
+<!-- Action 3 -->
+<button class="group flex items-center gap-5 p-6 bg-white border border-outline-variant/20 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all text-left">
+<div class="w-12 h-12 rounded-xl bg-highlight-green/10 flex items-center justify-center text-highlight-green group-hover:bg-highlight-green group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">rule</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface font-bold group-hover:text-primary transition-colors">Evaluar Estudiantes</p>
+<p class="text-[12px] text-on-surface-variant">Registra evaluaciones cognitivas con la rúbrica</p>
+</div>
+</button>
+<!-- Action 4 -->
+<button class="group flex items-center gap-5 p-6 bg-white border border-outline-variant/20 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all text-left">
+<div class="w-12 h-12 rounded-xl bg-highlight-orange/10 flex items-center justify-center text-highlight-orange group-hover:bg-highlight-orange group-hover:text-on-surface transition-colors">
+<span class="material-symbols-outlined">assignment</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface font-bold group-hover:text-primary transition-colors">Ficha de Monitoreo</p>
+<p class="text-[12px] text-on-surface-variant">Completa fichas cualitativas individuales</p>
+</div>
+</button>
+<!-- Action 5 -->
+<button class="group flex items-center gap-5 p-6 bg-white border border-outline-variant/20 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all text-left">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed-dim/20 flex items-center justify-center text-secondary group-hover:bg-secondary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">person_check</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface font-bold group-hover:text-primary transition-colors">Autoevaluación Docente</p>
+<p class="text-[12px] text-on-surface-variant">Reflexiona sobre tu práctica pedagógica</p>
+</div>
+</button>
+<!-- Action 6 -->
+<button class="group flex items-center gap-5 p-6 bg-white border border-outline-variant/20 rounded-2xl hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all text-left">
+<div class="w-12 h-12 rounded-xl bg-tertiary-container/20 flex items-center justify-center text-tertiary group-hover:bg-tertiary group-hover:text-white transition-colors">
+<span class="material-symbols-outlined">analytics</span>
+</div>
+<div>
+<p class="font-label-md text-on-surface font-bold group-hover:text-primary transition-colors">Métricas Colectivas</p>
+<p class="text-[12px] text-on-surface-variant">Visualiza el consolidado grupal de desempeño</p>
+</div>
+</button>
+</div>
+</section>
+<!-- Contextual Sidebar / Bottom Section -->
+<section class="grid grid-cols-1 lg:grid-cols-3 gap-gutter">
+<div class="lg:col-span-2 bg-white rounded-3xl p-8 border border-outline-variant/20 shadow-sm">
+<div class="flex items-center justify-between mb-6">
+<h4 class="font-label-md text-label-md text-on-surface-variant uppercase tracking-widest font-bold">Próximas Sesiones</h4>
+<span class="material-symbols-outlined text-on-surface-variant">calendar_today</span>
+</div>
+<div class="space-y-4">
+<div class="flex items-center gap-5 p-4 rounded-2xl bg-primary/5 hover:bg-primary/10 transition-colors border border-primary/5">
+<div class="bg-primary text-on-primary p-2.5 rounded-xl text-xs font-bold text-center w-14 shadow-sm">
+                            08:30<br/>AM
+                        </div>
+<div class="flex-1">
+<p class="font-label-md text-on-surface font-bold text-base">Matemáticas - Grado 5</p>
+<p class="text-[12px] text-on-surface-variant mt-0.5">Unidad 4: Fracciones Avanzadas</p>
+</div>
+<button class="p-2 hover:bg-white rounded-full transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+<div class="flex items-center gap-5 p-4 rounded-2xl bg-surface-container/50 hover:bg-surface-container transition-colors opacity-70">
+<div class="bg-soft-blue/20 p-2.5 rounded-xl text-soft-blue text-xs font-bold text-center w-14 border border-soft-blue/10">
+                            10:15<br/>AM
+                        </div>
+<div class="flex-1">
+<p class="font-label-md text-on-surface font-semibold text-base">Ciencias Naturales</p>
+<p class="text-[12px] text-on-surface-variant mt-0.5">Laboratorio de Fotosíntesis</p>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-3xl overflow-hidden relative border border-outline-variant/20 shadow-sm min-h-[240px]">
+<img alt="Ambiente educativo" class="w-full h-full object-cover opacity-15 absolute inset-0" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpaj4Pmr8NEE6L9VgElItMAX4H1g3cOFLLTGNooiWn6d6ThO7nbu2C3CL3ny-ou5aJURMrgY9OkeU0hJ0urMwxWdaZFMsOfS0LExb5XDCwiVQrCRHB_3Mk9kNMQUXkPviMvZc8bcBDIoN2b3mvYPMvw7yY-MtsDMndjfhXCTiQuW3QsaHrd1--mI7KTxHzDWn3ZXBGmGB4_QooQBOPGZoJ41gteYw2kQnxyfQmbK3N-0TAV03C7ekWuIzgPYnSm0VUrOLDWLlynQM"/>
+<div class="relative z-10 p-10 h-full flex flex-col justify-end bg-gradient-to-t from-white via-white/80 to-transparent">
+<h4 class="font-headline-md text-headline-md text-on-surface">Asistencia</h4>
+<p class="font-body-md text-on-surface-variant mt-2">Hoy registraste el 100% de asistencia en tu grupo activo.</p>
+</div>
+</div>
+</section>
+</div>
+<!-- Atmospheric Footer -->
+<footer class="py-10 px-margin-desktop text-center opacity-40">
+<p class="font-label-sm text-label-sm text-on-surface-variant tracking-widest uppercase">Kimma © 2024 • Conexión, Cuidado y Crecimiento Cognitivo</p>
+</footer>
+</main>
+</body></html>

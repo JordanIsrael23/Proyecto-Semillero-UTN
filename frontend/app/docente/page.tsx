@@ -315,6 +315,11 @@ export default function DocenteDashboard() {
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!selectedGroup) {
+      alert('Seleccione un grupo antes de crear el estudiante.');
+      return;
+    }
+
     if (!validarCedulaEcuatoriana(studentForm.cedula)) {
       alert("La cédula del estudiante no es una cédula ecuatoriana válida.");
       return;
@@ -335,9 +340,17 @@ export default function DocenteDashboard() {
         })
       });
 
-      const data = await res.json();
+      // Manejo robusto de errores: leer texto y parsear JSON si es posible
+      const text = await res.text();
+      let data: any = null;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch {
+        data = { message: text };
+      }
+
       if (!res.ok) {
-        throw new Error(data.message || "Error al registrar el estudiante.");
+        throw new Error(data?.message || "Error al registrar el estudiante.");
       }
 
       setShowStudentModal(false);

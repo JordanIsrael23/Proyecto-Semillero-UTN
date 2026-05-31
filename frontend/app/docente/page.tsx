@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { validarCedulaEcuatoriana } from "../utils/validation";
+import DashboardWelcome from "../components/DashboardWelcome";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:4000/api";
 
@@ -110,7 +111,7 @@ export default function DocenteDashboard() {
   const [familias, setFamilias] = useState<FamiliaDemo[]>([]);
 
   // Estados de negocio
-  const [activeTab, setActiveTab] = useState<string>("alumnos");
+  const [activeTab, setActiveTab] = useState<string>("inicio");
   const [grupos, setGrupos] = useState<Grupo[]>([]);
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
@@ -729,6 +730,14 @@ ${
         {/* 2. BARRA LATERAL (MENU DE SECCIONES) */}
         <aside className="w-full md:w-64 bg-slate-950/50 md:border-r border-slate-800 p-4 space-y-2">
           <button
+            onClick={() => setActiveTab("inicio")}
+            className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
+              activeTab === "inicio" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
+            }`}
+          >
+            <span>🏠 Inicio</span>
+          </button>
+          <button
             onClick={() => setActiveTab("alumnos")}
             className={`w-full text-left py-3 px-4 rounded-xl text-sm font-bold flex items-center gap-3 transition-all cursor-pointer ${
               activeTab === "alumnos" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" : "text-slate-400 hover:bg-slate-850 hover:text-white"
@@ -780,6 +789,89 @@ ${
 
         {/* 3. CONTENIDO DINÁMICO */}
         <main className="flex-1 p-6 sm:p-8 overflow-y-auto">
+
+          {/* TAB 0: INICIO / DASHBOARD DE BIENVENIDA */}
+          {activeTab === "inicio" && (
+            <DashboardWelcome
+              userName={`${session?.perfil.nombre} ${session?.perfil.apellido}`}
+              role="docente"
+              indicators={[
+                {
+                  icon: "👥",
+                  label: "Estudiantes Matriculados",
+                  value: estudiantes.length,
+                  subtitle: "Alumnos registrados en el grupo activo",
+                  color: "indigo",
+                },
+                {
+                  icon: "📁",
+                  label: "Grupos Asignados",
+                  value: grupos.length,
+                  subtitle: "Semilleros bajo tu responsabilidad",
+                  color: "emerald",
+                },
+                {
+                  icon: "📅",
+                  label: "Unidades Didácticas",
+                  value: unidades.length,
+                  subtitle: "Planificaciones creadas o en curso",
+                  color: "amber",
+                },
+                {
+                  icon: "📝",
+                  label: "Criterios de Evaluación",
+                  value: criterios.length,
+                  subtitle: "Criterios disponibles en la rúbrica",
+                  color: "cyan",
+                },
+              ]}
+              actions={[
+                {
+                  icon: "👥",
+                  label: "Gestionar Alumnos",
+                  description: "Registra y vincula estudiantes con sus representantes",
+                  tab: "alumnos",
+                  color: "indigo",
+                },
+                {
+                  icon: "📅",
+                  label: "Planificación Didáctica",
+                  description: "Crea unidades didácticas y actividades curriculares",
+                  tab: "planificacion",
+                  color: "emerald",
+                },
+                {
+                  icon: "📝",
+                  label: "Evaluar Estudiantes",
+                  description: "Registra evaluaciones cognitivas con la rúbrica",
+                  tab: "evaluar",
+                  color: "amber",
+                },
+                {
+                  icon: "📊",
+                  label: "Ficha de Monitoreo",
+                  description: "Completa fichas cualitativas individuales",
+                  tab: "monitoreo",
+                  color: "pink",
+                },
+                {
+                  icon: "🍎",
+                  label: "Autoevaluación Docente",
+                  description: "Reflexiona sobre tu práctica pedagógica",
+                  tab: "autoevaluacion",
+                  color: "violet",
+                },
+                {
+                  icon: "📈",
+                  label: "Métricas Colectivas",
+                  description: "Visualiza el consolidado grupal de desempeño",
+                  tab: "consolidado",
+                  color: "cyan",
+                },
+              ]}
+              onNavigate={setActiveTab}
+            />
+          )}
 
           {/* TAB 1: ALUMNOS Y GRUPOS */}
           {activeTab === "alumnos" && (

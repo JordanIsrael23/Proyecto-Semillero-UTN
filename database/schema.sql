@@ -139,6 +139,7 @@ CREATE TABLE actividades_casa_seguimiento (
     realizada BOOLEAN NOT NULL DEFAULT FALSE,
     fecha_realizacion TIMESTAMP WITH TIME ZONE,
     comentario_familia TEXT,
+    nota VARCHAR(20),
     fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

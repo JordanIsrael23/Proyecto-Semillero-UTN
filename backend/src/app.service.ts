@@ -629,11 +629,12 @@ export class AppService {
         fecha_realizacion: seg ? seg.fecha_realizacion : null,
         comentario_familia: seg ? seg.comentario_familia : null,
         seguimiento_id: seg ? seg.id : null,
+        nota: seg ? seg.nota : null,
       };
     });
   }
 
-  async saveActividadCasaSeguimiento(data: { estudiante_id: string; actividad_id: string; realizada: boolean; comentario_familia?: string }) {
+  async saveActividadCasaSeguimiento(data: { estudiante_id: string; actividad_id: string; realizada?: boolean; comentario_familia?: string; nota?: string }) {
     const existing = await this.prisma.actividades_casa_seguimiento.findFirst({
       where: {
         estudiante_id: data.estudiante_id,
@@ -645,9 +646,10 @@ export class AppService {
       return this.prisma.actividades_casa_seguimiento.update({
         where: { id: existing.id },
         data: {
-          realizada: data.realizada,
-          fecha_realizacion: data.realizada ? new Date() : null,
-          comentario_familia: data.comentario_familia,
+          realizada: data.realizada !== undefined ? data.realizada : existing.realizada,
+          fecha_realizacion: data.realizada !== undefined ? (data.realizada ? new Date() : null) : existing.fecha_realizacion,
+          comentario_familia: data.comentario_familia !== undefined ? data.comentario_familia : existing.comentario_familia,
+          nota: data.nota !== undefined ? data.nota : existing.nota,
         },
       });
     }
@@ -656,9 +658,10 @@ export class AppService {
       data: {
         estudiante_id: data.estudiante_id,
         actividad_id: data.actividad_id,
-        realizada: data.realizada,
+        realizada: data.realizada || false,
         fecha_realizacion: data.realizada ? new Date() : null,
-        comentario_familia: data.comentario_familia,
+        comentario_familia: data.comentario_familia || null,
+        nota: data.nota || null,
       },
     });
   }

@@ -642,6 +642,14 @@ export class AppService {
       },
     });
 
+    let parsedNota: number | null = null;
+    if (data.nota !== undefined && data.nota !== null && data.nota !== "") {
+      const val = parseFloat(data.nota);
+      if (!isNaN(val)) {
+        parsedNota = val;
+      }
+    }
+
     if (existing) {
       return this.prisma.actividades_casa_seguimiento.update({
         where: { id: existing.id },
@@ -649,7 +657,7 @@ export class AppService {
           realizada: data.realizada !== undefined ? data.realizada : existing.realizada,
           fecha_realizacion: data.realizada !== undefined ? (data.realizada ? new Date() : null) : existing.fecha_realizacion,
           comentario_familia: data.comentario_familia !== undefined ? data.comentario_familia : existing.comentario_familia,
-          nota: data.nota !== undefined ? data.nota : existing.nota,
+          nota: data.nota !== undefined ? parsedNota : existing.nota,
         },
       });
     }
@@ -661,7 +669,7 @@ export class AppService {
         realizada: data.realizada || false,
         fecha_realizacion: data.realizada ? new Date() : null,
         comentario_familia: data.comentario_familia || null,
-        nota: data.nota || null,
+        nota: parsedNota,
       },
     });
   }

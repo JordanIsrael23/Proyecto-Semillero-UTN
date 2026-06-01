@@ -629,7 +629,7 @@ export class AppService {
         fecha_realizacion: seg ? seg.fecha_realizacion : null,
         comentario_familia: seg ? seg.comentario_familia : null,
         seguimiento_id: seg ? seg.id : null,
-        nota: seg ? seg.nota : null,
+        nota: seg && seg.nota !== null ? String(seg.nota) : null,
       };
     });
   }

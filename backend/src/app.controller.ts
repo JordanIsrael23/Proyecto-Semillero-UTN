@@ -199,13 +199,14 @@ export class AppController {
   @Post('estudiantes/:id/actividades-casa/seguimiento')
   async saveActividadCasaSeguimiento(
     @Param('id') estudianteId: string,
-    @Body() body: { actividad_id: string; realizada: boolean; comentario_familia?: string }
+    @Body() body: { actividad_id: string; realizada?: boolean; comentario_familia?: string; nota?: string }
   ) {
     return this.appService.saveActividadCasaSeguimiento({
       estudiante_id: estudianteId,
       actividad_id: body.actividad_id,
       realizada: body.realizada,
       comentario_familia: body.comentario_familia,
+      nota: body.nota,
     });
   }
 

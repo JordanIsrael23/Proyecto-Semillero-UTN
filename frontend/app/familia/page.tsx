@@ -81,7 +81,34 @@ interface ActividadCasa {
   realizada: boolean;
   fecha_realizacion?: string | null;
   comentario_familia?: string | null;
+  nota?: string | null;
 }
+
+const getEquivalenciaNota = (notaStr: string | null | undefined) => {
+  if (!notaStr) return null;
+  
+  // Try parsing as float first
+  const nota = parseFloat(notaStr);
+  if (!isNaN(nota)) {
+    if (nota >= 8.0) {
+      return { label: "Logrado", colorClass: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" };
+    }
+    if (nota >= 5.0) {
+      return { label: "En Proceso", colorClass: "bg-amber-500/10 text-amber-500 border-amber-500/20" };
+    }
+    return { label: "Iniciado", colorClass: "bg-red-500/10 text-red-500 border-red-500/20" };
+  }
+  
+  // Fallback to old code formats
+  const clean = notaStr.toUpperCase().trim();
+  if (clean === "L" || clean === "LOGRADO") {
+    return { label: "Logrado", colorClass: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20" };
+  }
+  if (clean === "EP" || clean === "EN PROCESO") {
+    return { label: "En Proceso", colorClass: "bg-amber-500/10 text-amber-500 border-amber-500/20" };
+  }
+  return { label: "Iniciado", colorClass: "bg-red-500/10 text-red-500 border-red-500/20" };
+};
 
 export default function FamiliaDashboard() {
   const router = useRouter();
@@ -489,11 +516,20 @@ export default function FamiliaDashboard() {
                                   className="mt-1 h-5 w-5 shrink-0 cursor-pointer rounded border-outline-variant/40 bg-surface-container-lowest text-primary focus:ring-primary"
                                 />
                                 <div className="flex-1 space-y-2">
-                                  <div>
-                                    <span className="rounded border border-outline-variant/30 bg-surface-container px-2 py-0.5 text-[9px] font-extrabold uppercase text-on-surface-variant">
-                                      {task.unidad_titulo}
-                                    </span>
-                                    <h4 className={`font-extrabold text-base mt-2 text-on-surface`}>{task.titulo}</h4>
+                                  <div className="space-y-1">
+                                    <div className="flex justify-between items-start gap-4">
+                                      <div>
+                                        <span className="rounded border border-outline-variant/30 bg-surface-container px-2 py-0.5 text-[9px] font-extrabold uppercase text-on-surface-variant">
+                                          {task.unidad_titulo}
+                                        </span>
+                                        <h4 className={`font-extrabold text-base mt-2 text-on-surface`}>{task.titulo}</h4>
+                                      </div>
+                                      {task.nota && getEquivalenciaNota(task.nota) && (
+                                        <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border tracking-wider shrink-0 ${getEquivalenciaNota(task.nota)?.colorClass}`}>
+                                          Nota: {getEquivalenciaNota(task.nota)?.label}
+                                        </span>
+                                      )}
+                                    </div>
                                     <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{task.descripcion}</p>
                                   </div>
 

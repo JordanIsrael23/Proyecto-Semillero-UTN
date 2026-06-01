@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { validarCedulaEcuatoriana } from "../utils/validation";
 import DashboardWelcome from "../components/DashboardWelcome";
 import DashboardShell from "../components/DashboardShell";
+import ThemeToggle from "../components/ThemeToggle";
 
 const DOCENTE_NAV = [
   { id: "inicio", label: "Inicio", icon: "home" },

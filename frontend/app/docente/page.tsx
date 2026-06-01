@@ -134,7 +134,6 @@ export default function DocenteDashboard() {
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
-  const [showRepresentativeModal, setShowRepresentativeModal] = useState(false);
 
   const [studentForm, setStudentForm] = useState({
     cedula: "",
@@ -146,11 +145,17 @@ export default function DocenteDashboard() {
   });
 
   const [representativeForm, setRepresentativeForm] = useState({
+    cedula: "",
     nombre: "",
     apellido: "",
     email: "",
     telefono: ""
   });
+
+  const [isStudentAutofilled, setIsStudentAutofilled] = useState(false);
+  const [isRepresentativeAutofilled, setIsRepresentativeAutofilled] = useState(false);
+  const [lastSearchedStudentCedula, setLastSearchedStudentCedula] = useState("");
+  const [lastSearchedRepCedula, setLastSearchedRepCedula] = useState("");
 
   const [unitForm, setUnitForm] = useState({
     id: "",
@@ -317,13 +322,143 @@ export default function DocenteDashboard() {
       .catch((e) => console.error("Error al cargar ficha de monitoreo:", e));
   }, [selectedStudent, activeTab]);
 
+  // Buscar estudiante por cédula
+  useEffect(() => {
+    const searchStudent = async () => {
+      const ced = studentForm.cedula;
+      if (ced.length === 10 && validarCedulaEcuatoriana(ced)) {
+        if (ced === lastSearchedStudentCedula) return;
+        setLastSearchedStudentCedula(ced);
+        try {
+          const res = await fetch(`${BACKEND_URL}/estudiantes/buscar/${ced}`);
+          if (res.ok) {
+            const text = await res.text();
+            const data = text ? JSON.parse(text) : null;
+            if (data) {
+              setStudentForm(prev => ({
+                ...prev,
+                nombre: data.nombre,
+                apellido: data.apellido,
+                fecha_nacimiento: data.fecha_nacimiento
+              }));
+              setIsStudentAutofilled(true);
+
+              // Si tiene representante vinculado, autocompletar también el representante
+              const repRelation = data.familia_estudiante?.[0];
+              if (repRelation) {
+                const rep = repRelation.familias;
+                const repCed = rep.usuarios?.cedula || "";
+                setLastSearchedRepCedula(repCed);
+                setRepresentativeForm({
+                  cedula: repCed,
+                  nombre: rep.nombre,
+                  apellido: rep.apellido,
+                  email: rep.usuarios?.email || "",
+                  telefono: rep.telefono || ""
+                });
+                setIsRepresentativeAutofilled(true);
+                setStudentForm(prev => ({
+                  ...prev,
+                  representante_id: rep.id,
+                  parentesco: repRelation.parentesco || "Padre"
+                }));
+              }
+            }
+          }
+        } catch (e) {
+          console.error("Error al buscar estudiante:", e);
+        }
+      } else {
+        setLastSearchedStudentCedula("");
+        if (isStudentAutofilled) {
+          setIsStudentAutofilled(false);
+          setStudentForm(prev => ({
+            ...prev,
+            nombre: "",
+            apellido: "",
+            fecha_nacimiento: ""
+          }));
+          // Si el representante también fue autocompletado a través del estudiante, limpiarlo
+          if (isRepresentativeAutofilled) {
+            setLastSearchedRepCedula("");
+            setIsRepresentativeAutofilled(false);
+            setRepresentativeForm({
+              cedula: "",
+              nombre: "",
+              apellido: "",
+              email: "",
+              telefono: ""
+            });
+            setStudentForm(prev => ({
+              ...prev,
+              representante_id: ""
+            }));
+          }
+        }
+      }
+    };
+    searchStudent();
+  }, [studentForm.cedula, isStudentAutofilled, isRepresentativeAutofilled, lastSearchedStudentCedula]);
+
+  // Buscar representante por cédula
+  useEffect(() => {
+    const searchRepresentative = async () => {
+      const ced = representativeForm.cedula;
+      if (ced.length === 10 && validarCedulaEcuatoriana(ced)) {
+        if (ced === lastSearchedRepCedula) return;
+        setLastSearchedRepCedula(ced);
+        try {
+          const res = await fetch(`${BACKEND_URL}/familias/buscar/${ced}`);
+          if (res.ok) {
+            const text = await res.text();
+            const data = text ? JSON.parse(text) : null;
+            if (data) {
+              setRepresentativeForm({
+                cedula: data.cedula,
+                nombre: data.nombre,
+                apellido: data.apellido,
+                email: data.email,
+                telefono: data.telefono || ""
+              });
+              setIsRepresentativeAutofilled(true);
+              setStudentForm(prev => ({
+                ...prev,
+                representante_id: data.id
+              }));
+            }
+          }
+        } catch (e) {
+          console.error("Error al buscar representante:", e);
+        }
+      } else {
+        setLastSearchedRepCedula("");
+        if (isRepresentativeAutofilled) {
+          setIsRepresentativeAutofilled(false);
+          setRepresentativeForm(prev => ({
+            ...prev,
+            cedula: representativeForm.cedula,
+            nombre: "",
+            apellido: "",
+            email: "",
+            telefono: ""
+          }));
+          setStudentForm(prev => ({
+            ...prev,
+            representante_id: ""
+          }));
+        }
+      }
+    };
+    searchRepresentative();
+  }, [representativeForm.cedula, isRepresentativeAutofilled, lastSearchedRepCedula]);
+
   // Cierre de sesión
   const handleLogout = () => {
     localStorage.removeItem("user_session");
     router.replace("/");
   };
 
-  // Crear estudiante
+  // Crear estudiante y representante de manera integrada
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -337,7 +472,44 @@ export default function DocenteDashboard() {
       return;
     }
 
+    if (!validarCedulaEcuatoriana(representativeForm.cedula)) {
+      alert("La cédula del representante no es una cédula ecuatoriana válida.");
+      return;
+    }
+
     try {
+      let currentRepId = studentForm.representante_id;
+
+      // 1. Si no hay ID de representante, significa que es nuevo y debemos crearlo
+      if (!currentRepId) {
+        const resFam = await fetch(`${BACKEND_URL}/familias`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            cedula: representativeForm.cedula,
+            nombre: representativeForm.nombre,
+            apellido: representativeForm.apellido,
+            email: representativeForm.email,
+            telefono: representativeForm.telefono || undefined
+          })
+        });
+
+        const textFam = await resFam.text();
+        let dataFam: any = null;
+        try {
+          dataFam = textFam ? JSON.parse(textFam) : null;
+        } catch {
+          dataFam = { message: textFam };
+        }
+
+        if (!resFam.ok) {
+          throw new Error(dataFam?.message || "Error al registrar el representante.");
+        }
+
+        currentRepId = dataFam.id;
+      }
+
+      // 2. Registrar el estudiante
       const res = await fetch(`${BACKEND_URL}/estudiantes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -347,12 +519,11 @@ export default function DocenteDashboard() {
           apellido: studentForm.apellido,
           fecha_nacimiento: studentForm.fecha_nacimiento,
           grupo_id: selectedGroup,
-          representante_id: studentForm.representante_id || undefined,
+          representante_id: currentRepId || undefined,
           parentesco: studentForm.parentesco
         })
       });
 
-      // Manejo robusto de errores: leer texto y parsear JSON si es posible
       const text = await res.text();
       let data: any = null;
       try {
@@ -374,6 +545,17 @@ export default function DocenteDashboard() {
         representante_id: "",
         parentesco: "Padre"
       });
+      setRepresentativeForm({
+        cedula: "",
+        nombre: "",
+        apellido: "",
+        email: "",
+        telefono: ""
+      });
+      setIsStudentAutofilled(false);
+      setIsRepresentativeAutofilled(false);
+      setLastSearchedStudentCedula("");
+      setLastSearchedRepCedula("");
 
       // Recargar estudiantes
       const listRes = await fetch(`${BACKEND_URL}/grupos/${selectedGroup}/estudiantes`);
@@ -382,48 +564,6 @@ export default function DocenteDashboard() {
       alert("Estudiante registrado exitosamente.");
     } catch (err: any) {
       alert(err.message || "No se pudo registrar el alumno.");
-    }
-  };
-
-  // Crear Representante (desde modal interno)
-  const handleCreateRepresentative = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      const res = await fetch(`${BACKEND_URL}/familias`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(representativeForm)
-      });
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.message || "Error al crear representante.");
-      }
-
-      alert("Representante creado con éxito.");
-      setShowRepresentativeModal(false);
-      setRepresentativeForm({ nombre: "", apellido: "", email: "", telefono: "" });
-
-      // Recargar lista de familias vinculables
-      const demoUsersRes = await fetch(`${BACKEND_URL}/usuarios-demo`);
-      const demoUsers = await demoUsersRes.json();
-      const list = demoUsers
-        .filter((u: any) => u.rol === "familia")
-        .map((u: any) => ({
-          id: u.familias?.id,
-          nombre: u.familias?.nombre,
-          apellido: u.familias?.apellido,
-          usuarios: { email: u.email }
-        }));
-      setFamilias(list);
-
-      // Preseleccionar el nuevo representante
-      setStudentForm((prev) => ({
-        ...prev,
-        representante_id: data.id
-      }));
-    } catch (err: any) {
-      alert(err.message);
     }
   };
 
@@ -1403,106 +1543,215 @@ ${
       {/* Modal Agregar Alumno */}
       {showStudentModal && (
         <div className="ds-modal-overlay fixed inset-0 z-50 flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
-          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-on-surface">Registrar Alumno</h3>
+          <div className="ds-modal relative max-w-4xl w-full space-y-6 p-6 sm:p-8">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-4">
+              <h3 className="text-lg font-bold text-on-surface">Registrar Estudiante y Representante</h3>
               <button
-                onClick={() => setShowStudentModal(false)}
+                onClick={() => {
+                  setShowStudentModal(false);
+                  setIsStudentAutofilled(false);
+                  setIsRepresentativeAutofilled(false);
+                  setStudentForm({
+                    cedula: "",
+                    nombre: "",
+                    apellido: "",
+                    fecha_nacimiento: "",
+                    representante_id: "",
+                    parentesco: "Padre"
+                  });
+                  setRepresentativeForm({
+                    cedula: "",
+                    nombre: "",
+                    apellido: "",
+                    email: "",
+                    telefono: ""
+                  });
+                  setLastSearchedStudentCedula("");
+                  setLastSearchedRepCedula("");
+                }}
                 className="text-on-surface-variant/80 hover:text-on-surface cursor-pointer font-bold"
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleCreateStudent} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Cédula del Niño (10 dígitos)</label>
-                <input
-                  type="text"
-                  required
-                  maxLength={10}
-                  placeholder="Ej: 1005678901"
-                  value={studentForm.cedula}
-                  onChange={(e) => setStudentForm({ ...studentForm, cedula: e.target.value.replace(/\D/g, "") })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
+            <form onSubmit={handleCreateStudent} className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                {/* COLUMNA IZQUIERDA: DATOS DEL ESTUDIANTE */}
+                <div className="space-y-4">
+                  <h4 className="font-bold text-sm text-primary border-b border-outline-variant/10 pb-2">
+                    Datos del Estudiante
+                  </h4>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Nombre</label>
-                <input
-                  type="text"
-                  required
-                  value={studentForm.nombre}
-                  onChange={(e) => setStudentForm({ ...studentForm, nombre: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Cédula del Niño (10 dígitos)</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={10}
+                      placeholder="Ej: 1005678901"
+                      value={studentForm.cedula}
+                      onChange={(e) => setStudentForm({ ...studentForm, cedula: e.target.value.replace(/\D/g, "") })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
+                    />
+                    {isStudentAutofilled && (
+                      <span className="text-[11px] text-green-400 font-bold block mt-1">
+                        ✓ Estudiante encontrado (autocompletado, se actualizará su grupo).
+                      </span>
+                    )}
+                  </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Apellido</label>
-                <input
-                  type="text"
-                  required
-                  value={studentForm.apellido}
-                  onChange={(e) => setStudentForm({ ...studentForm, apellido: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Nombre</label>
+                    <input
+                      type="text"
+                      required
+                      disabled={isStudentAutofilled}
+                      value={studentForm.nombre}
+                      onChange={(e) => setStudentForm({ ...studentForm, nombre: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                    />
+                  </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Fecha de Nacimiento</label>
-                <input
-                  type="date"
-                  required
-                  value={studentForm.fecha_nacimiento}
-                  onChange={(e) => setStudentForm({ ...studentForm, fecha_nacimiento: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Apellido</label>
+                    <input
+                      type="text"
+                      required
+                      disabled={isStudentAutofilled}
+                      value={studentForm.apellido}
+                      onChange={(e) => setStudentForm({ ...studentForm, apellido: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                    />
+                  </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Vincular Representante (Familia)</label>
-                <div className="flex gap-2">
-                  <select
-                    value={studentForm.representante_id}
-                    onChange={(e) => setStudentForm({ ...studentForm, representante_id: e.target.value })}
-                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                  >
-                    <option value="">-- Ninguno --</option>
-                    {familias.map((f) => (
-                      <option key={f.id} value={f.id}>
-                        {f.nombre} {f.apellido}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => setShowRepresentativeModal(true)}
-                    className="px-3 border border-outline-variant/30 bg-surface-container-low hover:bg-surface-container rounded-xl text-xs font-bold cursor-pointer text-primary"
-                  >
-                    + Nuevo
-                  </button>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Fecha de Nacimiento</label>
+                    <input
+                      type="date"
+                      required
+                      disabled={isStudentAutofilled}
+                      value={studentForm.fecha_nacimiento}
+                      onChange={(e) => setStudentForm({ ...studentForm, fecha_nacimiento: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Parentesco con el Representante</label>
+                    <select
+                      value={studentForm.parentesco}
+                      onChange={(e) => setStudentForm({ ...studentForm, parentesco: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
+                    >
+                      <option value="Padre">Padre</option>
+                      <option value="Madre">Madre</option>
+                      <option value="Tutor">Tutor / Representante Legal</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Parentesco</label>
-                <select
-                  value={studentForm.parentesco}
-                  onChange={(e) => setStudentForm({ ...studentForm, parentesco: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                >
-                  <option value="Padre">Padre</option>
-                  <option value="Madre">Madre</option>
-                  <option value="Tutor">Tutor / Representante Legal</option>
-                </select>
+                {/* COLUMNA DERECHA: DATOS DEL REPRESENTANTE */}
+                <div className="space-y-4">
+                  <h4 className="font-bold text-sm text-primary border-b border-outline-variant/10 pb-2">
+                    Datos del Representante (Familia)
+                  </h4>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Cédula del Representante (10 dígitos)</label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={10}
+                      placeholder="Ej: 1003456789"
+                      value={representativeForm.cedula}
+                      onChange={(e) => setRepresentativeForm({ ...representativeForm, cedula: e.target.value.replace(/\D/g, "") })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
+                    />
+                    {isRepresentativeAutofilled && (
+                      <span className="text-[11px] text-green-400 font-bold block mt-1">
+                        ✓ Representante encontrado (autocompletado, se vinculará automáticamente).
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Nombre</label>
+                    <input
+                      type="text"
+                      required
+                      disabled={isRepresentativeAutofilled}
+                      value={representativeForm.nombre}
+                      onChange={(e) => setRepresentativeForm({ ...representativeForm, nombre: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Apellido</label>
+                    <input
+                      type="text"
+                      required
+                      disabled={isRepresentativeAutofilled}
+                      value={representativeForm.apellido}
+                      onChange={(e) => setRepresentativeForm({ ...representativeForm, apellido: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Correo Electrónico</label>
+                    <input
+                      type="email"
+                      required
+                      placeholder="ejemplo@correo.com"
+                      disabled={isRepresentativeAutofilled}
+                      value={representativeForm.email}
+                      onChange={(e) => setRepresentativeForm({ ...representativeForm, email: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Teléfono (Opcional)</label>
+                    <input
+                      type="tel"
+                      disabled={isRepresentativeAutofilled}
+                      value={representativeForm.telefono}
+                      onChange={(e) => setRepresentativeForm({ ...representativeForm, telefono: e.target.value })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                    />
+                  </div>
+                </div>
+
               </div>
 
               <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
                 <button
                   type="button"
-                  onClick={() => setShowStudentModal(false)}
+                  onClick={() => {
+                    setShowStudentModal(false);
+                    setIsStudentAutofilled(false);
+                    setIsRepresentativeAutofilled(false);
+                    setStudentForm({
+                      cedula: "",
+                      nombre: "",
+                      apellido: "",
+                      fecha_nacimiento: "",
+                      representante_id: "",
+                      parentesco: "Padre"
+                    });
+                    setRepresentativeForm({
+                      cedula: "",
+                      nombre: "",
+                      apellido: "",
+                      email: "",
+                      telefono: ""
+                    });
+                    setLastSearchedStudentCedula("");
+                    setLastSearchedRepCedula("");
+                  }}
                   className="py-2.5 px-4 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-xl text-xs font-bold cursor-pointer"
                 >
                   Cancelar
@@ -1511,86 +1760,7 @@ ${
                   type="submit"
                   className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl cursor-pointer"
                 >
-                  Agregar Estudiante
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Agregar Representante */}
-      {showRepresentativeModal && (
-        <div className="ds-modal-overlay fixed inset-0 z-[60] flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
-          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
-            <div className="flex justify-between items-center">
-              <h3 className="text-lg font-bold text-on-surface">Registrar Representante</h3>
-              <button
-                onClick={() => setShowRepresentativeModal(false)}
-                className="text-on-surface-variant/80 hover:text-on-surface cursor-pointer font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            <form onSubmit={handleCreateRepresentative} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Nombre</label>
-                <input
-                  type="text"
-                  required
-                  value={representativeForm.nombre}
-                  onChange={(e) => setRepresentativeForm({ ...representativeForm, nombre: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Apellido</label>
-                <input
-                  type="text"
-                  required
-                  value={representativeForm.apellido}
-                  onChange={(e) => setRepresentativeForm({ ...representativeForm, apellido: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Correo Electrónico</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="ejemplo@correo.com"
-                  value={representativeForm.email}
-                  onChange={(e) => setRepresentativeForm({ ...representativeForm, email: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Teléfono (Opcional)</label>
-                <input
-                  type="tel"
-                  value={representativeForm.telefono}
-                  onChange={(e) => setRepresentativeForm({ ...representativeForm, telefono: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
-                <button
-                  type="button"
-                  onClick={() => setShowRepresentativeModal(false)}
-                  className="py-2.5 px-4 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-xl text-xs font-bold cursor-pointer"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl cursor-pointer"
-                >
-                  Crear Representante
+                  Registrar Todo
                 </button>
               </div>
             </form>

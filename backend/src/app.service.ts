@@ -38,23 +38,76 @@ export class AppService {
     return familia;
   }
 
-  async createFamilia(data: { email: string; nombre: string; apellido: string; telefono?: string }) {
+  async findEstudianteByCedula(cedula: string) {
+    const estudiante = await this.prisma.estudiantes.findUnique({
+      where: { cedula },
+      include: {
+        familia_estudiante: {
+          include: {
+            familias: {
+              include: {
+                usuarios: true,
+              },
+            },
+          },
+        },
+      },
+    });
+    if (!estudiante) return null;
+
+    // Formatear la fecha de nacimiento para el input date (YYYY-MM-DD)
+    const formattedFechaNacimiento = estudiante.fecha_nacimiento
+      ? new Date(estudiante.fecha_nacimiento).toISOString().split('T')[0]
+      : '';
+
+    return {
+      ...estudiante,
+      fecha_nacimiento: formattedFechaNacimiento,
+    };
+  }
+
+  async findFamiliaByCedula(cedula: string) {
+    const usuario = await this.prisma.usuarios.findUnique({
+      where: { cedula },
+      include: { familias: true },
+    });
+    if (!usuario || usuario.rol !== 'familia' || !usuario.familias) {
+      return null;
+    }
+    return {
+      id: usuario.familias.id,
+      cedula: usuario.cedula,
+      email: usuario.email,
+      nombre: usuario.familias.nombre,
+      apellido: usuario.familias.apellido,
+      telefono: usuario.familias.telefono,
+    };
+  }
+
+  async createFamilia(data: { cedula?: string; email: string; nombre: string; apellido: string; telefono?: string }) {
     // Verificar si el correo ya existe
-    const existing = await this.prisma.usuarios.findUnique({
+    const existingEmail = await this.prisma.usuarios.findUnique({
       where: { email: data.email },
     });
-    if (existing) {
+    if (existingEmail) {
       throw new BadRequestException('El correo electrónico ya está registrado.');
     }
 
+    // Si se provee cédula, verificar si la cédula ya existe
+    if (data.cedula) {
+      const existingCedula = await this.prisma.usuarios.findUnique({
+        where: { cedula: data.cedula },
+      });
+      if (existingCedula) {
+        throw new BadRequestException('La cédula del representante ya está registrada.');
+      }
+    }
+
     return this.prisma.$transaction(async (tx) => {
-      // Nota: Para mantener compatibilidad con el endpoint antiguo,
-      // generamos una cédula temporal o vacía si no se especifica.
-      // Pero como cedula es UNIQUE, usamos el email o un random/timestamp.
-      const tempCedula = 'TEMP_' + Date.now();
+      const targetCedula = data.cedula || 'TEMP_' + Date.now();
       const user = await tx.usuarios.create({
         data: {
-          cedula: tempCedula,
+          cedula: targetCedula,
           email: data.email,
           password_hash: '$2b$10$wR1lBghQo9U17B576/Hjue/96slyD6ZcW6e4t2M56r1g2L6vS7npe', // hash de password123
           rol: 'familia',
@@ -126,30 +179,58 @@ export class AppService {
     const existingEst = await this.prisma.estudiantes.findUnique({
       where: { cedula: data.cedula },
     });
-    if (existingEst) {
-      throw new BadRequestException('La cédula del estudiante ya está registrada.');
-    }
 
     return this.prisma.$transaction(async (tx) => {
-      const estudiante = await tx.estudiantes.create({
-        data: {
-          cedula: data.cedula,
-          nombre: data.nombre,
-          apellido: data.apellido,
-          grupo_id: data.grupo_id,
-          fecha_nacimiento: new Date(data.fecha_nacimiento),
-          activo: true,
-        },
-      });
-
-      if (data.representante_id) {
-        await tx.familia_estudiante.create({
+      let estudiante;
+      if (existingEst) {
+        // Si ya existe, lo actualizamos (lo cambiamos de grupo, actualizamos datos y lo activamos)
+        estudiante = await tx.estudiantes.update({
+          where: { id: existingEst.id },
           data: {
-            familia_id: data.representante_id,
-            estudiante_id: estudiante.id,
-            parentesco: data.parentesco || 'Representante',
+            nombre: data.nombre,
+            apellido: data.apellido,
+            grupo_id: data.grupo_id,
+            fecha_nacimiento: new Date(data.fecha_nacimiento),
+            activo: true,
           },
         });
+
+        if (data.representante_id) {
+          // Desvincular relaciones anteriores de familia_estudiante para este estudiante
+          await tx.familia_estudiante.deleteMany({
+            where: { estudiante_id: estudiante.id },
+          });
+
+          await tx.familia_estudiante.create({
+            data: {
+              familia_id: data.representante_id,
+              estudiante_id: estudiante.id,
+              parentesco: data.parentesco || 'Representante',
+            },
+          });
+        }
+      } else {
+        // Si no existe, lo creamos
+        estudiante = await tx.estudiantes.create({
+          data: {
+            cedula: data.cedula,
+            nombre: data.nombre,
+            apellido: data.apellido,
+            grupo_id: data.grupo_id,
+            fecha_nacimiento: new Date(data.fecha_nacimiento),
+            activo: true,
+          },
+        });
+
+        if (data.representante_id) {
+          await tx.familia_estudiante.create({
+            data: {
+              familia_id: data.representante_id,
+              estudiante_id: estudiante.id,
+              parentesco: data.parentesco || 'Representante',
+            },
+          });
+        }
       }
 
       return estudiante;

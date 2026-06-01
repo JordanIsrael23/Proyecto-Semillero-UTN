@@ -28,6 +28,11 @@ export class AppController {
     return this.appService.getEstudiantesByGrupo(grupoId);
   }
 
+  @Get('estudiantes/buscar/:cedula')
+  async findEstudianteByCedula(@Param('cedula') cedula: string) {
+    return this.appService.findEstudianteByCedula(cedula);
+  }
+
   @Post('estudiantes')
   async createEstudiante(
     @Body() body: {
@@ -53,8 +58,13 @@ export class AppController {
     return this.appService.deleteEstudiante(id);
   }
 
+  @Get('familias/buscar/:cedula')
+  async findFamiliaByCedula(@Param('cedula') cedula: string) {
+    return this.appService.findFamiliaByCedula(cedula);
+  }
+
   @Post('familias')
-  async createFamilia(@Body() body: { email: string; nombre: string; apellido: string; telefono?: string }) {
+  async createFamilia(@Body() body: { cedula?: string; email: string; nombre: string; apellido: string; telefono?: string }) {
     return this.appService.createFamilia(body);
   }
 

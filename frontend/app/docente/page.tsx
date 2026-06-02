@@ -1031,7 +1031,7 @@ ${data.tareasCasa.length === 0
                 icon: "folder",
                 label: "Grupos Asignados",
                 value: grupos.length,
-                subtitle: "Semilleros bajo tu responsibility",
+                subtitle: "Semilleros bajo tu responsabilidad",
                 color: "orange",
               },
               {

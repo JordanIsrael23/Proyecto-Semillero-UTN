@@ -23,6 +23,15 @@ export class AppController {
     return this.appService.getGruposByDocente(activeUserId);
   }
 
+  @Post('grupos')
+  async createGrupo(
+    @Headers('x-user-id') userId: string,
+    @Body() body: { nombre: string }
+  ) {
+    const activeUserId = userId || 'a0000000-0000-0000-0000-000000000001';
+    return this.appService.createGroup(body.nombre, activeUserId);
+  }
+
   @Get('grupos/:id/estudiantes')
   async getEstudiantes(@Param('id') grupoId: string) {
     return this.appService.getEstudiantesByGrupo(grupoId);

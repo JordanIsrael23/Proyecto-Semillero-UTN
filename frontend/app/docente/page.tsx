@@ -134,6 +134,7 @@ export default function DocenteDashboard() {
   const [showStudentModal, setShowStudentModal] = useState(false);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
+  const [feedback, setFeedback] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const [studentForm, setStudentForm] = useState({
     cedula: "",
@@ -172,7 +173,7 @@ export default function DocenteDashboard() {
     objetivos_aprendizaje: "",
     destrezas: "",
     semanas_previstas: 1,
-    estado: "borrador" as any
+    estado: "borrador"
   });
 
   const [activityForm, setActivityForm] = useState({
@@ -181,6 +182,12 @@ export default function DocenteDashboard() {
     tipo: "casa" as "clase" | "casa",
     recursos: [] as { titulo: string; url: string }[]
   });
+
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = window.setTimeout(() => setFeedback(null), 3200);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
 
   // Rejilla de evaluaciones activa
   const [evaluacionesActive, setEvaluacionesActive] = useState<{ [criterioId: string]: { nivelId: string; obs: string } }>({});
@@ -697,9 +704,9 @@ export default function DocenteDashboard() {
       const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades`, { headers: { "x-user-id": session?.user.id || "" } });
       const unitsData = await unitsRes.json();
       setUnidades(unitsData);
-      alert("Unidad clonada como borrador.");
+      setFeedback({ message: "Unidad clonada como borrador.", type: "success" });
     } catch (err: any) {
-      alert(err.message);
+      setFeedback({ message: err.message || "Error al clonar la unidad.", type: "error" });
     }
   };
 
@@ -722,13 +729,14 @@ export default function DocenteDashboard() {
 
       setShowActivityModal(false);
       setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [] });
+      setFeedback({ message: "Actividad añadida con éxito.", type: "success" });
 
       // Recargar unidades
       const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades`, { headers: { "x-user-id": session?.user.id || "" } });
       const unitsData = await unitsRes.json();
       setUnidades(unitsData);
     } catch (err: any) {
-      alert(err.message);
+      setFeedback({ message: err.message || "Error al crear la actividad.", type: "error" });
     }
   };
 
@@ -934,6 +942,37 @@ ${
       panelSubtitle="Panel Docente"
       onLogout={handleLogout}
     >
+      {feedback && (
+        <div className="fixed inset-x-0 top-6 z-50 flex justify-center px-4">
+          <div
+            className="flex items-start gap-3 rounded-3xl border px-4 py-4 bg-surface-container-lowest text-on-surface shadow-xl shadow-black/10 max-w-sm w-full"
+            style={{
+              borderColor: feedback.type === "success" ? "var(--primary)" : "var(--error)"
+            }}
+          >
+            <span
+              className="text-lg"
+              style={{ color: feedback.type === "success" ? "var(--primary)" : "var(--error)" }}
+            >
+              {feedback.type === "success" ? "✅" : "⚠️"}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-on-surface">
+                {feedback.type === "success" ? "¡Listo!" : "Error"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-on-surface-variant">{feedback.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFeedback(null)}
+              className="text-xs font-bold text-on-surface-variant opacity-80 transition hover:opacity-100"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-y-auto">
 
           {/* TAB 0: INICIO / DASHBOARD DE BIENVENIDA */}

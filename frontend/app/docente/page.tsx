@@ -476,17 +476,17 @@ export default function DocenteDashboard() {
     e.preventDefault();
 
     if (!selectedGroup) {
-      alert('Seleccione un grupo antes de crear el estudiante.');
+      setFeedback({ message: 'Seleccione un grupo antes de crear el estudiante.', type: 'error' });
       return;
     }
 
     if (!validarCedulaEcuatoriana(studentForm.cedula)) {
-      alert("La cédula del estudiante no es una cédula ecuatoriana válida.");
+      setFeedback({ message: "La cédula del estudiante no es una cédula ecuatoriana válida.", type: 'error' });
       return;
     }
 
     if (!validarCedulaEcuatoriana(representativeForm.cedula)) {
-      alert("La cédula del representante no es una cédula ecuatoriana válida.");
+      setFeedback({ message: "La cédula del representante no es una cédula ecuatoriana válida.", type: 'error' });
       return;
     }
 
@@ -574,9 +574,9 @@ export default function DocenteDashboard() {
       const listRes = await fetch(`${BACKEND_URL}/grupos/${selectedGroup}/estudiantes`);
       const listData = await listRes.json();
       setEstudiantes(listData);
-      alert("Estudiante registrado exitosamente.");
+      setFeedback({ message: "Estudiante registrado exitosamente.", type: "success" });
     } catch (err: any) {
-      alert(err.message || "No se pudo registrar el alumno.");
+      setFeedback({ message: err.message || "No se pudo registrar el alumno.", type: "error" });
     }
   };
 

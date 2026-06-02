@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { validarCedulaEcuatoriana } from "../utils/validation";
 import DashboardWelcome from "../components/DashboardWelcome";
 import DashboardShell from "../components/DashboardShell";
+import AppModal from "../components/AppModal";
 
 const DOCENTE_NAV = [
   { id: "inicio", label: "Inicio", icon: "home" },
@@ -168,6 +169,12 @@ export default function DocenteDashboard() {
   const [studentTasks, setStudentTasks] = useState<any[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(false);
   const [savingTaskGradeId, setSavingTaskGradeId] = useState<string | null>(null);
+
+  // Modal de confirmación (reemplaza window.confirm)
+  const [confirmModal, setConfirmModal] = useState<{
+    message: string;
+    onConfirm: () => void;
+  } | null>(null);
 
   const [unitForm, setUnitForm] = useState({
     id: "",
@@ -649,11 +656,11 @@ export default function DocenteDashboard() {
           prev.map(t => (t.id === activityId ? { ...t, nota: gradeValue || null } : t))
         );
       } else {
-        alert("No se pudo guardar la calificación.");
+        setFeedback({ message: "No se pudo guardar la calificación.", type: "error" });
       }
     } catch (e) {
       console.error("Error al calificar tarea:", e);
-      alert("Error de red al guardar la calificación.");
+      setFeedback({ message: "Error de red al guardar la calificación.", type: "error" });
     } finally {
       setSavingTaskGradeId(null);
     }
@@ -672,7 +679,7 @@ export default function DocenteDashboard() {
     }
     const gradeNum = parseFloat(gradeValue);
     if (isNaN(gradeNum) || gradeNum < 0 || gradeNum > 10) {
-      alert("La calificación debe ser un número entre 0 y 10.");
+      setFeedback({ message: "La calificación debe ser un número entre 0 y 10.", type: "error" });
       // Revert local state by reloading tasks
       if (selectedStudentForTasks) {
         const res = await fetch(`${BACKEND_URL}/estudiantes/${selectedStudentForTasks.id}/actividades-casa`);
@@ -723,7 +730,7 @@ export default function DocenteDashboard() {
       const unitsData = await unitsRes.json();
       setUnidades(unitsData);
     } catch (err: any) {
-      alert(err.message);
+      setFeedback({ message: err.message || "Error al guardar planificación.", type: "error" });
     }
   };
 
@@ -815,7 +822,7 @@ export default function DocenteDashboard() {
 
     try {
       await Promise.all(promises);
-      alert("Evaluaciones registradas exitosamente.");
+      setFeedback({ message: "Evaluaciones registradas exitosamente.", type: "success" });
       setEvaluacionesActive({});
 
       // Actualizar gráficos grupales
@@ -823,7 +830,7 @@ export default function DocenteDashboard() {
       const cData = await cRes.json();
       setMetricasGrupales(cData);
     } catch (err) {
-      alert("Ocurrió un error al guardar las evaluaciones.");
+      setFeedback({ message: "Ocurrió un error al guardar las evaluaciones.", type: "error" });
     }
   };
 
@@ -844,10 +851,10 @@ export default function DocenteDashboard() {
       const data = await res.json();
       if (!res.ok) throw new Error("No se pudo guardar la ficha.");
 
-      alert("Ficha de monitoreo individual guardada exitosamente.");
+      setFeedback({ message: "Ficha de monitoreo individual guardada exitosamente.", type: "success" });
       setFichaMonitoreo(data);
     } catch (err: any) {
-      alert(err.message);
+      setFeedback({ message: err.message || "No se pudo guardar la ficha.", type: "error" });
     }
   };
 
@@ -877,10 +884,10 @@ export default function DocenteDashboard() {
 
       if (!res.ok) throw new Error("Error al guardar autoevaluación.");
 
-      alert("Autoevaluación guardada exitosamente.");
+      setFeedback({ message: "Autoevaluación guardada exitosamente.", type: "success" });
       setAutoevaluacionReflexion("");
     } catch (err: any) {
-      alert(err.message);
+      setFeedback({ message: err.message || "Error al guardar autoevaluación.", type: "error" });
     }
   };
 
@@ -953,7 +960,7 @@ ${
       link.download = `informe_cognitivo_${data.estudiante.nombre.toLowerCase()}_${data.estudiante.apellido.toLowerCase()}.txt`;
       link.click();
     } catch (e) {
-      alert("No se pudo descargar el informe.");
+      setFeedback({ message: "No se pudo descargar el informe.", type: "error" });
     }
   };
 
@@ -1179,12 +1186,16 @@ ${
                                   Informe TXT
                                 </button>
                                 <button
-                                  onClick={async () => {
-                                    if (confirm("¿Seguro que deseas dar de baja lógica a este estudiante?")) {
-                                      await fetch(`${BACKEND_URL}/estudiantes/${est.id}`, { method: "DELETE" });
-                                      const res = await fetch(`${BACKEND_URL}/grupos/${selectedGroup}/estudiantes`);
-                                      setEstudiantes(await res.json());
-                                    }
+                                  onClick={() => {
+                                    setConfirmModal({
+                                      message: `¿Seguro que deseas dar de baja lógica a ${est.nombre} ${est.apellido}? Esta acción desactivará al estudiante.`,
+                                      onConfirm: async () => {
+                                        await fetch(`${BACKEND_URL}/estudiantes/${est.id}`, { method: "DELETE" });
+                                        const res = await fetch(`${BACKEND_URL}/grupos/${selectedGroup}/estudiantes`);
+                                        setEstudiantes(await res.json());
+                                        setFeedback({ message: `${est.nombre} ${est.apellido} fue dado de baja exitosamente.`, type: "success" });
+                                      },
+                                    });
                                   }}
                                   className="py-1.5 px-3 bg-surface-container-lowest hover:bg-red-500/10 hover:text-red-400 border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant/80"
                                 >
@@ -2337,6 +2348,19 @@ ${
           </div>
         </div>
       )}
+
+      {/* Modal de confirmación – reemplaza window.confirm() */}
+      <AppModal
+        open={!!confirmModal}
+        type="confirm"
+        variant="danger"
+        title="Confirmar acción"
+        message={confirmModal?.message ?? ""}
+        confirmLabel="Sí, dar de baja"
+        cancelLabel="Cancelar"
+        onConfirm={() => confirmModal?.onConfirm()}
+        onClose={() => setConfirmModal(null)}
+      />
 
     </DashboardShell>
   );

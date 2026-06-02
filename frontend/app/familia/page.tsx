@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DashboardWelcome from "../components/DashboardWelcome";
 import DashboardShell from "../components/DashboardShell";
+import AppModal from "../components/AppModal";
 
 const FAMILIA_NAV = [
   { id: "inicio", label: "Inicio", icon: "home" },
@@ -123,6 +124,15 @@ export default function FamiliaDashboard() {
   const [hijoFicha, setHijoFicha] = useState<FichaMonitoreo | null>(null);
   const [actividadesCasa, setActividadesCasa] = useState<ActividadCasa[]>([]);
 
+  // Feedback toast (reemplaza window.alert)
+  const [feedback, setFeedback] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    if (!feedback) return;
+    const timer = window.setTimeout(() => setFeedback(null), 3500);
+    return () => window.clearTimeout(timer);
+  }, [feedback]);
+
   // 1. Validar sesión
   useEffect(() => {
     const sessionJson = localStorage.getItem("user_session");
@@ -214,7 +224,7 @@ export default function FamiliaDashboard() {
       const tasksData = await tasksRes.json();
       setActividadesCasa(Array.isArray(tasksData) ? tasksData : []);
     } catch (e) {
-      alert("Error al actualizar la tarea de casa.");
+      setFeedback({ message: "Error al actualizar la tarea de casa.", type: "error" });
     }
   };
 
@@ -239,6 +249,37 @@ export default function FamiliaDashboard() {
       onLogout={handleLogout}
       searchPlaceholder="Buscar hijos, tareas..."
     >
+      {/* Toast de feedback – reemplaza window.alert() */}
+      {feedback && (
+        <div className="fixed inset-x-0 top-6 z-50 flex justify-center px-4">
+          <div
+            className="flex items-start gap-3 rounded-3xl border px-4 py-4 bg-surface-container-lowest text-on-surface shadow-xl shadow-black/10 max-w-sm w-full"
+            style={{
+              borderColor: feedback.type === "success" ? "var(--primary)" : "var(--error)"
+            }}
+          >
+            <span
+              className="text-lg"
+              style={{ color: feedback.type === "success" ? "var(--primary)" : "var(--error)" }}
+            >
+              {feedback.type === "success" ? "✅" : "⚠️"}
+            </span>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-on-surface">
+                {feedback.type === "success" ? "¡Listo!" : "Error"}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-on-surface-variant">{feedback.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setFeedback(null)}
+              className="text-xs font-bold text-on-surface-variant opacity-80 transition hover:opacity-100"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
       <div className="overflow-y-auto">
 
           {/* TAB 0: INICIO / DASHBOARD DE BIENVENIDA */}

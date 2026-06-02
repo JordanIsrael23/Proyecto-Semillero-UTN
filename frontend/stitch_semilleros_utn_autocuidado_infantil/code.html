@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Semilleros UTN 2026 - Kimma</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "outline-variant": "#c2c7cf",
+                        "primary-fixed": "#d1e4ff",
+                        "on-tertiary-fixed-variant": "#624000",
+                        "primary-fixed-dim": "#a4c9f8",
+                        "primary-container": "#84a9d6",
+                        "on-surface": "#1b1c1c",
+                        "inverse-on-surface": "#f2f0f0",
+                        "secondary-fixed": "#ccebc2",
+                        "secondary-container": "#c9e8bf",
+                        "outline": "#73777f",
+                        "primary": "#3b618a",
+                        "on-primary-fixed": "#001d36",
+                        "on-primary": "#ffffff",
+                        "surface-dim": "#dbd9d9",
+                        "on-primary-fixed-variant": "#204970",
+                        "surface": "#fbf9f8",
+                        "on-tertiary-fixed": "#291800",
+                        "on-surface-variant": "#42474e",
+                        "tertiary-container": "#ce9e59",
+                        "surface-tint": "#3b618a",
+                        "secondary-fixed-dim": "#b1cfa7",
+                        "secondary": "#4a6545",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#334d2f",
+                        "background": "#fbf9f8",
+                        "error": "#ba1a1a",
+                        "surface-container": "#efeded",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#082007",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#e4e2e2",
+                        "surface-variant": "#e4e2e2",
+                        "surface-container-low": "#f5f3f3",
+                        "tertiary-fixed": "#ffddb2",
+                        "tertiary": "#7d5718",
+                        "inverse-primary": "#a4c9f8",
+                        "surface-bright": "#fbf9f8",
+                        "on-tertiary-container": "#543600",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#4f6a49",
+                        "inverse-surface": "#303030",
+                        "on-primary-container": "#123e65",
+                        "surface-container-high": "#eae8e7",
+                        "on-background": "#1b1c1c",
+                        "error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#f1be75"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "48px",
+                        "margin-desktop": "64px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "xs": "4px",
+                        "gutter": "24px",
+                        "xl": "80px",
+                        "md": "24px",
+                        "margin-mobile": "16px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "fontWeight": "500"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(214, 226, 240, 0.5);
+        }
+        .tonal-elevation {
+            box-shadow: 0 20px 25px -5px rgba(132, 169, 214, 0.1), 0 10px 10px -5px rgba(132, 169, 214, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface">
+<!-- Navigation -->
+<nav class="fixed top-0 w-full bg-surface/90 backdrop-blur-md border-b border-outline-variant/30 z-50 transition-all duration-300">
+<div class="flex justify-between items-center h-16 px-margin-mobile md:px-margin-desktop w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">Semilleros UTN 2026</span>
+</div>
+<div class="hidden md:flex items-center gap-gutter">
+<a class="text-primary font-bold border-b-2 border-primary font-label-md text-label-md py-1" href="#">Proyecto</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md py-1" href="#">Pedagogía</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md py-1" href="#">Pilares</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md py-1" href="#">UTN</a>
+</div>
+<button class="bg-primary text-on-primary px-6 py-2 rounded-lg font-label-md text-label-md hover:opacity-90 transition-all scale-95 active:scale-90">
+                Acceder Web App
+            </button>
+</div>
+</nav>
+<main class="pt-16">
+<!-- Hero Section -->
+<section class="relative min-h-[80vh] flex items-center overflow-hidden bg-gradient-to-br from-surface to-primary-fixed/20">
+<div class="w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop grid grid-cols-1 md:grid-cols-2 gap-xl items-center py-xl">
+<div class="space-y-md animate-fade-in">
+<span class="inline-block px-4 py-1.5 rounded-full bg-primary-container/20 text-primary font-label-md text-label-md">Innovación Educativa</span>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">
+                        Cultivando el futuro con <span class="text-tertiary">Kimma</span>
+</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                        Un ecosistema de conexión, cuidado y crecimiento cognitivo diseñado para potenciar el desarrollo integral en la primera infancia.
+                    </p>
+<div class="flex flex-wrap gap-md pt-base">
+<button class="bg-primary text-on-primary px-8 py-3 rounded-xl font-label-md text-label-md shadow-lg shadow-primary/20 hover:scale-105 transition-transform">
+                            Acceder Web App
+                        </button>
+<button class="border-2 border-primary text-primary px-8 py-3 rounded-xl font-label-md text-label-md hover:bg-primary/5 transition-colors">
+                            Saber más
+                        </button>
+</div>
+</div>
+<div class="relative flex justify-center items-center">
+<div class="relative w-full aspect-square max-w-md">
+<!-- Decorative background elements -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-tertiary-fixed rounded-full blur-3xl opacity-30 animate-pulse"></div>
+<div class="absolute -bottom-10 -left-10 w-40 h-40 bg-secondary-fixed rounded-full blur-3xl opacity-30 animate-pulse"></div>
+<div class="relative z-10 w-full h-full rounded-full border-8 border-white bg-white shadow-2xl overflow-hidden flex items-center justify-center p-8">
+<img alt="Kimma Brand Identity" class="w-full h-auto object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSJHyJvQD0k79zynxa_nRrS2H6Pvw3NQRnwzSLW6_xFd3yQmrQDz0_e64-ZwGGCE1K3Vw6xOQc4Vg6qmCKdyl3G6hCR2Tspjvy5bWc31sgTG6beBbXZOETb9ilu3i0LB-LSyXk-EPL0dhZ178uoyHmrBIBY4jh-LD2CnLqdYwCznm9KFVum3AgpHaICf1ilrsmReGbprlBc5mgb2rT0bu1qdkfYW4PY_g8y5gfp6-PL31RKk4A9atZFtIL2qNDsBg4xeAMl4fwrAw"/>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Scientific Basis Section -->
+<section class="py-xl bg-surface">
+<div class="w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl items-center">
+<div class="rounded-3xl overflow-hidden shadow-xl order-2 md:order-1">
+<img class="w-full h-[500px] object-cover" data-alt="A professional research classroom setting at a university. Bright, modern architecture with scientists and educators collaborating around digital displays and anatomical models of neural development. Soft, natural light fills the space, creating a clinical yet warm academic atmosphere that conveys trust and rigor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDGobnQFPJGWUVVXD-VZBhIgzNO0WmCA5S4mGvOGA1Esc7bzdpaoJuYKfOlkQ5pfmZ1Ayooi0j_14eP-GC-w7a6EZ741VVYIOCHYJc3g4vgGxvWINMmH5NYahVT_Uuh-e95mClmlLDR7VTIf1TcbVI8O2vVhZLHJHFHD5EL3z3VQ70ZT7gmkMGBzJXoEGq8T-aj7WnuDlCRisNTB_M0m7F9EL_Q8moH6_9DlLr0rYIc3cOBesBlRjdAG7JVworsyKEeS348SADwCng"/>
+</div>
+<div class="space-y-md order-1 md:order-2">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Base Científica y Pedagógica</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Nacida de la investigación en la **FECYT** de la Universidad Técnica del Norte, nuestra metodología se fundamenta en la Educación Inicial de vanguardia, combinando neurociencia aplicada con entornos lúdicos.
+                        </p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-gutter pt-base">
+<div class="flex items-start gap-sm p-base rounded-xl bg-secondary-container/10 border border-secondary-container/20">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<div>
+<h4 class="font-label-md text-label-md text-secondary">Estimulación Temprana</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Programas personalizados para cada etapa del desarrollo.</p>
+</div>
+</div>
+<div class="flex items-start gap-sm p-base rounded-xl bg-primary-container/10 border border-primary-container/20">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+<div>
+<h4 class="font-label-md text-label-md text-primary">Rigor Académico</h4>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Validado por expertos investigadores de la FECYT.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Core Pillars Section -->
+<section class="py-xl bg-surface-container-low">
+<div class="w-full max-w-7xl mx-auto px-margin-mobile md:px-margin-desktop">
+<div class="text-center max-w-2xl mx-auto mb-lg">
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Nuestros Pilares Fundamentales</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-sm">Estructuras diseñadas para sostener el crecimiento saludable y equilibrado del niño.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter">
+<!-- Pillar 1 -->
+<div class="bg-white p-lg rounded-3xl border border-outline-variant/30 tonal-elevation hover:-translate-y-2 transition-transform duration-300">
+<div class="w-16 h-16 rounded-2xl bg-tertiary-fixed flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-tertiary text-[32px]">self_care</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-sm">Autocuidado</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Fomentamos la autonomía desde la consciencia personal, enseñando hábitos que promueven el bienestar físico y emocional.
+                        </p>
+</div>
+<!-- Pillar 2 -->
+<div class="bg-white p-lg rounded-3xl border border-outline-variant/30 tonal-elevation hover:-translate-y-2 transition-transform duration-300">
+<div class="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-primary text-[32px]">groups</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-sm">Personas Seguras</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Construimos vínculos de confianza y entornos seguros que permiten la exploración libre y el desarrollo de la autoestima.
+                        </p>
+</div>
+<!-- Pillar 3 -->
+<div class="bg-white p-lg rounded-3xl border border-outline-variant/30 tonal-elevation hover:-translate-y-2 transition-transform duration-300">
+<div class="w-16 h-16 rounded-2xl bg-secondary-fixed flex items-center justify-center mb-md">
+<span class="material-symbols-outlined text-secondary text-[32px]">auto_graph</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-sm">Desarrollo Cognitivo</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                            Implementamos estrategias pedagógicas dinámicas que activan el potencial intelectual y la curiosidad innata.
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Institutional Backing -->
+<section class="py-xl bg-white">
+<div class="w-full max-w-4xl mx-auto px-margin-mobile text-center">
+<div class="mb-lg">
+<img alt="Universidad Técnica del Norte Logo" class="h-40 mx-auto object-contain grayscale hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF0WX1V9MP-oN2MCvqkM8Hjs4CZxlfO7esJcRfA0RX9xgzgG1vAE-g9GQpxWuqBsWji_1bZIQKb0uxMbyobTxC4WUjdQscyax-IJLaYHtryb79obukEoLK25dwc1t2173X7KkBYEnXxRZzwcTuhsrlRDGrsSxedM_ZRpCAHt6BzcqbC6Z2wp_93N7ZDviWFlzZL4pr1SFysFEbFF-TVYpEUPEVLDpQC9da8bQGoL2aXmc0sFiYEGxtMM9jH7uZagsXXBJxZ3QCrmc"/>
+</div>
+<h2 class="font-headline-md text-headline-md text-primary mb-md">Respaldo Académico Institucional</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                    Semilleros UTN 2026 es un proyecto de vinculación e investigación oficial de la **Universidad Técnica del Norte**, reafirmando nuestro compromiso con la excelencia educativa y la transformación social en el norte del país.
+                </p>
+<div class="mt-lg flex justify-center gap-gutter text-outline font-label-md">
+<span>Ibarra, Ecuador</span>
+<span>•</span>
+<span>Autónoma desde 1986</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-surface-container dark:bg-surface-container-highest w-full rounded-t-xl border-t border-outline-variant/20 mt-xl">
+<div class="flex flex-col md:flex-row justify-between items-center py-lg px-margin-mobile md:px-margin-desktop w-full max-w-7xl mx-auto gap-md">
+<div class="flex flex-col items-center md:items-start gap-2">
+<span class="font-headline-md text-headline-md font-bold text-primary">Semilleros UTN</span>
+<p class="font-body-md text-body-md text-on-surface-variant text-center md:text-left">© 2026 Semilleros UTN - FECYT Universidad Técnica del Norte. Todos los derechos reservados.</p>
+</div>
+<div class="flex flex-wrap justify-center gap-gutter">
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Investigación FECYT</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Guía de Autocuidado</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Políticas de Privacidad</a>
+<a class="text-on-surface-variant hover:text-primary transition-colors font-body-md text-body-md" href="#">Contacto Institucional</a>
+</div>
+</div>
+</footer>
+<script>
+        // Simple header scroll interaction
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('shadow-md', 'h-14');
+                nav.classList.remove('h-16');
+            } else {
+                nav.classList.remove('shadow-md', 'h-14');
+                nav.classList.add('h-16');
+            }
+        });
+
+        // Entrance animations handler
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section > div').forEach(el => {
+            el.classList.add('transition-all', 'duration-700', 'opacity-0', 'translate-y-10');
+            observer.observe(el);
+        });
+    </script>
+</body></html>

@@ -31,11 +31,10 @@ export default function Home() {
 
       {/* Navigation */}
       <nav
-        className={`fixed top-0 z-50 w-full border-b border-outline-variant/20 transition-all duration-300 ${
-          scrolled
-            ? "bg-surface/85 py-3 shadow-md backdrop-blur-md dark:bg-surface/80"
-            : "bg-transparent py-5"
-        }`}
+        className={`fixed top-0 z-50 w-full border-b border-outline-variant/20 transition-all duration-300 ${scrolled
+          ? "bg-surface/85 py-3 shadow-md backdrop-blur-md dark:bg-surface/80"
+          : "bg-transparent py-5"
+          }`}
       >
         <div className="mx-auto flex max-w-7xl items-center justify-between px-margin-mobile md:px-margin-desktop">
           {/* Logo */}
@@ -97,11 +96,10 @@ export default function Home() {
 
         {/* Mobile Menu Drawer */}
         <div
-          className={`absolute left-0 top-full w-full border-b border-outline-variant/20 bg-surface/95 shadow-xl backdrop-blur-lg transition-all duration-300 ease-in-out md:hidden ${
-            mobileMenuOpen
-              ? "visible opacity-100 translate-y-0"
-              : "invisible opacity-0 -translate-y-4"
-          }`}
+          className={`absolute left-0 top-full w-full border-b border-outline-variant/20 bg-surface/95 shadow-xl backdrop-blur-lg transition-all duration-300 ease-in-out md:hidden ${mobileMenuOpen
+            ? "visible opacity-100 translate-y-0"
+            : "invisible opacity-0 -translate-y-4"
+            }`}
         >
           <div className="flex flex-col gap-4 p-6">
             <a
@@ -184,14 +182,16 @@ export default function Home() {
               {/* Blur elements behind image container */}
               <div className="absolute -top-10 -right-10 h-48 w-48 rounded-full bg-highlight-orange/30 blur-3xl opacity-60 dark:bg-highlight-orange/20" />
               <div className="absolute -bottom-10 -left-10 h-48 w-48 rounded-full bg-highlight-green/30 blur-3xl opacity-60 dark:bg-highlight-green/20" />
-              
-              <div className="relative z-10 w-full max-w-md aspect-square overflow-hidden rounded-full border-8 border-surface-container-lowest bg-surface-container-lowest shadow-xl dark:shadow-2xl flex items-center justify-center p-12 transition-transform duration-500 hover:scale-[1.02]">
+
+              {/* 1. Eliminado el 'p-12' para que la imagen toque los bordes */}
+              <div className="relative z-10 w-full max-w-md aspect-square overflow-hidden rounded-full border-8 border-surface-container-lowest bg-surface-container-lowest shadow-xl dark:shadow-2xl flex items-center justify-center transition-transform duration-500 hover:scale-[1.02]">
                 <Image
-                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuDSJHyJvQD0k79zynxa_nRrS2H6Pvw3NQRnwzSLW6_xFd3yQmrQDz0_e64-ZwGGCE1K3Vw6xOQc4Vg6qmCKdyl3G6hCR2Tspjvy5bWc31sgTG6beBbXZOETb9ilu3i0LB-LSyXk-EPL0dhZ178uoyHmrBIBY4jh-LD2CnLqdYwCznm9KFVum3AgpHaICf1ilrsmReGbprlBc5mgb2rT0bu1qdkfYW4PY_g8y5gfp6-PL31RKk4A9atZFtIL2qNDsBg4xeAMl4fwrAw"
+                  src="/kimma_logo.jpeg"
                   alt="Kimma Brand Identity"
                   width={380}
                   height={380}
-                  className="h-auto w-full object-contain shrink-0 dark:brightness-95"
+                  /* 2. Cambiado a w-full h-full y object-cover */
+                  className="h-full w-full object-cover shrink-0 dark:brightness-95"
                   priority
                   unoptimized
                 />
@@ -223,7 +223,7 @@ export default function Home() {
                   Base Científica y Pedagógica
                 </h2>
                 <p className="text-lg leading-relaxed text-on-surface-variant">
-                  Nacida de la investigación en la **FECYT** de la Universidad Técnica del Norte, nuestra metodología se fundamenta en la Educación Inicial de vanguardia, combinando neurociencia aplicada con entornos lúdicos y de cuidado.
+                  Nacida de la investigación en la FECYT de la Universidad Técnica del Norte, nuestra metodología se fundamenta en la Educación Inicial de vanguardia, combinando neurociencia aplicada con entornos lúdicos y de cuidado.
                 </p>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 pt-2">
@@ -300,13 +300,13 @@ export default function Home() {
         {/* Institutional Backing Section */}
         <section id="utn" className="py-20 md:py-24 bg-surface-container-lowest transition-colors duration-300">
           <div className="mx-auto max-w-4xl px-margin-mobile text-center space-y-8">
-            <div className="mx-auto w-full max-w-[280px] p-4 bg-white dark:bg-slate-900 rounded-3xl border border-outline-variant/10 shadow-sm transition-transform hover:scale-[1.02]">
+            <div className="mx-auto flex items-center justify-center w-full max-w-[200px] aspect-square overflow-hidden rounded-full transition-transform hover:scale-[1.02]">
               <Image
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDF0WX1V9MP-oN2MCvqkM8Hjs4CZxlfO7esJcRfA0RX9xgzgG1vAE-g9GQpxWuqBsWji_1bZIQKb0uxMbyobTxC4WUjdQscyax-IJLaYHtryb79obukEoLK25dwc1t2173X7KkBYEnXxRZzwcTuhsrlRDGrsSxedM_ZRpCAHt6BzcqbC6Z2wp_93N7ZDviWFlzZL4pr1SFysFEbFF-TVYpEUPEVLDpQC9da8bQGoL2aXmc0sFiYEGxtMM9jH7uZagsXXBJxZ3QCrmc"
+                src="/UTN_logo.png"
                 alt="Universidad Técnica del Norte Logo"
-                width={260}
-                height={160}
-                className="h-auto w-full object-contain shrink-0"
+                width={200}
+                height={200}
+                className="h-full w-full object-contain shrink-0"
                 unoptimized
               />
             </div>
@@ -315,7 +315,7 @@ export default function Home() {
                 Respaldo Académico Institucional
               </h2>
               <p className="mx-auto max-w-2xl text-lg leading-relaxed text-on-surface-variant">
-                Semilleros UTN 2026 es un proyecto de vinculación e investigación oficial de la **Universidad Técnica del Norte**, reafirmando nuestro compromiso con la excelencia educativa y la transformación social en el norte del país.
+                Semilleros UTN 2026 es un proyecto de vinculación e investigación oficial de la Universidad Técnica del Norte, reafirmando nuestro compromiso con la excelencia educativa y la transformación social en el norte del país.
               </p>
             </div>
             <div className="flex justify-center gap-6 text-sm text-on-surface-variant/80 font-bold">

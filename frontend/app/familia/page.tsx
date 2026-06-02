@@ -530,7 +530,7 @@ export default function FamiliaDashboard() {
                                         </span>
                                       )}
                                     </div>
-                                    <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{task.descripcion}</p>
+                                    <p className="mt-1 text-xs leading-relaxed text-on-surface">{task.descripcion}</p>
                                   </div>
 
                                   {task.recursos_enlaces && task.recursos_enlaces.length > 0 && (

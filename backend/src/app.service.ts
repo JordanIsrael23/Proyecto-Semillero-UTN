@@ -5,7 +5,7 @@ import { validarCedulaEcuatoriana } from './utils/validation';
 
 @Injectable()
 export class AppService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   // --------------------------------------------------------------------------
   // 1. SIMULACIÓN DE SESIONES (Lista de usuarios cargados para el Frontend Selector)
@@ -144,6 +144,27 @@ export class AppService {
         },
       },
       orderBy: { nombre: 'asc' },
+    });
+  }
+
+  async createGroup(nombre: string, usuarioId: string) {
+    // 1. Buscar el id de la tabla docentes usando el usuario_id de la sesión
+    const docente = await this.prisma.docentes.findUnique({
+      where: { usuario_id: usuarioId }
+    });
+
+    if (!docente) {
+      throw new Error('Docente no encontrado');
+      // Nota: Si usas NotFoundException, asegúrate de importarlo de '@nestjs/common'
+    }
+
+    // 2. Crear el grupo asociado a ese docente_id
+    return this.prisma.grupos.create({
+      data: {
+        nombre: nombre,
+        docente_id: docente.id,
+        activo: true
+      }
     });
   }
 

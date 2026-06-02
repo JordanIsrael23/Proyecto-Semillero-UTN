@@ -98,7 +98,7 @@ interface FichaMonitoreo {
 }
 
 interface MetricaGrupal {
-  criterio: string;
+  criterion: string;
   iniciado: number;
   enProceso: number;
   logrado: number;
@@ -132,9 +132,14 @@ export default function DocenteDashboard() {
 
   // Formularios y modales
   const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showGroupModal, setShowGroupModal] = useState(false);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; type: "success" | "error" } | null>(null);
+
+  const [groupForm, setGroupForm] = useState({
+    nombre: ""
+  });
 
   const [studentForm, setStudentForm] = useState({
     cedula: "",
@@ -441,7 +446,7 @@ export default function DocenteDashboard() {
             }
           }
         } catch (e) {
-          console.error("Error al buscar representante:", e);
+          console.error("Error al buscar representative:", e);
         }
       } else {
         setLastSearchedRepCedula("");
@@ -469,6 +474,36 @@ export default function DocenteDashboard() {
   const handleLogout = () => {
     localStorage.removeItem("user_session");
     router.replace("/");
+  };
+
+  // Crear Grupo Nuevo
+  const handleCreateGroup = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!groupForm.nombre.trim()) return;
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/grupos`, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "x-user-id": session?.user.id || ""
+        },
+        body: JSON.stringify({
+          nombre: groupForm.nombre
+        })
+      });
+
+      if (!res.ok) throw new Error("Error al registrar el grupo.");
+
+      const data = await res.json();
+      setGrupos(prev => [...prev, data]);
+      setSelectedGroup(data.id);
+      setShowGroupModal(false);
+      setGroupForm({ nombre: "" });
+      setFeedback({ message: "Grupo registrado exitosamente.", type: "success" });
+    } catch (err: any) {
+      setFeedback({ message: err.message || "No se pudo registrar el grupo.", type: "error" });
+    }
   };
 
   // Crear estudiante y representante de manera integrada
@@ -992,7 +1027,7 @@ ${
                   icon: "folder",
                   label: "Grupos Asignados",
                   value: grupos.length,
-                  subtitle: "Semilleros bajo tu responsabilidad",
+                  subtitle: "Semilleros bajo tu responsibility",
                   color: "orange",
                 },
                 {
@@ -1078,6 +1113,12 @@ ${
                       </option>
                     ))}
                   </select>
+                  <button
+                    onClick={() => setShowGroupModal(true)}
+                    className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
+                  >
+                    + Agregar Grupo
+                  </button>
                   <button
                     onClick={() => setShowStudentModal(true)}
                     className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
@@ -1327,7 +1368,7 @@ ${
                     {criterios.map((crit) => {
                       const selection = evaluacionesActive[crit.id] || { nivelId: "", obs: "" };
                       return (
-                        <div key={crit.id} className="bg-surface-container-low border border-outline-variant/30 p-6 rounded-2xl flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
+                        <div key={crit.id} className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
                           <div>
                             <h4 className="text-base font-bold text-on-surface">{crit.nombre}</h4>
                             <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">{crit.descripcion}</p>
@@ -1609,7 +1650,7 @@ ${
                   {metricasGrupales.some(m => m.iniciado > m.logrado) && (
                     <div className="bg-amber-500/10 border border-amber-500/20 text-amber-200 p-4 rounded-xl text-xs font-bold flex items-center gap-2">
                       <span>⚠️</span>
-                      <span><strong>Recomendación de Refuerzo:</strong> El grupo presenta áreas de oportunidad considerables. Se sugiere enfocar esfuerzos y materiales en los criterios con mayor porcentaje en nivel Iniciado.</span>
+                      <span><strong>Recomendación de Refuerzo:</strong> El grupo presenta áreas de oportunidad considerables. Se sugiere enfocar esfuerzos and materiales en los criterios con mayor porcentaje en nivel Iniciado.</span>
                     </div>
                   )}
 
@@ -1622,7 +1663,7 @@ ${
 
                       return (
                         <div key={idx} className="space-y-2 border-b border-outline-variant/20 pb-5 last:border-0 last:pb-0">
-                          <h4 className="text-sm font-bold text-on-surface">{met.criterio}</h4>
+                          <h4 className="text-sm font-bold text-on-surface">{met.criterion}</h4>
                           <div className="h-6 w-full bg-surface-container-lowest rounded-full overflow-hidden flex text-[10px] font-extrabold text-on-surface text-center">
                             {pctIniciado > 0 && (
                               <div className="bg-red-500 flex items-center justify-center transition-all" style={{ width: `${pctIniciado}%` }}>
@@ -1661,6 +1702,59 @@ ${
       {/* ==================================================================
           MODALES (DOCENTE)
           ================================================================== */}
+
+      {/* Modal Agregar Grupo */}
+      {showGroupModal && (
+        <div className="ds-modal-overlay fixed inset-0 z-50 flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
+          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
+            <div className="flex justify-between items-center border-b border-outline-variant/20 pb-4">
+              <h3 className="text-lg font-bold text-on-surface">Registrar Nuevo Grupo / Aula</h3>
+              <button
+                onClick={() => {
+                  setShowGroupModal(false);
+                  setGroupForm({ nombre: "" });
+                }}
+                className="text-on-surface-variant/80 hover:text-on-surface cursor-pointer font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateGroup} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-on-surface-variant block">Nombre del Grupo</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Ej: Inicial II - Semillero B"
+                  value={groupForm.nombre}
+                  onChange={(e) => setGroupForm({ nombre: e.target.value })}
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowGroupModal(false);
+                    setGroupForm({ nombre: "" });
+                  }}
+                  className="py-2.5 px-4 bg-surface-container-low hover:bg-surface-container text-on-surface-variant rounded-xl text-xs font-bold cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl cursor-pointer"
+                >
+                  Registrar Grupo
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Modal Agregar Alumno */}
       {showStudentModal && (
@@ -2036,7 +2130,7 @@ ${
                   required
                   placeholder="Ej: Pintar lámina con crayones"
                   value={activityForm.titulo}
-                  onChange={(e) => setActivityForm({ ...activityForm, titulo: e.target.value })}
+                  onChange={(e) => setActivityForm({ ...activityForm, ...activityForm, titulo: e.target.value })}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                 />
               </div>

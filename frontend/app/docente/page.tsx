@@ -491,7 +491,7 @@ export default function DocenteDashboard() {
     try {
       const res = await fetch(`${BACKEND_URL}/grupos`, {
         method: "POST",
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
           "x-user-id": session?.user.id || ""
         },
@@ -912,45 +912,42 @@ FECHA DE GENERACIÓN: ${new Date().toLocaleDateString()}
 ------------------------------------------------------------------
 1. HISTORIAL DE EVALUACIONES COGNITIVAS POR CRITERIO
 ------------------------------------------------------------------
-${
-  data.evaluaciones.length === 0
-    ? "No se registran evaluaciones cognitivas aún."
-    : data.evaluaciones
-        .map(
-          (ev: any) =>
-            `- [${ev.criterios_evaluacion.nombre}]: Logro = ${ev.niveles_logro.nombre} en Unidad: "${ev.unidades_didacticas.titulo}"\n  Observación: ${ev.observaciones || "Sin observación"}\n  Fecha: ${new Date(ev.fecha_evaluacion).toLocaleDateString()}`
-        )
-        .join("\n\n")
-}
+${data.evaluaciones.length === 0
+          ? "No se registran evaluaciones cognitivas aún."
+          : data.evaluaciones
+            .map(
+              (ev: any) =>
+                `- [${ev.criterios_evaluacion.nombre}]: Logro = ${ev.niveles_logro.nombre} en Unidad: "${ev.unidades_didacticas.titulo}"\n  Observación: ${ev.observaciones || "Sin observación"}\n  Fecha: ${new Date(ev.fecha_evaluacion).toLocaleDateString()}`
+            )
+            .join("\n\n")
+        }
 
 ------------------------------------------------------------------
 2. FICHA DE MONITOREO CUALITATIVA
 ------------------------------------------------------------------
-${
-  !data.fichaMonitoreo
-    ? "No se ha completado la ficha de monitoreo individual."
-    : `* Clasificación: ${data.fichaMonitoreo.clasificacion}
+${!data.fichaMonitoreo
+          ? "No se ha completado la ficha de monitoreo individual."
+          : `* Clasificación: ${data.fichaMonitoreo.clasificacion}
 * Seriación: ${data.fichaMonitoreo.seriacion}
 * Asimilación y Acomodación: ${data.fichaMonitoreo.asimilacion_acomodacion}
 * Justificación Lógica: ${data.fichaMonitoreo.justificacion_logica}
 * Autorregulación/Metacognición: ${data.fichaMonitoreo.autorregulacion}
 * Observaciones del Docente: ${data.fichaMonitoreo.observaciones || "Ninguna"}
 * Acciones de Apoyo Recomendadas: ${data.fichaMonitoreo.acciones_apoyo || "Ninguna"}`
-}
+        }
 
 ------------------------------------------------------------------
 3. SEGUIMIENTO DE ACTIVIDADES EN CASA
 ------------------------------------------------------------------
-${
-  data.tareasCasa.length === 0
-    ? "No se registran tareas de extensión en casa."
-    : data.tareasCasa
-        .map(
-          (tc: any) =>
-            `- Actividad: "${tc.actividades.titulo}"\n  Realizada: ${tc.realizada ? "SÍ" : "NO"}\n  Comentario Familia: ${tc.comentario_familia || "Ninguno"}`
-        )
-        .join("\n\n")
-}
+${data.tareasCasa.length === 0
+          ? "No se registran tareas de extensión en casa."
+          : data.tareasCasa
+            .map(
+              (tc: any) =>
+                `- Actividad: "${tc.actividades.titulo}"\n  Realizada: ${tc.realizada ? "SÍ" : "NO"}\n  Comentario Familia: ${tc.comentario_familia || "Ninguno"}`
+            )
+            .join("\n\n")
+        }
 ==================================================================
 `;
 
@@ -1017,626 +1014,98 @@ ${
 
       <div className="overflow-y-auto">
 
-          {/* TAB 0: INICIO / DASHBOARD DE BIENVENIDA */}
-          {activeTab === "inicio" && (
-            <DashboardWelcome
-              userName={`${session?.perfil.nombre} ${session?.perfil.apellido}`}
-              role="docente"
-              indicators={[
-                {
-                  icon: "group",
-                  label: "Estudiantes Matriculados",
-                  value: estudiantes.length,
-                  subtitle: "Alumnos registrados en el grupo activo",
-                  color: "soft-blue",
-                },
-                {
-                  icon: "folder",
-                  label: "Grupos Asignados",
-                  value: grupos.length,
-                  subtitle: "Semilleros bajo tu responsibility",
-                  color: "orange",
-                },
-                {
-                  icon: "calendar_month",
-                  label: "Unidades Didácticas",
-                  value: unidades.length,
-                  subtitle: "Planificaciones creadas o en curso",
-                  color: "primary",
-                },
-                {
-                  icon: "task",
-                  label: "Criterios de Evaluación",
-                  value: criterios.length,
-                  subtitle: "Criterios disponibles en la rúbrica",
-                  color: "green",
-                },
-              ]}
-              actions={[
-                {
-                  icon: "person_search",
-                  label: "Gestionar Alumnos",
-                  description: "Registra y vincula estudiantes con sus representantes",
-                  tab: "alumnos",
-                  color: "soft-blue",
-                },
-                {
-                  icon: "edit_calendar",
-                  label: "Planificación Didáctica",
-                  description: "Crea unidades didácticas y actividades curriculares",
-                  tab: "planificacion",
-                  color: "primary",
-                },
-                {
-                  icon: "rule",
-                  label: "Evaluar Estudiantes",
-                  description: "Registra evaluaciones cognitivas con la rúbrica",
-                  tab: "evaluar",
-                  color: "green",
-                },
-                {
-                  icon: "assignment",
-                  label: "Ficha de Monitoreo",
-                  description: "Completa fichas cualitativas individuales",
-                  tab: "monitoreo",
-                  color: "orange",
-                },
-                {
-                  icon: "person_check",
-                  label: "Autoevaluación Docente",
-                  description: "Reflexiona sobre tu práctica pedagógica",
-                  tab: "autoevaluacion",
-                  color: "secondary",
-                },
-                {
-                  icon: "analytics",
-                  label: "Métricas Colectivas",
-                  description: "Visualiza el consolidado grupal de desempeño",
-                  tab: "consolidado",
-                  color: "tertiary",
-                },
-              ]}
-              onNavigate={setActiveTab}
-            />
-          )}
+        {/* TAB 0: INICIO / DASHBOARD DE BIENVENIDA */}
+        {activeTab === "inicio" && (
+          <DashboardWelcome
+            userName={`${session?.perfil.nombre} ${session?.perfil.apellido}`}
+            role="docente"
+            indicators={[
+              {
+                icon: "group",
+                label: "Estudiantes Matriculados",
+                value: estudiantes.length,
+                subtitle: "Alumnos registrados en el grupo activo",
+                color: "soft-blue",
+              },
+              {
+                icon: "folder",
+                label: "Grupos Asignados",
+                value: grupos.length,
+                subtitle: "Semilleros bajo tu responsibility",
+                color: "orange",
+              },
+              {
+                icon: "calendar_month",
+                label: "Unidades Didácticas",
+                value: unidades.length,
+                subtitle: "Planificaciones creadas o en curso",
+                color: "primary",
+              },
+              {
+                icon: "task",
+                label: "Criterios de Evaluación",
+                value: criterios.length,
+                subtitle: "Criterios disponibles en la rúbrica",
+                color: "green",
+              },
+            ]}
+            actions={[
+              {
+                icon: "person_search",
+                label: "Gestionar Alumnos",
+                description: "Registra y vincula estudiantes con sus representantes",
+                tab: "alumnos",
+                color: "soft-blue",
+              },
+              {
+                icon: "edit_calendar",
+                label: "Planificación Didáctica",
+                description: "Crea unidades didácticas y actividades curriculares",
+                tab: "planificacion",
+                color: "primary",
+              },
+              {
+                icon: "rule",
+                label: "Evaluar Estudiantes",
+                description: "Registra evaluaciones cognitivas con la rúbrica",
+                tab: "evaluar",
+                color: "green",
+              },
+              {
+                icon: "assignment",
+                label: "Ficha de Monitoreo",
+                description: "Completa fichas cualitativas individuales",
+                tab: "monitoreo",
+                color: "orange",
+              },
+              {
+                icon: "person_check",
+                label: "Autoevaluación Docente",
+                description: "Reflexiona sobre tu práctica pedagógica",
+                tab: "autoevaluacion",
+                color: "secondary",
+              },
+              {
+                icon: "analytics",
+                label: "Métricas Colectivas",
+                description: "Visualiza el consolidado grupal de desempeño",
+                tab: "consolidado",
+                color: "tertiary",
+              },
+            ]}
+            onNavigate={setActiveTab}
+          />
+        )}
 
-          {/* TAB 1: ALUMNOS Y GRUPOS */}
-          {activeTab === "alumnos" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
-                <div>
-                  <h2 className="font-headline text-xl font-bold text-on-surface">Alumnos y Grupos</h2>
-                  <p className="text-xs text-on-surface-variant mt-1">Registra estudiantes y vincula sus representantes.</p>
-                </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <select
-                    value={selectedGroup}
-                    onChange={(e) => setSelectedGroup(e.target.value)}
-                    className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[220px]"
-                  >
-                    {grupos.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.nombre}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    onClick={() => setShowGroupModal(true)}
-                    className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
-                  >
-                    + Agregar Grupo
-                  </button>
-                  <button
-                    onClick={() => setShowStudentModal(true)}
-                    className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
-                  >
-                    + Agregar Alumno
-                  </button>
-                </div>
+        {/* TAB 1: ALUMNOS Y GRUPOS */}
+        {activeTab === "alumnos" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
+              <div>
+                <h2 className="font-headline text-xl font-bold text-on-surface">Alumnos y Grupos</h2>
+                <p className="text-xs text-on-surface-variant mt-1">Registra estudiantes y vincula sus representantes.</p>
               </div>
-
-              {/* Listado de Estudiantes */}
-              <div className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm">
-                {estudiantes.length === 0 ? (
-                  <div className="text-center py-16 text-on-surface-variant/80 space-y-2">
-                    <span className="text-4xl block">👥</span>
-                    <p className="font-bold text-sm">No hay alumnos registrados en este grupo.</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm">
-                      <thead className="bg-surface-container-lowest border-b border-outline-variant/30 text-on-surface-variant font-bold uppercase text-xs tracking-wider">
-                        <tr>
-                          <th className="px-6 py-4">Cédula</th>
-                          <th className="px-6 py-4">Nombre y Apellido</th>
-                          <th className="px-6 py-4">F. Nacimiento</th>
-                          <th className="px-6 py-4">Representante</th>
-                          <th className="px-6 py-4 text-right">Acciones</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-outline-variant/20">
-                        {estudiantes.map((est) => {
-                          const rep = est.familia_estudiante?.[0];
-                          return (
-                            <tr key={est.id} className="hover:bg-surface-container-lowest/50 transition-colors">
-                              <td className="px-6 py-4 font-mono text-on-surface-variant font-bold">{est.cedula}</td>
-                              <td className="px-6 py-4 font-bold text-on-surface">{est.apellido}, {est.nombre}</td>
-                              <td className="px-6 py-4 text-on-surface-variant">{new Date(est.fecha_nacimiento).toLocaleDateString()}</td>
-                              <td className="px-6 py-4">
-                                {rep ? (
-                                  <div>
-                                    <p className="text-on-surface font-semibold">{rep.familias.nombre} {rep.familias.apellido}</p>
-                                    <p className="text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider">{rep.parentesco}</p>
-                                  </div>
-                                ) : (
-                                  <span className="text-on-surface-variant/80 font-medium">Sin asignar</span>
-                                )}
-                              </td>
-                              <td className="px-6 py-4 text-right space-x-2">
-                                <button
-                                  onClick={() => handleOpenGradeTasksModal(est)}
-                                  className="py-1.5 px-3 bg-surface-container-lowest hover:bg-tertiary/10 hover:text-tertiary border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant"
-                                >
-                                  Calificar Tareas
-                                </button>
-                                <button
-                                  onClick={() => handleDownloadInforme(est.id)}
-                                  className="py-1.5 px-3 bg-surface-container-lowest hover:bg-primary/10 hover:text-primary border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant"
-                                >
-                                  Informe TXT
-                                </button>
-                                <button
-                                  onClick={() => {
-                                    setConfirmModal({
-                                      message: `¿Seguro que deseas dar de baja lógica a ${est.nombre} ${est.apellido}? Esta acción desactivará al estudiante.`,
-                                      onConfirm: async () => {
-                                        await fetch(`${BACKEND_URL}/estudiantes/${est.id}`, { method: "DELETE" });
-                                        const res = await fetch(`${BACKEND_URL}/grupos/${selectedGroup}/estudiantes`);
-                                        setEstudiantes(await res.json());
-                                        setFeedback({ message: `${est.nombre} ${est.apellido} fue dado de baja exitosamente.`, type: "success" });
-                                      },
-                                    });
-                                  }}
-                                  className="py-1.5 px-3 bg-surface-container-lowest hover:bg-red-500/10 hover:text-red-400 border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant/80"
-                                >
-                                  Dar de Baja
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 2: PLANIFICACIÓN PEDAGÓGICA */}
-          {activeTab === "planificacion" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
-                <div>
-                  <h2 className="font-headline text-xl font-bold text-on-surface">Planificación de Actividades</h2>
-                  <p className="text-xs text-on-surface-variant mt-1">Gestiona unidades didácticas y asigna tareas.</p>
-                </div>
-                <button
-                  onClick={() => {
-                    setUnitForm({ id: "", titulo: "", resumen: "", ambito: "Relaciones lógico-matemáticas", objetivos_generales: "", objetivos_aprendizaje: "", destrezas: "", semanas_previstas: 1, estado: "borrador" });
-                    setShowUnitModal(true);
-                  }}
-                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
-                >
-                  + Nueva Unidad Didáctica
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                {unidades.map((unit) => (
-                  <div key={unit.id} className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
-                    <div className="space-y-4">
-                      <div className="flex justify-between items-start">
-                        <span className="text-[10px] font-extrabold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md border border-primary/20 tracking-wider">
-                          {unit.ambito}
-                        </span>
-                        <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border tracking-wider ${
-                          unit.estado === "activo"
-                            ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
-                            : unit.estado === "borrador"
-                            ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
-                            : "bg-surface-container text-on-surface-variant border-outline-variant/30"
-                        }`}>
-                          {unit.estado}
-                        </span>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-on-surface">{unit.titulo}</h3>
-                        <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{unit.resumen || "Sin descripción disponible."}</p>
-                      </div>
-                      <div className="text-xs text-on-surface-variant/80 font-semibold flex items-center gap-1.5">
-                        <span>🕒</span>
-                        <span>Semanas previstas: {unit.semanas_previstas}</span>
-                      </div>
-
-                      {unit.actividades && unit.actividades.length > 0 && (
-                        <div className="border-t border-outline-variant/20 pt-4 mt-4">
-                          <p className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider mb-2">Actividades vinculadas:</p>
-                          <ul className="space-y-1.5 text-xs text-on-surface-variant">
-                            {unit.actividades.map((act) => (
-                              <li key={act.id} className="flex items-center gap-2">
-                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${
-                                  act.tipo === "casa" ? "bg-highlight-orange/10 text-highlight-orange" : "bg-primary/10 text-primary"
-                                }`}>
-                                  {act.tipo}
-                                </span>
-                                <span className="font-semibold">{act.titulo}</span>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-2 border-t border-outline-variant/20 pt-4 mt-6">
-                      <button
-                        onClick={() => {
-                          setUnitForm({
-                            id: unit.id,
-                            titulo: unit.titulo,
-                            resumen: unit.resumen || "",
-                            ambito: unit.ambito,
-                            objetivos_generales: unit.objetivos_generales || "",
-                            objetivos_aprendizaje: unit.objetivos_aprendizaje || "",
-                            destrezas: unit.destrezas || "",
-                            semanas_previstas: unit.semanas_previstas,
-                            estado: unit.estado
-                          });
-                          setShowUnitModal(true);
-                        }}
-                        className="flex-1 py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                      >
-                        Editar
-                      </button>
-                      <button
-                        onClick={() => handleCloneUnit(unit.id)}
-                        className="flex-1 py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
-                      >
-                        Clonar
-                      </button>
-                      <button
-                        onClick={() => {
-                          setSelectedUnit(unit.id);
-                          setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [] });
-                          setShowActivityModal(true);
-                        }}
-                        className="py-2 px-3 bg-primary hover:brightness-110 text-on-primary rounded-xl text-xs font-bold transition-all cursor-pointer"
-                      >
-                        + Actividad
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 3: REJILLA DE EVALUACIÓN */}
-          {activeTab === "evaluar" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
-                <div>
-                  <h2 className="font-headline text-xl font-bold text-on-surface">Registro de Evaluaciones</h2>
-                  <p className="text-xs text-on-surface-variant mt-1">Evalúa de forma ágil mediante la rúbrica cognitiva.</p>
-                </div>
-                <select
-                  value={selectedUnit}
-                  onChange={(e) => setSelectedUnit(e.target.value)}
-                  className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
-                >
-                  <option value="">-- Selecciona Unidad --</option>
-                  {unidades.filter(u => u.estado === 'activo').map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.titulo}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Selector horizontal de Estudiante */}
-              <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-thin">
-                {estudiantes.map((est) => (
-                  <button
-                    key={est.id}
-                    onClick={() => setSelectedStudent(est)}
-                    className={`py-2 px-4 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${
-                      selectedStudent?.id === est.id
-                        ? "bg-primary border-primary text-on-surface shadow-lg shadow-primary/20"
-                        : "bg-surface-container-low border-outline-variant/20 text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
-                    }`}
-                  >
-                    {est.apellido}, {est.nombre}
-                  </button>
-                ))}
-              </div>
-
-              {selectedStudent && selectedUnit ? (
-                <div className="space-y-6">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-surface-container-low border border-outline-variant/30 p-6 rounded-2xl gap-4">
-                    <div>
-                      <p className="text-xs text-on-surface-variant/80 font-bold uppercase tracking-wider">Estudiante Evaluado</p>
-                      <h3 className="text-lg font-bold text-on-surface mt-1">{selectedStudent.nombre} {selectedStudent.apellido}</h3>
-                    </div>
-                    <button
-                      onClick={handleSaveEvaluaciones}
-                      className="py-3 px-5 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer w-full sm:w-auto"
-                    >
-                      Guardar Todas las Evaluaciones
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {criterios.map((crit) => {
-                      const selection = evaluacionesActive[crit.id] || { nivelId: "", obs: "" };
-                      return (
-                        <div key={crit.id} className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
-                          <div>
-                            <h4 className="text-base font-bold text-on-surface">{crit.nombre}</h4>
-                            <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">{crit.descripcion}</p>
-                          </div>
-                          
-                          <div className="mt-6 space-y-4">
-                            <div className="grid grid-cols-3 gap-2">
-                              {niveles.map((niv) => {
-                                const isActive = selection.nivelId === niv.id;
-                                let activeClass = "bg-surface-container-lowest border-outline-variant/30 text-on-surface-variant hover:bg-surface-container hover:text-on-surface";
-                                if (isActive) {
-                                  if (niv.codigo === "I") activeClass = "bg-red-500/20 border-red-500 text-red-300 shadow-md shadow-red-500/5";
-                                  if (niv.codigo === "EP") activeClass = "bg-amber-500/20 border-amber-500 text-amber-300 shadow-md shadow-amber-500/5";
-                                  if (niv.codigo === "L") activeClass = "bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/5";
-                                }
-                                return (
-                                  <button
-                                    key={niv.id}
-                                    onClick={() => handleGradeCriterio(crit.id, niv.id)}
-                                    className={`py-2 px-3 border rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${activeClass}`}
-                                  >
-                                    {niv.nombre}
-                                  </button>
-                                );
-                              })}
-                            </div>
-                            <textarea
-                              placeholder="Observaciones de logro..."
-                              value={selection.obs}
-                              onChange={(e) => handleGradeObsChange(crit.id, e.target.value)}
-                              className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-2 text-xs text-on-surface focus:outline-none focus:border-primary h-[60px] resize-none"
-                            />
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : (
-                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
-                  <span className="text-4xl block mb-3">📝</span>
-                  <p className="text-sm font-bold">Por favor, selecciona una Unidad Activa y un Estudiante para iniciar la evaluación.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 4: FICHA DE MONITOREO */}
-          {activeTab === "monitoreo" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
-                <div>
-                  <h2 className="font-headline text-xl font-bold text-on-surface">Ficha de Monitoreo Individual</h2>
-                  <p className="text-xs text-on-surface-variant mt-1">Registra análisis cualitativos de los procesos cognitivos.</p>
-                </div>
-                <select
-                  value={selectedStudent?.id || ""}
-                  onChange={(e) => {
-                    const est = estudiantes.find((es) => es.id === e.target.value);
-                    if (est) setSelectedStudent(est);
-                  }}
-                  className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
-                >
-                  <option value="">-- Selecciona Estudiante --</option>
-                  {estudiantes.map((est) => (
-                    <option key={est.id} value={est.id}>
-                      {est.apellido}, {est.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedStudent ? (
-                <form onSubmit={handleSaveFicha} className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8 space-y-6">
-                  <h3 className="text-lg font-bold text-on-surface border-b border-outline-variant/20 pb-3">
-                    Estudiante: <span className="text-primary">{selectedStudent.nombre} {selectedStudent.apellido}</span>
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Clasificación</label>
-                      <textarea
-                        required
-                        value={fichaMonitoreo.clasificacion}
-                        onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, clasificacion: e.target.value })}
-                        placeholder="Descripción sobre cómo agrupa objetos según atributos (forma, color, etc.)"
-                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Seriación</label>
-                      <textarea
-                        required
-                        value={fichaMonitoreo.seriacion}
-                        onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, seriacion: e.target.value })}
-                        placeholder="Descripción sobre la habilidad de ordenar elementos de manera secuencial."
-                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Asimilación y Acomodación</label>
-                      <textarea
-                        required
-                        value={fichaMonitoreo.asimilacion_acomodacion}
-                        onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, asimilacion_acomodacion: e.target.value })}
-                        placeholder="Descripción de la apropiación y reestructuración de esquemas mentales."
-                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Justificación Lógica</label>
-                      <textarea
-                        required
-                        value={fichaMonitoreo.justificacion_logica}
-                        onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, justificacion_logica: e.target.value })}
-                        placeholder="Cómo expresa lógicamente la causa o razón de sus respuestas y acciones."
-                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Autorregulación</label>
-                      <textarea
-                        required
-                        value={fichaMonitoreo.autorregulacion}
-                        onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, autorregulacion: e.target.value })}
-                        placeholder="Capacidad del menor de guiar y coordinar sus propias conductas."
-                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Observaciones del Docente</label>
-                      <textarea
-                        value={fichaMonitoreo.observaciones || ""}
-                        onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, observaciones: e.target.value })}
-                        placeholder="Notas adicionales e incidencias observadas."
-                        className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Acciones de Apoyo Recomendadas (Para Docente y Familia)</label>
-                    <textarea
-                      value={fichaMonitoreo.acciones_apoyo || ""}
-                      onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, acciones_apoyo: e.target.value })}
-                      placeholder="Dinámicas sugeridas de apoyo escolar que deben implementarse en el aula y en casa."
-                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[80px]"
-                    />
-                  </div>
-
-                  <div className="flex justify-end border-t border-outline-variant/20 pt-5 mt-4">
-                    <button
-                      type="submit"
-                      className="py-3 px-6 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
-                    >
-                      Guardar Ficha de Monitoreo
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
-                  <span className="text-4xl block mb-3">📊</span>
-                  <p className="text-sm font-bold">Por favor, selecciona un Estudiante para llenar la Ficha de Monitoreo.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 5: AUTOEVALUACIÓN DOCENTE */}
-          {activeTab === "autoevaluacion" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
-                <div>
-                  <h2 className="font-headline text-xl font-bold text-on-surface">Autoevaluación Docente</h2>
-                  <p className="text-xs text-on-surface-variant mt-1">Reflexiona y evalúa tu práctica en la unidad didáctica.</p>
-                </div>
-                <select
-                  value={selectedUnit}
-                  onChange={(e) => setSelectedUnit(e.target.value)}
-                  className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
-                >
-                  <option value="">-- Selecciona Unidad --</option>
-                  {unidades.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.titulo}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {selectedUnit ? (
-                <form onSubmit={handleSaveAutoevaluacion} className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8 space-y-6">
-                  <h3 className="text-lg font-bold text-on-surface border-b border-outline-variant/20 pb-3">
-                    Formulario Pedagógico de Autoevaluación
-                  </h3>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {[
-                      { num: 1, text: "1. ¿Las actividades permitieron el desarrollo cognitivo planteado?" },
-                      { num: 2, text: "2. ¿Los recursos didácticos facilitaron la asimilación y acomodación?" },
-                      { num: 3, text: "3. ¿Las rúbricas aplicadas permitieron medir el logro individual?" },
-                      { num: 4, text: "4. ¿El tiempo estipulado para la unidad didáctica fue suficiente?" },
-                      { num: 5, text: "5. ¿La comunicación y actividades en casa fueron apoyadas por la familia?" },
-                      { num: 6, text: "6. ¿Se implementaron las adecuaciones curriculares necesarias?" }
-                    ].map((q) => (
-                      <div key={q.num} className="space-y-2">
-                        <span className="text-xs font-bold text-on-surface-variant block">{q.text}</span>
-                        <select
-                          value={autoevaluacionAnswers[q.num]}
-                          onChange={(e) => setAutoevaluacionAnswers({ ...autoevaluacionAnswers, [q.num]: e.target.value as any })}
-                          className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-primary w-full"
-                        >
-                          <option value="SI">Sí</option>
-                          <option value="NO">No</option>
-                          <option value="EP">En Proceso</option>
-                        </select>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="space-y-2 pt-4">
-                    <label className="text-xs font-bold text-on-surface-variant block">Reflexión Pedagógica y Propuestas de Mejora</label>
-                    <textarea
-                      required
-                      value={autoevaluacionReflexion}
-                      onChange={(e) => setAutoevaluacionReflexion(e.target.value)}
-                      placeholder="Escriba sus comentarios reflexivos pedagógicos..."
-                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
-                    />
-                  </div>
-
-                  <div className="flex justify-end border-t border-outline-variant/20 pt-5 mt-4">
-                    <button
-                      type="submit"
-                      className="py-3 px-6 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
-                    >
-                      Registrar Autoevaluación
-                    </button>
-                  </div>
-                </form>
-              ) : (
-                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
-                  <span className="text-4xl block mb-3">🍎</span>
-                  <p className="text-sm font-bold">Por favor, selecciona una Unidad para completar tu autoevaluación.</p>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* TAB 6: CONSOLIDADO GRUPAL */}
-          {activeTab === "consolidado" && (
-            <div className="space-y-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
-                <div>
-                  <h2 className="font-headline text-xl font-bold text-on-surface">Métricas Colectivas</h2>
-                  <p className="text-xs text-on-surface-variant mt-1">Conteo consolidado de niveles de logro alcanzados por el grupo.</p>
-                </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 <select
                   value={selectedGroup}
                   onChange={(e) => setSelectedGroup(e.target.value)}
@@ -1648,65 +1117,590 @@ ${
                     </option>
                   ))}
                 </select>
+                <button
+                  onClick={() => setShowGroupModal(true)}
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
+                >
+                  + Agregar Grupo
+                </button>
+                <button
+                  onClick={() => setShowStudentModal(true)}
+                  className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
+                >
+                  + Agregar Alumno
+                </button>
               </div>
+            </div>
 
-              {metricasGrupales.length === 0 ? (
-                <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
-                  <span className="text-4xl block mb-3">📈</span>
-                  <p className="text-sm font-bold">No se registran evaluaciones suficientes en este grupo para procesar métricas colectivas.</p>
+            {/* Listado de Estudiantes */}
+            <div className="overflow-hidden rounded-2xl border border-outline-variant/20 bg-surface-container-lowest shadow-sm">
+              {estudiantes.length === 0 ? (
+                <div className="text-center py-16 text-on-surface-variant/80 space-y-2">
+                  <span className="text-4xl block">👥</span>
+                  <p className="font-bold text-sm">No hay alumnos registrados en este grupo.</p>
                 </div>
               ) : (
-                <div className="space-y-6 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
-                  
-                  {metricasGrupales.some(m => m.iniciado > m.logrado) && (
-                    <div className="bg-amber-500/10 border border-amber-500/20 text-amber-200 p-4 rounded-xl text-xs font-bold flex items-center gap-2">
-                      <span>⚠️</span>
-                      <span><strong>Recomendación de Refuerzo:</strong> El grupo presenta áreas de oportunidad considerables. Se sugiere enfocar esfuerzos and materiales en los criterios con mayor porcentaje en nivel Iniciado.</span>
-                    </div>
-                  )}
-
-                  <div className="space-y-6">
-                    {metricasGrupales.map((met, idx) => {
-                      const total = met.iniciado + met.enProceso + met.logrado;
-                      const pctIniciado = total > 0 ? (met.iniciado / total) * 100 : 0;
-                      const pctProceso = total > 0 ? (met.enProceso / total) * 100 : 0;
-                      const pctLogrado = total > 0 ? (met.logrado / total) * 100 : 0;
-
-                      return (
-                        <div key={idx} className="space-y-2 border-b border-outline-variant/20 pb-5 last:border-0 last:pb-0">
-                          <h4 className="text-sm font-bold text-on-surface">{met.criterion}</h4>
-                          <div className="h-6 w-full bg-surface-container-lowest rounded-full overflow-hidden flex text-[10px] font-extrabold text-on-surface text-center">
-                            {pctIniciado > 0 && (
-                              <div className="bg-red-500 flex items-center justify-center transition-all" style={{ width: `${pctIniciado}%` }}>
-                                {met.iniciado} Iniciado ({Math.round(pctIniciado)}%)
-                              </div>
-                            )}
-                            {pctProceso > 0 && (
-                              <div className="bg-amber-500 flex items-center justify-center transition-all" style={{ width: `${pctProceso}%` }}>
-                                {met.enProceso} En Proceso ({Math.round(pctProceso)}%)
-                              </div>
-                            )}
-                            {pctLogrado > 0 && (
-                              <div className="bg-emerald-500 flex items-center justify-center transition-all" style={{ width: `${pctLogrado}%` }}>
-                                {met.logrado} Logrado ({Math.round(pctLogrado)}%)
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex gap-4 text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider">
-                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-red-500 rounded-full" />Iniciado ({met.iniciado})</span>
-                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />En Proceso ({met.enProceso})</span>
-                            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />Logrado ({met.logrado})</span>
-                            <span className="ml-auto text-on-surface-variant">Total: {total} alumnos</span>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-surface-container-lowest border-b border-outline-variant/30 text-on-surface-variant font-bold uppercase text-xs tracking-wider">
+                      <tr>
+                        <th className="px-6 py-4">Cédula</th>
+                        <th className="px-6 py-4">Nombre y Apellido</th>
+                        <th className="px-6 py-4">F. Nacimiento</th>
+                        <th className="px-6 py-4">Representante</th>
+                        <th className="px-6 py-4 text-right">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant/20">
+                      {estudiantes.map((est) => {
+                        const rep = est.familia_estudiante?.[0];
+                        return (
+                          <tr key={est.id} className="hover:bg-surface-container-lowest/50 transition-colors">
+                            <td className="px-6 py-4 font-mono text-on-surface-variant font-bold">{est.cedula}</td>
+                            <td className="px-6 py-4 font-bold text-on-surface">{est.apellido}, {est.nombre}</td>
+                            <td className="px-6 py-4 text-on-surface-variant">{new Date(est.fecha_nacimiento).toLocaleDateString()}</td>
+                            <td className="px-6 py-4">
+                              {rep ? (
+                                <div>
+                                  <p className="text-on-surface font-semibold">{rep.familias.nombre} {rep.familias.apellido}</p>
+                                  <p className="text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider">{rep.parentesco}</p>
+                                </div>
+                              ) : (
+                                <span className="text-on-surface-variant/80 font-medium">Sin asignar</span>
+                              )}
+                            </td>
+                            <td className="px-6 py-4 text-right space-x-2">
+                              <button
+                                onClick={() => handleOpenGradeTasksModal(est)}
+                                className="py-1.5 px-3 bg-surface-container-lowest hover:bg-tertiary/10 hover:text-tertiary border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant"
+                              >
+                                Calificar Tareas
+                              </button>
+                              <button
+                                onClick={() => handleDownloadInforme(est.id)}
+                                className="py-1.5 px-3 bg-surface-container-lowest hover:bg-primary/10 hover:text-primary border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant"
+                              >
+                                Informe TXT
+                              </button>
+                              <button
+                                onClick={() => {
+                                  setConfirmModal({
+                                    message: `¿Seguro que deseas dar de baja lógica a ${est.nombre} ${est.apellido}? Esta acción desactivará al estudiante.`,
+                                    onConfirm: async () => {
+                                      await fetch(`${BACKEND_URL}/estudiantes/${est.id}`, { method: "DELETE" });
+                                      const res = await fetch(`${BACKEND_URL}/grupos/${selectedGroup}/estudiantes`);
+                                      setEstudiantes(await res.json());
+                                      setFeedback({ message: `${est.nombre} ${est.apellido} fue dado de baja exitosamente.`, type: "success" });
+                                    },
+                                  });
+                                }}
+                                className="py-1.5 px-3 bg-surface-container-lowest hover:bg-red-500/10 hover:text-red-400 border border-outline-variant/30 rounded-lg text-xs font-bold transition-all cursor-pointer text-on-surface-variant/80"
+                              >
+                                Dar de Baja
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               )}
             </div>
-          )}
+          </div>
+        )}
+
+        {/* TAB 2: PLANIFICACIÓN PEDAGÓGICA */}
+        {activeTab === "planificacion" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
+              <div>
+                <h2 className="font-headline text-xl font-bold text-on-surface">Planificación de Actividades</h2>
+                <p className="text-xs text-on-surface-variant mt-1">Gestiona unidades didácticas y asigna tareas.</p>
+              </div>
+              <button
+                onClick={() => {
+                  setUnitForm({ id: "", titulo: "", resumen: "", ambito: "Relaciones lógico-matemáticas", objetivos_generales: "", objetivos_aprendizaje: "", destrezas: "", semanas_previstas: 1, estado: "borrador" });
+                  setShowUnitModal(true);
+                }}
+                className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
+              >
+                + Nueva Unidad Didáctica
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              {unidades.map((unit) => (
+                <div key={unit.id} className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-start">
+                      <span className="text-[10px] font-extrabold uppercase bg-primary/10 text-primary px-2 py-1 rounded-md border border-primary/20 tracking-wider">
+                        {unit.ambito}
+                      </span>
+                      <span className={`text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border tracking-wider ${unit.estado === "activo"
+                        ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                        : unit.estado === "borrador"
+                          ? "bg-amber-500/10 text-amber-300 border-amber-500/20"
+                          : "bg-surface-container text-on-surface-variant border-outline-variant/30"
+                        }`}>
+                        {unit.estado}
+                      </span>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-on-surface">{unit.titulo}</h3>
+                      <p className="text-xs text-on-surface-variant mt-2 leading-relaxed">{unit.resumen || "Sin descripción disponible."}</p>
+                    </div>
+                    <div className="text-xs text-on-surface-variant/80 font-semibold flex items-center gap-1.5">
+                      <span>🕒</span>
+                      <span>Semanas previstas: {unit.semanas_previstas}</span>
+                    </div>
+
+                    {unit.actividades && unit.actividades.length > 0 && (
+                      <div className="border-t border-outline-variant/20 pt-4 mt-4">
+                        <p className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider mb-2">Actividades vinculadas:</p>
+                        <ul className="space-y-1.5 text-xs text-on-surface-variant">
+                          {unit.actividades.map((act) => (
+                            <li key={act.id} className="flex items-center gap-2">
+                              <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${act.tipo === "casa" ? "bg-highlight-orange/10 text-highlight-orange" : "bg-primary/10 text-primary"
+                                }`}>
+                                {act.tipo}
+                              </span>
+                              <span className="font-semibold">{act.titulo}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2 border-t border-outline-variant/20 pt-4 mt-6">
+                    <button
+                      onClick={() => {
+                        setUnitForm({
+                          id: unit.id,
+                          titulo: unit.titulo,
+                          resumen: unit.resumen || "",
+                          ambito: unit.ambito,
+                          objetivos_generales: unit.objetivos_generales || "",
+                          objetivos_aprendizaje: unit.objetivos_aprendizaje || "",
+                          destrezas: unit.destrezas || "",
+                          semanas_previstas: unit.semanas_previstas,
+                          estado: unit.estado
+                        });
+                        setShowUnitModal(true);
+                      }}
+                      className="flex-1 py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleCloneUnit(unit.id)}
+                      className="flex-1 py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      Clonar
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedUnit(unit.id);
+                        setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [] });
+                        setShowActivityModal(true);
+                      }}
+                      className="py-2 px-3 bg-primary hover:brightness-110 text-on-primary rounded-xl text-xs font-bold transition-all cursor-pointer"
+                    >
+                      + Actividad
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: REJILLA DE EVALUACIÓN */}
+        {activeTab === "evaluar" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
+              <div>
+                <h2 className="font-headline text-xl font-bold text-on-surface">Registro de Evaluaciones</h2>
+                <p className="text-xs text-on-surface-variant mt-1">Evalúa de forma ágil mediante la rúbrica cognitiva.</p>
+              </div>
+              <select
+                value={selectedUnit}
+                onChange={(e) => setSelectedUnit(e.target.value)}
+                className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
+              >
+                <option value="">-- Selecciona Unidad --</option>
+                {unidades.filter(u => u.estado === 'activo').map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.titulo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Selector horizontal de Estudiante */}
+            <div className="flex gap-2 overflow-x-auto pb-3 scrollbar-thin">
+              {estudiantes.map((est) => (
+                <button
+                  key={est.id}
+                  onClick={() => setSelectedStudent(est)}
+                  className={`py-2 px-4 rounded-xl text-xs font-bold transition-all shrink-0 cursor-pointer border ${selectedStudent?.id === est.id
+                    ? "bg-primary border-primary text-on-surface shadow-lg shadow-primary/20"
+                    : "bg-surface-container-low border-outline-variant/20 text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface"
+                    }`}
+                >
+                  {est.apellido}, {est.nombre}
+                </button>
+              ))}
+            </div>
+
+            {selectedStudent && selectedUnit ? (
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-surface-container-low border border-outline-variant/30 p-6 rounded-2xl gap-4">
+                  <div>
+                    <p className="text-xs text-on-surface-variant/80 font-bold uppercase tracking-wider">Estudiante Evaluado</p>
+                    <h3 className="text-lg font-bold text-on-surface mt-1">{selectedStudent.nombre} {selectedStudent.apellido}</h3>
+                  </div>
+                  <button
+                    onClick={handleSaveEvaluaciones}
+                    className="py-3 px-5 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer w-full sm:w-auto"
+                  >
+                    Guardar Todas las Evaluaciones
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {criterios.map((crit) => {
+                    const selection = evaluacionesActive[crit.id] || { nivelId: "", obs: "" };
+                    return (
+                      <div key={crit.id} className="bg-surface-container-low border border-outline-variant/30 rounded-2xl p-6 flex flex-col justify-between hover:border-outline-variant/30 transition-all shadow-xl">
+                        <div>
+                          <h4 className="text-base font-bold text-on-surface">{crit.nombre}</h4>
+                          <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">{crit.descripcion}</p>
+                        </div>
+
+                        <div className="mt-6 space-y-4">
+                          <div className="grid grid-cols-3 gap-2">
+                            {niveles.map((niv) => {
+                              const isActive = selection.nivelId === niv.id;
+                              let activeClass = "bg-surface-container-lowest border-outline-variant/30 text-on-surface-variant hover:bg-surface-container hover:text-on-surface";
+                              if (isActive) {
+                                if (niv.codigo === "I") activeClass = "bg-red-500/20 border-red-500 text-red-300 shadow-md shadow-red-500/5";
+                                if (niv.codigo === "EP") activeClass = "bg-amber-500/20 border-amber-500 text-amber-300 shadow-md shadow-amber-500/5";
+                                if (niv.codigo === "L") activeClass = "bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-md shadow-emerald-500/5";
+                              }
+                              return (
+                                <button
+                                  key={niv.id}
+                                  onClick={() => handleGradeCriterio(crit.id, niv.id)}
+                                  className={`py-2 px-3 border rounded-xl text-xs font-bold transition-all text-center cursor-pointer ${activeClass}`}
+                                >
+                                  {niv.nombre}
+                                </button>
+                              );
+                            })}
+                          </div>
+                          <textarea
+                            placeholder="Observaciones de logro..."
+                            value={selection.obs}
+                            onChange={(e) => handleGradeObsChange(crit.id, e.target.value)}
+                            className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-2 text-xs text-on-surface focus:outline-none focus:border-primary h-[60px] resize-none"
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
+                <span className="text-4xl block mb-3">📝</span>
+                <p className="text-sm font-bold">Por favor, selecciona una Unidad Activa y un Estudiante para iniciar la evaluación.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 4: FICHA DE MONITOREO */}
+        {activeTab === "monitoreo" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
+              <div>
+                <h2 className="font-headline text-xl font-bold text-on-surface">Ficha de Monitoreo Individual</h2>
+                <p className="text-xs text-on-surface-variant mt-1">Registra análisis cualitativos de los procesos cognitivos.</p>
+              </div>
+              <select
+                value={selectedStudent?.id || ""}
+                onChange={(e) => {
+                  const est = estudiantes.find((es) => es.id === e.target.value);
+                  if (est) setSelectedStudent(est);
+                }}
+                className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
+              >
+                <option value="">-- Selecciona Estudiante --</option>
+                {estudiantes.map((est) => (
+                  <option key={est.id} value={est.id}>
+                    {est.apellido}, {est.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedStudent ? (
+              <form onSubmit={handleSaveFicha} className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8 space-y-6">
+                <h3 className="text-lg font-bold text-on-surface border-b border-outline-variant/20 pb-3">
+                  Estudiante: <span className="text-primary">{selectedStudent.nombre} {selectedStudent.apellido}</span>
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Clasificación</label>
+                    <textarea
+                      required
+                      value={fichaMonitoreo.clasificacion}
+                      onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, clasificacion: e.target.value })}
+                      placeholder="Descripción sobre cómo agrupa objetos según atributos (forma, color, etc.)"
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Seriación</label>
+                    <textarea
+                      required
+                      value={fichaMonitoreo.seriacion}
+                      onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, seriacion: e.target.value })}
+                      placeholder="Descripción sobre la habilidad de ordenar elementos de manera secuencial."
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Asimilación y Acomodación</label>
+                    <textarea
+                      required
+                      value={fichaMonitoreo.asimilacion_acomodacion}
+                      onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, asimilacion_acomodacion: e.target.value })}
+                      placeholder="Descripción de la apropiación y reestructuración de esquemas mentales."
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Justificación Lógica</label>
+                    <textarea
+                      required
+                      value={fichaMonitoreo.justificacion_logica}
+                      onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, justificacion_logica: e.target.value })}
+                      placeholder="Cómo expresa lógicamente la causa o razón de sus respuestas y acciones."
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Autorregulación</label>
+                    <textarea
+                      required
+                      value={fichaMonitoreo.autorregulacion}
+                      onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, autorregulacion: e.target.value })}
+                      placeholder="Capacidad del menor de guiar y coordinar sus propias conductas."
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Observaciones del Docente</label>
+                    <textarea
+                      value={fichaMonitoreo.observaciones || ""}
+                      onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, observaciones: e.target.value })}
+                      placeholder="Notas adicionales e incidencias observadas."
+                      className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block">Acciones de Apoyo Recomendadas (Para Docente y Familia)</label>
+                  <textarea
+                    value={fichaMonitoreo.acciones_apoyo || ""}
+                    onChange={(e) => setFichaMonitoreo({ ...fichaMonitoreo, acciones_apoyo: e.target.value })}
+                    placeholder="Dinámicas sugeridas de apoyo escolar que deben implementarse en el aula y en casa."
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[80px]"
+                  />
+                </div>
+
+                <div className="flex justify-end border-t border-outline-variant/20 pt-5 mt-4">
+                  <button
+                    type="submit"
+                    className="py-3 px-6 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
+                  >
+                    Guardar Ficha de Monitoreo
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
+                <span className="text-4xl block mb-3">📊</span>
+                <p className="text-sm font-bold">Por favor, selecciona un Estudiante para llenar la Ficha de Monitoreo.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 5: AUTOEVALUACIÓN DOCENTE */}
+        {activeTab === "autoevaluacion" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
+              <div>
+                <h2 className="font-headline text-xl font-bold text-on-surface">Autoevaluación Docente</h2>
+                <p className="text-xs text-on-surface-variant mt-1">Reflexiona y evalúa tu práctica en la unidad didáctica.</p>
+              </div>
+              <select
+                value={selectedUnit}
+                onChange={(e) => setSelectedUnit(e.target.value)}
+                className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
+              >
+                <option value="">-- Selecciona Unidad --</option>
+                {unidades.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.titulo}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedUnit ? (
+              <form onSubmit={handleSaveAutoevaluacion} className="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8 space-y-6">
+                <h3 className="text-lg font-bold text-on-surface border-b border-outline-variant/20 pb-3">
+                  Formulario Pedagógico de Autoevaluación
+                </h3>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    { num: 1, text: "1. ¿Las actividades permitieron el desarrollo cognitivo planteado?" },
+                    { num: 2, text: "2. ¿Los recursos didácticos facilitaron la asimilación y acomodación?" },
+                    { num: 3, text: "3. ¿Las rúbricas aplicadas permitieron medir el logro individual?" },
+                    { num: 4, text: "4. ¿El tiempo estipulado para la unidad didáctica fue suficiente?" },
+                    { num: 5, text: "5. ¿La comunicación y actividades en casa fueron apoyadas por la familia?" },
+                    { num: 6, text: "6. ¿Se implementaron las adecuaciones curriculares necesarias?" }
+                  ].map((q) => (
+                    <div key={q.num} className="space-y-2">
+                      <span className="text-xs font-bold text-on-surface-variant block">{q.text}</span>
+                      <select
+                        value={autoevaluacionAnswers[q.num]}
+                        onChange={(e) => setAutoevaluacionAnswers({ ...autoevaluacionAnswers, [q.num]: e.target.value as any })}
+                        className="bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-2.5 text-sm text-on-surface focus:outline-none focus:border-primary w-full"
+                      >
+                        <option value="SI">Sí</option>
+                        <option value="NO">No</option>
+                        <option value="EP">En Proceso</option>
+                      </select>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="space-y-2 pt-4">
+                  <label className="text-xs font-bold text-on-surface-variant block">Reflexión Pedagógica y Propuestas de Mejora</label>
+                  <textarea
+                    required
+                    value={autoevaluacionReflexion}
+                    onChange={(e) => setAutoevaluacionReflexion(e.target.value)}
+                    placeholder="Escriba sus comentarios reflexivos pedagógicos..."
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-4 py-3 text-sm text-on-surface focus:outline-none focus:border-primary h-[100px]"
+                  />
+                </div>
+
+                <div className="flex justify-end border-t border-outline-variant/20 pt-5 mt-4">
+                  <button
+                    type="submit"
+                    className="py-3 px-6 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
+                  >
+                    Registrar Autoevaluación
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
+                <span className="text-4xl block mb-3">🍎</span>
+                <p className="text-sm font-bold">Por favor, selecciona una Unidad para completar tu autoevaluación.</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 6: CONSOLIDADO GRUPAL */}
+        {activeTab === "consolidado" && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-outline-variant/30 pb-5">
+              <div>
+                <h2 className="font-headline text-xl font-bold text-on-surface">Métricas Colectivas</h2>
+                <p className="text-xs text-on-surface-variant mt-1">Conteo consolidado de niveles de logro alcanzados por el grupo.</p>
+              </div>
+              <select
+                value={selectedGroup}
+                onChange={(e) => setSelectedGroup(e.target.value)}
+                className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[220px]"
+              >
+                {grupos.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {metricasGrupales.length === 0 ? (
+              <div className="bg-surface-container-low border border-outline-variant/30 rounded-2xl text-center py-20 text-on-surface-variant/80">
+                <span className="text-4xl block mb-3">📈</span>
+                <p className="text-sm font-bold">No se registran evaluaciones suficientes en este grupo para procesar métricas colectivas.</p>
+              </div>
+            ) : (
+              <div className="space-y-6 rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-6 shadow-sm sm:p-8">
+
+                {metricasGrupales.some(m => m.iniciado > m.logrado) && (
+                  <div className="bg-amber-500/10 border border-amber-500/20 text-amber-200 p-4 rounded-xl text-xs font-bold flex items-center gap-2">
+                    <span>⚠️</span>
+                    <span><strong>Recomendación de Refuerzo:</strong> El grupo presenta áreas de oportunidad considerables. Se sugiere enfocar esfuerzos and materiales en los criterios con mayor porcentaje en nivel Iniciado.</span>
+                  </div>
+                )}
+
+                <div className="space-y-6">
+                  {metricasGrupales.map((met, idx) => {
+                    const total = met.iniciado + met.enProceso + met.logrado;
+                    const pctIniciado = total > 0 ? (met.iniciado / total) * 100 : 0;
+                    const pctProceso = total > 0 ? (met.enProceso / total) * 100 : 0;
+                    const pctLogrado = total > 0 ? (met.logrado / total) * 100 : 0;
+
+                    return (
+                      <div key={idx} className="space-y-2 border-b border-outline-variant/20 pb-5 last:border-0 last:pb-0">
+                        <h4 className="text-sm font-bold text-on-surface">{met.criterion}</h4>
+                        <div className="h-6 w-full bg-surface-container-lowest rounded-full overflow-hidden flex text-[10px] font-extrabold text-on-surface text-center">
+                          {pctIniciado > 0 && (
+                            <div className="bg-red-500 flex items-center justify-center transition-all" style={{ width: `${pctIniciado}%` }}>
+                              {met.iniciado} Iniciado ({Math.round(pctIniciado)}%)
+                            </div>
+                          )}
+                          {pctProceso > 0 && (
+                            <div className="bg-amber-500 flex items-center justify-center transition-all" style={{ width: `${pctProceso}%` }}>
+                              {met.enProceso} En Proceso ({Math.round(pctProceso)}%)
+                            </div>
+                          )}
+                          {pctLogrado > 0 && (
+                            <div className="bg-emerald-500 flex items-center justify-center transition-all" style={{ width: `${pctLogrado}%` }}>
+                              {met.logrado} Logrado ({Math.round(pctLogrado)}%)
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex gap-4 text-[10px] text-on-surface-variant/80 font-bold uppercase tracking-wider">
+                          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-red-500 rounded-full" />Iniciado ({met.iniciado})</span>
+                          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-amber-500 rounded-full" />En Proceso ({met.enProceso})</span>
+                          <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 bg-emerald-500 rounded-full" />Logrado ({met.logrado})</span>
+                          <span className="ml-auto text-on-surface-variant">Total: {total} alumnos</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
       </div>
 
@@ -1804,7 +1798,7 @@ ${
 
             <form onSubmit={handleCreateStudent} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
+
                 {/* COLUMNA IZQUIERDA: DATOS DEL ESTUDIANTE */}
                 <div className="space-y-4">
                   <h4 className="font-bold text-sm text-primary border-b border-outline-variant/10 pb-2">
@@ -2003,7 +1997,8 @@ ${
       {/* Modal Agregar / Editar Unidad Didáctica */}
       {showUnitModal && (
         <div className="ds-modal-overlay fixed inset-0 z-50 flex animate-fade-in items-center justify-center p-4 backdrop-blur-sm">
-          <div className="ds-modal relative max-w-md w-full space-y-6 p-6 sm:p-8">
+          {/* 1. Ensanchado el modal con max-w-3xl */}
+          <div className="ds-modal relative max-w-3xl w-full space-y-6 p-6 sm:p-8">
             <div className="flex justify-between items-center">
               <h3 className="text-lg font-bold text-on-surface">
                 {unitForm.id ? "Editar Unidad Didáctica" : "Crear Unidad Didáctica"}
@@ -2017,93 +2012,106 @@ ${
             </div>
 
             <form onSubmit={handleSaveUnit} className="space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Título de la Unidad</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Unidad 1: Colores primarios"
-                  value={unitForm.titulo}
-                  onChange={(e) => setUnitForm({ ...unitForm, titulo: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
+              {/* Contenedor Grid Principal */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Ámbito Cognitivo</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Relaciones lógico-matemáticas"
-                  value={unitForm.ambito}
-                  onChange={(e) => setUnitForm({ ...unitForm, ambito: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Resumen Pedagógico</label>
-                <textarea
-                  placeholder="Resumen del ámbito a evaluar..."
-                  value={unitForm.resumen}
-                  onChange={(e) => setUnitForm({ ...unitForm, resumen: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[60px]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Objetivos Generales</label>
-                <textarea
-                  value={unitForm.objetivos_generales}
-                  onChange={(e) => setUnitForm({ ...unitForm, objetivos_generales: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[50px]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Objetivos de Aprendizaje</label>
-                <textarea
-                  value={unitForm.objetivos_aprendizaje}
-                  onChange={(e) => setUnitForm({ ...unitForm, objetivos_aprendizaje: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[50px]"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Destrezas a Evaluar</label>
-                <textarea
-                  value={unitForm.destrezas}
-                  onChange={(e) => setUnitForm({ ...unitForm, destrezas: e.target.value })}
-                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[50px]"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
+                {/* Fila 1: Título de la Unidad (Izquierda) */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-on-surface-variant block">Semanas Previstas</label>
+                  <label className="text-xs font-bold text-on-surface-variant block">Título de la Unidad</label>
                   <input
-                    type="number"
-                    min={1}
+                    type="text"
                     required
-                    value={unitForm.semanas_previstas}
-                    onChange={(e) => setUnitForm({ ...unitForm, semanas_previstas: Number(e.target.value) })}
+                    placeholder="Ej: Unidad 1: Colores primarios"
+                    value={unitForm.titulo}
+                    onChange={(e) => setUnitForm({ ...unitForm, titulo: e.target.value })}
                     className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
                   />
                 </div>
+
+                {/* Fila 1: Ámbito Cognitivo (Derecha) */}
                 <div className="space-y-1">
-                  <label className="text-xs font-bold text-on-surface-variant block">Estado</label>
-                  <select
-                    value={unitForm.estado}
-                    onChange={(e) => setUnitForm({ ...unitForm, estado: e.target.value as any })}
+                  <label className="text-xs font-bold text-on-surface-variant block">Ámbito Cognitivo</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Ej: Relaciones lógico-matemáticas"
+                    value={unitForm.ambito}
+                    onChange={(e) => setUnitForm({ ...unitForm, ambito: e.target.value })}
                     className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
-                  >
-                    <option value="borrador">Borrador</option>
-                    <option value="activo">Activo</option>
-                    <option value="archivado">Archivado</option>
-                  </select>
+                  />
                 </div>
+
+                {/* Fila 2: Resumen Pedagógico (Ocupa todo el ancho) */}
+                <div className="space-y-1 md:col-span-2">
+                  <label className="text-xs font-bold text-on-surface-variant block">Resumen Pedagógico</label>
+                  <textarea
+                    placeholder="Resumen del ámbito a evaluar..."
+                    value={unitForm.resumen}
+                    onChange={(e) => setUnitForm({ ...unitForm, resumen: e.target.value })}
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[60px]"
+                  />
+                </div>
+
+                {/* Fila 3: Objetivos Generales (Izquierda) */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-on-surface-variant block">Objetivos Generales</label>
+                  <textarea
+                    value={unitForm.objetivos_generales}
+                    onChange={(e) => setUnitForm({ ...unitForm, objetivos_generales: e.target.value })}
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[60px]"
+                  />
+                </div>
+
+                {/* Fila 3: Objetivos de Aprendizaje (Derecha) */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-on-surface-variant block">Objetivos de Aprendizaje</label>
+                  <textarea
+                    value={unitForm.objetivos_aprendizaje}
+                    onChange={(e) => setUnitForm({ ...unitForm, objetivos_aprendizaje: e.target.value })}
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[60px]"
+                  />
+                </div>
+
+                {/* Fila 4: Destrezas a Evaluar (Izquierda) */}
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-on-surface-variant block">Destrezas a Evaluar</label>
+                  <textarea
+                    value={unitForm.destrezas}
+                    onChange={(e) => setUnitForm({ ...unitForm, destrezas: e.target.value })}
+                    className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[116px] resize-none"
+                  />
+                </div>
+
+                {/* Fila 4: Lado Derecho (Semanas y Estado juntos en una sub-grilla) */}
+                <div className="grid grid-cols-2 gap-4 content-start">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Semanas Previstas</label>
+                    <input
+                      type="number"
+                      min={1}
+                      required
+                      value={unitForm.semanas_previstas}
+                      onChange={(e) => setUnitForm({ ...unitForm, semanas_previstas: Number(e.target.value) })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-on-surface-variant block">Estado</label>
+                    <select
+                      value={unitForm.estado}
+                      onChange={(e) => setUnitForm({ ...unitForm, estado: e.target.value as any })}
+                      className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[38px]"
+                    >
+                      <option value="borrador">Borrador</option>
+                      <option value="activo">Activo</option>
+                      <option value="archivado">Archivado</option>
+                    </select>
+                  </div>
+                </div>
+
               </div>
 
+              {/* Botones de acción abajo a la derecha */}
               <div className="flex justify-end gap-2 pt-4 border-t border-outline-variant/20">
                 <button
                   type="button"
@@ -2278,7 +2286,7 @@ ${
                         <h4 className="text-sm font-bold text-on-surface mt-1">{task.titulo}</h4>
                         <p className="text-xs text-on-surface-variant leading-relaxed">{task.descripcion}</p>
                       </div>
-                      
+
                       {/* Control de Calificación */}
                       <div className="flex flex-col items-end gap-1 shrink-0">
                         <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Calificación (0 - 10)</label>

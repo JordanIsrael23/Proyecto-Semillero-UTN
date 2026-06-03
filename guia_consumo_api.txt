@@ -1,0 +1,725 @@
+================================================================================
+DOCUMENTACIÓN MAESTRA Y GUÍA DE PRUEBAS DE LA API - SEMILLERO UTN 2026
+================================================================================
+
+Este documento contiene la especificación absoluta para consumir y probar el 100% 
+de los endpoints del backend NestJS. Cada sección contiene la descripción, 
+dirección, cabeceras, cuerpo de envío, respuesta esperada y código en JavaScript.
+
+--------------------------------------------------------------------------------
+ÍNDICE DE ENDPOINTS DOCUMENTADOS
+--------------------------------------------------------------------------------
+1.  POST   /api/auth/login
+2.  POST   /api/auth/register
+3.  GET    /api/usuarios-demo
+4.  GET    /api/docente/grupos
+5.  POST   /api/grupos
+6.  GET    /api/grupos/:id/estudiantes
+7.  GET    /api/grupos/:id/consolidado
+8.  GET    /api/estudiantes/buscar/:cedula
+9.  POST   /api/estudiantes
+10. PUT    /api/estudiantes/:id
+11. DELETE /api/estudiantes/:id
+12. GET    /api/estudiantes/:id/evaluaciones
+13. GET    /api/estudiantes/:id/informe-completo
+14. GET    /api/familias/buscar/:cedula
+15. POST   /api/familias
+16. GET    /api/familia/hijos
+17. GET    /api/estudiantes/:id/actividades-casa
+18. POST   /api/estudiantes/:id/actividades-casa/seguimiento
+19. GET    /api/docente/unidades
+20. POST   /api/unidades
+21. PUT    /api/unidades/:id
+22. POST   /api/unidades/:id/clonar
+23. POST   /api/unidades/:id/actividades
+24. PUT    /api/actividades/:id
+25. DELETE /api/actividades/:id
+26. GET    /api/rubrica/criterios
+27. GET    /api/rubrica/niveles
+28. POST   /api/evaluaciones
+29. GET    /api/estudiantes/:id/ficha-monitoreo
+30. POST   /api/estudiantes/:id/ficha-monitoreo
+31. POST   /api/autoevaluaciones
+32. GET    /api/unidades/:id/autoevaluaciones
+
+--------------------------------------------------------------------------------
+CONFIGURACIÓN GENERAL DE PRUEBAS
+--------------------------------------------------------------------------------
+- URL Base local: http://localhost:4000
+- Todas las peticiones de escritura (POST/PUT) deben usar:
+  * Headers: {"Content-Type": "application/json"}
+- Los endpoints protegidos requieren identificar al usuario con:
+  * Headers: {"x-user-id": "UUID_DEL_USUARIO"}
+
+================================================================================
+ESPECIFICACIÓN DE ENDPOINTS
+================================================================================
+
+--------------------------------------------------------------------------------
+1. POST /api/auth/login
+--------------------------------------------------------------------------------
+Descripción: Autentica un usuario con email/cédula y contraseña.
+- URL: http://localhost:4000/api/auth/login
+- Headers:
+  {
+    "Content-Type": "application/json"
+  }
+- Request Body (JSON):
+  {
+    "cedulaOrEmail": "docente.utn@utn.edu.ec",
+    "password_raw": "Admin123*"
+  }
+- Response (200 OK):
+  {
+    "user": {
+      "id": "a0000000-0000-0000-0000-000000000001",
+      "cedula": "1000000001",
+      "email": "docente.utn@utn.edu.ec",
+      "rol": "docente",
+      "activo": true
+    },
+    "perfil": {
+      "id": "d0000000-0000-0000-0000-000000000001",
+      "nombre": "Jordan",
+      "apellido": "Israel"
+    }
+  }
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ cedulaOrEmail: 'docente.utn@utn.edu.ec', password_raw: 'Admin123*' })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+2. POST /api/auth/register
+--------------------------------------------------------------------------------
+Descripción: Registra un nuevo usuario con perfil.
+- URL: http://localhost:4000/api/auth/register
+- Request Body (JSON):
+  {
+    "cedula": "1004321098",
+    "email": "nuevo.profesor@utn.edu.ec",
+    "password_raw": "Admin123*",
+    "rol": "docente",
+    "nombre": "Alex",
+    "apellido": "Mena",
+    "telefono": "0982765431"
+  }
+- Response (201 Created):
+  {
+    "user": {
+      "id": "u-uuid-nuevo",
+      "cedula": "1004321098",
+      "email": "nuevo.profesor@utn.edu.ec",
+      "rol": "docente"
+    },
+    "perfil": {
+      "id": "p-uuid-nuevo",
+      "nombre": "Alex",
+      "apellido": "Mena"
+    }
+  }
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      cedula: '1004321098',
+      email: 'nuevo.profesor@utn.edu.ec',
+      password_raw: 'Admin123*',
+      rol: 'docente',
+      nombre: 'Alex',
+      apellido: 'Mena',
+      telefono: '0982765431'
+    })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+3. GET /api/usuarios-demo
+--------------------------------------------------------------------------------
+Descripción: Lista todos los usuarios registrados con perfiles.
+- URL: http://localhost:4000/api/usuarios-demo
+- Response (200 OK):
+  [
+    {
+      "id": "a0000000-0000-0000-0000-000000000001",
+      "email": "docente.utn@utn.edu.ec",
+      "rol": "docente",
+      "docentes": { "nombre": "Jordan", "apellido": "Israel" }
+    }
+  ]
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/usuarios-demo').then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+4. GET /api/docente/grupos
+--------------------------------------------------------------------------------
+Descripción: Obtiene las aulas asignadas al docente autenticado.
+- URL: http://localhost:4000/api/docente/grupos
+- Headers:
+  {
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Response (200 OK):
+  [
+    {
+      "id": "g-uuid-grupo",
+      "nombre": "Inicial II - Paralelo A",
+      "_count": { "estudiantes": 14 }
+    }
+  ]
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/docente/grupos', {
+    headers: { 'x-user-id': 'a0000000-0000-0000-0000-000000000001' }
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+5. POST /api/grupos
+--------------------------------------------------------------------------------
+Descripción: Registra un nuevo grupo del docente.
+- URL: http://localhost:4000/api/grupos
+- Headers:
+  {
+    "Content-Type": "application/json",
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Request Body (JSON):
+  {
+    "nombre": "Inicial I - Semillero"
+  }
+- Response (201 Created):
+  {
+    "id": "g-uuid-nuevo",
+    "nombre": "Inicial I - Semillero",
+    "docente_id": "d-uuid"
+  }
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/grupos', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-id': 'a0000000-0000-0000-0000-000000000001'
+    },
+    body: JSON.stringify({ nombre: 'Inicial I - Semillero' })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+6. GET /api/grupos/:id/estudiantes
+--------------------------------------------------------------------------------
+Descripción: Lista los estudiantes activos matriculados en el grupo.
+- URL: http://localhost:4000/api/grupos/g-uuid-grupo/estudiantes
+- Response (200 OK):
+  [
+    {
+      "id": "e-uuid",
+      "cedula": "1005555555",
+      "nombre": "Juan",
+      "apellido": "Alvarado",
+      "familia_estudiante": [
+        {
+          "parentesco": "Padre",
+          "familias": { "nombre": "Pedro", "apellido": "Alvarado" }
+        }
+      ]
+    }
+  ]
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/grupos/g-uuid-grupo/estudiantes')
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+7. GET /api/grupos/:id/consolidado
+--------------------------------------------------------------------------------
+Descripción: Retorna el consolidado cuantitativo de niveles de logro alcanzados.
+- URL: http://localhost:4000/api/grupos/g-uuid-grupo/consolidado
+- Response (200 OK):
+  [
+    {
+      "criterio": "Identifica figuras geométricas",
+      "iniciado": 2,
+      "enProceso": 4,
+      "logrado": 6
+    }
+  ]
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/grupos/g-uuid-grupo/consolidado')
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+8. GET /api/estudiantes/buscar/:cedula
+--------------------------------------------------------------------------------
+Descripción: Busca un estudiante y su representante por su cédula.
+- URL: http://localhost:4000/api/estudiantes/buscar/1000000002
+- Response (200 OK):
+  {
+    "id": "e-uuid",
+    "cedula": "1000000002",
+    "nombre": "Estudiante",
+    "apellido": "Demo",
+    "fecha_nacimiento": "2021-02-15",
+    "familia_estudiante": [...]
+  }
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes/buscar/1000000002')
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+9. POST /api/estudiantes
+--------------------------------------------------------------------------------
+Descripción: Registra o re-matricula un estudiante vinculándole su representante.
+- URL: http://localhost:4000/api/estudiantes
+- Request Body (JSON):
+  {
+    "cedula": "1005123456",
+    "nombre": "Gabriela",
+    "apellido": "Mendoza",
+    "grupo_id": "g-uuid-grupo",
+    "fecha_nacimiento": "2021-08-20",
+    "representante_id": "f-uuid-representante",
+    "parentesco": "Madre"
+  }
+- Response (201 Created):
+  {
+    "id": "e-uuid-nuevo",
+    "cedula": "1005123456",
+    "nombre": "Gabriela",
+    "apellido": "Mendoza",
+    "activo": true
+  }
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      cedula: '1005123456',
+      nombre: 'Gabriela',
+      apellido: 'Mendoza',
+      grupo_id: 'g-uuid-grupo',
+      fecha_nacimiento: '2021-08-20',
+      representante_id: 'f-uuid-representante',
+      parentesco: 'Madre'
+    })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+10. PUT /api/estudiantes/:id
+--------------------------------------------------------------------------------
+Descripción: Edita los datos de un estudiante.
+- URL: http://localhost:4000/api/estudiantes/e-uuid
+- Request Body (JSON):
+  {
+    "nombre": "Gabriela María",
+    "apellido": "Mendoza",
+    "grupo_id": "g-uuid-grupo",
+    "fecha_nacimiento": "2021-08-20",
+    "activo": true
+  }
+- Response (200 OK): Estudiante editado.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes/e-uuid', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      nombre: 'Gabriela María',
+      apellido: 'Mendoza',
+      grupo_id: 'g-uuid-grupo',
+      fecha_nacimiento: '2021-08-20',
+      activo: true
+    })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+11. DELETE /api/estudiantes/:id
+--------------------------------------------------------------------------------
+Descripción: Baja lógica del estudiante (activo = false).
+- URL: http://localhost:4000/api/estudiantes/e-uuid
+- Response (200 OK): Estudiante desactivado.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes/e-uuid', { method: 'DELETE' })
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+12. GET /api/estudiantes/:id/evaluaciones
+--------------------------------------------------------------------------------
+Descripción: Obtiene el historial de evaluaciones vigentes del alumno.
+- URL: http://localhost:4000/api/estudiantes/e-uuid/evaluaciones
+- Response (200 OK): Array de evaluaciones.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes/e-uuid/evaluaciones')
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+13. GET /api/estudiantes/:id/informe-completo
+--------------------------------------------------------------------------------
+Descripción: Consolida todo el historial del alumno para generar reportes.
+- URL: http://localhost:4000/api/estudiantes/e-uuid/informe-completo
+- Response (200 OK):
+  {
+    "estudiante": {...},
+    "evaluaciones": [...],
+    "fichaMonitoreo": {...},
+    "tareasCasa": [...]
+  }
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes/e-uuid/informe-completo')
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+14. GET /api/familias/buscar/:cedula
+--------------------------------------------------------------------------------
+Descripción: Busca un representante por su número de cédula.
+- URL: http://localhost:4000/api/familias/buscar/1003456789
+- Response (200 OK): Perfil del representante o null.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/familias/buscar/1003456789')
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+15. POST /api/familias
+--------------------------------------------------------------------------------
+Descripción: Registra un representante legal con credenciales iniciales.
+- URL: http://localhost:4000/api/familias
+- Request Body (JSON):
+  {
+    "cedula": "1003456789",
+    "email": "padre.demo@correo.com",
+    "nombre": "Pedro",
+    "apellido": "Alvarado",
+    "telefono": "0997776666"
+  }
+- Response (201 Created):
+  {
+    "id": "f-uuid-nuevo",
+    "usuario_id": "u-uuid",
+    "nombre": "Pedro",
+    "apellido": "Alvarado"
+  }
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/familias', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      cedula: '1003456789',
+      email: 'padre.demo@correo.com',
+      nombre: 'Pedro',
+      apellido: 'Alvarado',
+      telefono: '0997776666'
+    })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+16. GET /api/familia/hijos
+--------------------------------------------------------------------------------
+Descripción: Lista los hijos a cargo de la cuenta de familia autenticada.
+- URL: http://localhost:4000/api/familia/hijos
+- Headers:
+  {
+    "x-user-id": "id-usuario-familia"
+  }
+- Response (200 OK): Array de hijos.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/familia/hijos', {
+    headers: { 'x-user-id': 'id-usuario-familia' }
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+17. GET /api/estudiantes/:id/actividades-casa
+--------------------------------------------------------------------------------
+Descripción: Obtiene las tareas en casa de las unidades activas del alumno.
+- URL: http://localhost:4000/api/estudiantes/e-uuid/actividades-casa
+- Response (200 OK):
+  [
+    {
+      "id": "act-uuid",
+      "titulo": "Tarea de Seriación",
+      "realizada": true,
+      "nota": "Logrado" // Nota cualitativa traducida dinámicamente
+    }
+  ]
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes/e-uuid/actividades-casa')
+    .then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+18. POST /api/estudiantes/:id/actividades-casa/seguimiento
+--------------------------------------------------------------------------------
+Descripción: Guarda la realización de una tarea (Familia) o su nota (Docente).
+- URL: http://localhost:4000/api/estudiantes/e-uuid/actividades-casa/seguimiento
+- Request Body (JSON) - Caso Familia:
+  {
+    "actividad_id": "act-uuid",
+    "realizada": true,
+    "comentario_familia": "Realizó el ejercicio con semillas."
+  }
+- Request Body (JSON) - Caso Docente (Nota de 0 a 10):
+  {
+    "actividad_id": "act-uuid",
+    "nota": "8.5"
+  }
+- Response (201 Created): Registro guardado.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/estudiantes/e-uuid/actividades-casa/seguimiento', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ actividad_id: 'act-uuid', realizada: true, comentario_familia: 'Completado' })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+19. GET /api/docente/unidades
+--------------------------------------------------------------------------------
+Descripción: Lista todas las planificaciones didácticas del docente.
+- URL: http://localhost:4000/api/docente/unidades
+- Headers:
+  {
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Response (200 OK): Array de unidades con sus actividades.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/docente/unidades', {
+    headers: { 'x-user-id': 'a0000000-0000-0000-0000-000000000001' }
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+20. POST /api/unidades
+--------------------------------------------------------------------------------
+Descripción: Registra una nueva unidad didáctica.
+- URL: http://localhost:4000/api/unidades
+- Headers:
+  {
+    "Content-Type": "application/json",
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Request Body (JSON):
+  {
+    "titulo": "Clasificación elemental",
+    "ambito": "Relaciones lógico-matemáticas",
+    "resumen": "Aprender a agrupar elementos.",
+    "semanas_previstas": 3,
+    "estado": "borrador"
+  }
+- Response (201 Created): Unidad creada.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/unidades', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-user-id': 'a0000000-0000-0000-0000-000000000001'
+    },
+    body: JSON.stringify({
+      titulo: 'Clasificación elemental',
+      ambito: 'Relaciones lógico-matemáticas',
+      resumen: 'Aprender a agrupar',
+      semanas_previstas: 3,
+      estado: 'borrador'
+    })
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+21. PUT /api/unidades/:id
+--------------------------------------------------------------------------------
+Descripción: Modifica los parámetros o activa/archiva la unidad.
+- URL: http://localhost:4000/api/unidades/u-uuid
+- Request Body (JSON):
+  {
+    "titulo": "Clasificación elemental",
+    "ambito": "Relaciones lógico-matemáticas",
+    "resumen": "Aprender a agrupar...",
+    "semanas_previstas": 3,
+    "estado": "activo"
+  }
+- Response (200 OK): Unidad actualizada.
+
+--------------------------------------------------------------------------------
+22. POST /api/unidades/:id/clonar
+--------------------------------------------------------------------------------
+Descripción: Duplica la unidad y todas sus actividades como un nuevo borrador.
+- URL: http://localhost:4000/api/unidades/u-uuid/clonar
+- Headers:
+  {
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Response (201 Created): Nueva unidad clonada.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/unidades/u-uuid/clonar', {
+    method: 'POST',
+    headers: { 'x-user-id': 'a0000000-0000-0000-0000-000000000001' }
+  }).then(r => r.json()).then(console.log);
+  ```
+
+--------------------------------------------------------------------------------
+23. POST /api/unidades/:id/actividades
+--------------------------------------------------------------------------------
+Descripción: Añade una actividad de clase o casa a la unidad didáctica.
+- URL: http://localhost:4000/api/unidades/u-uuid/actividades
+- Request Body (JSON):
+  {
+    "titulo": "Agrupamiento libre",
+    "descripcion": "Pedir a los niños que agrupen...",
+    "tipo": "clase",
+    "recursos_enlaces": []
+  }
+- Response (201 Created): Actividad creada.
+
+--------------------------------------------------------------------------------
+24. PUT /api/actividades/:id
+--------------------------------------------------------------------------------
+Descripción: Actualiza la información de una actividad.
+- URL: http://localhost:4000/api/actividades/act-uuid
+- Request Body (JSON):
+  {
+    "titulo": "Agrupamiento libre",
+    "descripcion": "Instrucciones actualizadas...",
+    "tipo": "clase",
+    "recursos_enlaces": []
+  }
+- Response (200 OK): Actividad editada.
+
+--------------------------------------------------------------------------------
+25. DELETE /api/actividades/:id
+--------------------------------------------------------------------------------
+Descripción: Elimina permanentemente una actividad de la base de datos.
+- URL: http://localhost:4000/api/actividades/act-uuid
+- Response (200 OK): Actividad eliminada.
+
+--------------------------------------------------------------------------------
+26. GET /api/rubrica/criterios
+--------------------------------------------------------------------------------
+Descripción: Obtiene la lista completa de criterios de evaluación de la rúbrica.
+- URL: http://localhost:4000/api/rubrica/criterios
+- Response (200 OK): Lista de criterios.
+
+--------------------------------------------------------------------------------
+27. GET /api/rubrica/niveles
+--------------------------------------------------------------------------------
+Descripción: Lista los niveles de logro (Iniciado, En Proceso, Logrado).
+- URL: http://localhost:4000/api/rubrica/niveles
+- Response (200 OK): Lista de niveles de logro.
+
+--------------------------------------------------------------------------------
+28. POST /api/evaluaciones
+--------------------------------------------------------------------------------
+Descripción: Registra y versiona la evaluación cognitiva del alumno.
+- URL: http://localhost:4000/api/evaluaciones
+- Headers:
+  {
+    "Content-Type": "application/json",
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Request Body (JSON):
+  {
+    "estudiante_id": "e-uuid",
+    "criterio_id": "c-uuid",
+    "nivel_logro_id": "n-uuid",
+    "unidad_didactica_id": "u-uuid",
+    "observaciones": "Demostró alta concentración."
+  }
+- Response (201 Created): Nueva evaluación guardada.
+
+--------------------------------------------------------------------------------
+29. GET /api/estudiantes/:id/ficha-monitoreo
+--------------------------------------------------------------------------------
+Descripción: Recupera la última ficha cualitativa de monitoreo piagetiano.
+- URL: http://localhost:4000/api/estudiantes/e-uuid/ficha-monitoreo
+- Response (200 OK): Ficha de monitoreo.
+
+--------------------------------------------------------------------------------
+30. POST /api/estudiantes/:id/ficha-monitoreo
+--------------------------------------------------------------------------------
+Descripción: Guarda o actualiza la ficha cualitativa de monitoreo individual.
+- URL: http://localhost:4000/api/estudiantes/e-uuid/ficha-monitoreo
+- Headers:
+  {
+    "Content-Type": "application/json",
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Request Body (JSON):
+  {
+    "clasificacion": "Clasifica por color con facilidad.",
+    "seriacion": "Ordena de mayor a menor con semillas.",
+    "asimilacion_acomodacion": "Acomoda nuevos conceptos de figuras.",
+    "justificacion_logica": "Explica la causa de sus agrupamientos.",
+    "autorregulacion": "Mantiene el enfoque en la tarea asignada.",
+    "observaciones": "Ninguna novedad.",
+    "acciones_apoyo": "Ejercicios en casa."
+  }
+- Response (201 Created): Ficha guardada con éxito.
+
+--------------------------------------------------------------------------------
+31. POST /api/autoevaluaciones
+--------------------------------------------------------------------------------
+Descripción: Registra la autoevaluación del docente.
+- URL: http://localhost:4000/api/autoevaluaciones
+- Headers:
+  {
+    "Content-Type": "application/json",
+    "x-user-id": "a0000000-0000-0000-0000-000000000001"
+  }
+- Request Body (JSON):
+  {
+    "unidad_didactica_id": "u-uuid",
+    "reflexion": "Logré cumplir con la agenda planificada.",
+    "respuestas": [
+      { "numero_pregunta": 1, "respuesta": "SI" },
+      { "numero_pregunta": 2, "respuesta": "SI" },
+      { "numero_pregunta": 3, "respuesta": "EP" }
+    ]
+  }
+- Response (201 Created): Autoevaluación registrada.
+
+--------------------------------------------------------------------------------
+32. GET /api/unidades/:id/autoevaluaciones
+--------------------------------------------------------------------------------
+Descripción: Recupera todas las reflexiones docentes asociadas a una unidad.
+- URL: http://localhost:4000/api/unidades/u-uuid/autoevaluaciones
+- Response (200 OK): Lista de reflexiones y respuestas.
+- JS Fetch:
+  ```javascript
+  fetch('http://localhost:4000/api/unidades/u-uuid/autoevaluaciones')
+    .then(r => r.json()).then(console.log);
+  ```
+
+================================================================================
+FIN DE LA DOCUMENTACIÓN - SEMILLERO UTN 2026
+================================================================================

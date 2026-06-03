@@ -1,0 +1,191 @@
+================================================================================
+GUÍA DE ARQUITECTURA Y DISTRIBUCIÓN DEL PROYECTO - SEMILLERO UTN 2026
+================================================================================
+
+Este documento explica de forma detallada cómo está distribuido, estructurado y 
+organizado todo el código del proyecto "Semillero UTN". Describe su arquitectura 
+monorepo, tecnologías empleadas, modelo de base de datos, flujos de datos 
+y la separación de componentes tanto en el frontend como en el backend.
+
+--------------------------------------------------------------------------------
+1. ARQUITECTURA MONOREPO Y TECNOLOGÍAS
+--------------------------------------------------------------------------------
+
+El proyecto está organizado en una estructura de carpetas unificada (Monorepo):
+
+/Proyecto-Semillero-UTN
+│
+├── /database           --> Contiene el script físico inicial de PostgreSQL.
+├── /backend            --> API REST construida en NestJS con Prisma ORM.
+└── /frontend           --> Interfaz web construida en Next.js (App Router).
+
+Tecnologías del Backend:
+- NestJS (Framework modular de TypeScript para Node.js).
+- Prisma ORM (Mapeador objeto-relacional para interactuar con la base de datos).
+- PostgreSQL (Base de datos relacional para almacenamiento permanente).
+- Bcrypt (Encriptación segura de contraseñas).
+
+Tecnologías del Frontend:
+- Next.js 16 (Framework de React con soporte de renderizado del lado del servidor).
+- Tailwind CSS / Vanilla CSS (Para estilos y animaciones fluidas).
+- TypeScript (Para validación de tipados a nivel de desarrollo).
+
+--------------------------------------------------------------------------------
+2. DISEÑO Y MODELO DE BASE DE DATOS (schema.prisma)
+--------------------------------------------------------------------------------
+
+El esquema de la base de datos cuenta con las siguientes tablas clave:
+
+A. usuarios: Almacena las credenciales globales del usuario.
+   - `id` (UUID): Identificador único.
+   - `cedula` (VARCHAR): Cédula nacional del usuario.
+   - `email` (VARCHAR): Correo electrónico (único).
+   - `password_hash` (VARCHAR): Contraseña encriptada con Bcrypt.
+   - `rol` (ENUM): Rol en el sistema ('docente' o 'familia').
+   - `activo` (BOOLEAN): Estado lógico de la cuenta.
+
+B. docentes: Perfil extendido del docente.
+   - Relación 1:1 con `usuarios` mediante `usuario_id`.
+
+C. familias: Perfil extendido del representante de familia.
+   - Relación 1:1 con `usuarios` mediante `usuario_id`.
+
+D. grupos: Aulas o grupos de niños (Ej: Inicial II).
+   - Relación 1:N con `docentes` (`docente_id`).
+   - Relación 1:N con `estudiantes`.
+
+E. estudiantes: Datos personales del niño evaluado.
+   - Relación 1:N con `grupos` (`grupo_id`).
+   - `activo` (BOOLEAN): Baja lógica (si se pone en `false`, el niño no se lista 
+     pero sus datos históricos de evaluaciones permanecen intactos).
+
+F. familia_estudiante: Tabla intermedia que vincula alumnos con representantes.
+   - Soporta relaciones N:M con un campo `parentesco` (Madre, Padre, Tutor).
+
+G. unidades_didacticas: Planificaciones de ámbitos cognitivos creadas por docentes.
+   - Campos: `titulo`, `resumen`, `ambito`, `destrezas`, `semanas_previstas`.
+   - `estado` (ENUM): 'borrador', 'activo', 'archivado'.
+
+H. actividades: Actividades vinculadas a una unidad.
+   - `tipo` (ENUM): 'clase' (en aula) o 'casa' (tareas de extensión en el hogar).
+   - `recursos_enlaces` (JSON): Archivos o enlaces de vídeo cargados por el docente.
+
+I. evaluaciones_criterio: Registro de evaluaciones cognitivas.
+   - Relaciona un estudiante, un criterio de evaluación, un nivel de logro y una 
+     unidad didáctica específica.
+   - `version` (INT) y `activa` (BOOLEAN): Implementan un versionado automático. 
+     Si se re-evalúa al alumno, la evaluación anterior pasa a `activa: false` y se 
+     crea una nueva con versión incrementada.
+
+J. fichas_monitoreo: Análisis cualitativo individual del desarrollo del niño.
+   - Registra observaciones descriptivas sobre procesos piagetianos: Clasificación, 
+     Seriación, Asimilación/Acomodación, Justificación Lógica y Autorregulación.
+
+K. autoevaluaciones_docente / respuestas_autoevaluacion: 
+   - Formularios de reflexión pedagógica completados por el docente.
+
+L. actividades_casa_seguimiento: Seguimiento de las tareas en el hogar.
+   - Registra si la familia realizó la tarea (`realizada`), comentarios del 
+     representante, y la nota numérica asignada por el docente.
+
+--------------------------------------------------------------------------------
+3. ESTRUCTURA Y MÓDULOS DEL BACKEND (NestJS)
+--------------------------------------------------------------------------------
+
+El backend está diseñado bajo una arquitectura modular limpia. No existe un 
+controlador gigante, sino que cada característica tiene su propia carpeta con 
+su módulo, controlador y servicio:
+
+- `src/prisma.module.ts`: Módulo global marcado como `@Global()`. Abre y comparte 
+  la conexión con PostgreSQL a través de `PrismaService`, optimizando recursos.
+- `src/auth/`: Módulo de autenticación (Login, registro, validación y encriptado).
+- `src/usuarios/`: Gestión del simulador de perfiles de usuario.
+- `src/grupos/`: Operaciones sobre aulas de clase y métricas consolidadas grupales.
+- `src/estudiantes/`: Altas, bajas, búsquedas y reportes de estudiantes.
+- `src/familias/`: Relaciones de parentesco y entrega/calificación de tareas en casa.
+- `src/unidades/`: Gestión de planificaciones, clonación de unidades y actividades.
+- `src/evaluaciones/`: Catálogo de rúbricas y versionado de evaluaciones cognitivas.
+- `src/monitoreo/`: Llenado y edición de las fichas de monitoreo piagetianas.
+- `src/autoevaluaciones/`: Procesamiento de encuestas de autoevaluación del docente.
+
+--------------------------------------------------------------------------------
+4. ESTRUCTURA Y COMPONENTES DEL FRONTEND (Next.js)
+--------------------------------------------------------------------------------
+
+El frontend utiliza el enrutador de Next.js (App Router) en `frontend/app/`.
+El módulo principal es el panel del docente, ubicado en `app/docente/`. Su diseño 
+ha sido modularizado de la siguiente manera:
+
+1. app/docente/page.tsx:
+   - Es el orquestador principal. Carga la sesión del usuario, realiza las peticiones 
+     iniciales `fetch` al backend y maneja las variables de estado reactivas de React.
+   - No tiene código JSX de renderizado complejo; en su lugar, delega el pintado de la 
+     pantalla en los componentes de pestañas y modales importados.
+
+2. app/docente/types.ts:
+   - Archivo centralizado que contiene los contratos de TypeScript para todas las 
+     interfaces del sistema, asegurando coherencia de tipos y autocompletado en el editor.
+
+3. app/docente/components/ (Sub-componentes Modulares):
+   Pestañas (Tabs):
+   - `AlumnosTab.tsx`: Renderiza la tabla de alumnos, descarga de informes y bajas.
+   - `PlanificacionTab.tsx`: Tarjetas de unidades didácticas y clonación.
+   - `EvaluarTab.tsx`: Interfaz para calificar criterios cognitivos usando botones.
+   - `MonitoreoTab.tsx`: Formulario descriptivo de los procesos del niño.
+   - `AutoevaluacionTab.tsx`: Formulario de autoevaluación pedagógica del docente.
+   - `ConsolidadoTab.tsx`: Gráficos horizontales de barras con los porcentajes de logro.
+
+   Modales (Forms):
+   - `GroupModal.tsx`, `StudentModal.tsx`, `UnitModal.tsx`, `ActivityModal.tsx`: 
+     Diálogos emergentes con animaciones estilizadas para inserciones y ediciones.
+   - `GradeTasksModal.tsx`: Diálogo para que el docente califique tareas de casa.
+
+--------------------------------------------------------------------------------
+5. FLUJOS CLAVE DE LA APLICACIÓN
+--------------------------------------------------------------------------------
+
+Flujo A: Calificación de Tareas en Casa (Traducción Cualitativa)
+1. El docente califica una tarea en el frontend ingresando un número (Ej: 8.5) 
+   en `GradeTasksModal.tsx`.
+2. Se guarda al perder el foco (`onBlur`) enviando un POST a `/api/estudiantes/:id/actividades-casa/seguimiento`.
+3. El backend almacena el número decimal `8.5` en la tabla `actividades_casa_seguimiento`.
+4. Cuando el representante ingresa a su panel en `app/familia/page.tsx`, el frontend 
+   consulta los datos llamando a `GET /api/estudiantes/:id/actividades-casa`.
+5. El cliente traduce dinámicamente la nota de la tarea usando la función `getEquivalenciaNota()`:
+   - Nota >= 8.0 ➔ "Logrado" (Badge verde).
+   - Nota >= 5.0 y < 8.0 ➔ "En Proceso" (Badge amarillo/naranja).
+   - Nota < 5.0 ➔ "Iniciado" (Badge rojo).
+   El representante únicamente ve el badge cualitativo, protegiendo el enfoque 
+   pedagógico cualitativo sin mostrar números crudos.
+
+Flujo B: Versionado de Evaluaciones Cognitivas
+1. El docente ingresa a la pestaña "Rejilla de Evaluación" y califica a un estudiante.
+2. NestJS recibe la petición. Antes de insertar, abre una transacción de base de datos.
+3. Busca si existe una evaluación previa para ese estudiante, en el mismo criterio 
+   y la misma unidad didáctica que esté `activa: true`.
+4. Si existe, la actualiza a `activa: false`.
+5. Crea una nueva evaluación con `version: version_anterior + 1` y `activa: true`.
+6. De esta forma, el historial no se borra (cumpliendo RNF-06), pero las consultas 
+   rápidas solo muestran la versión más reciente (`activa: true`).
+
+--------------------------------------------------------------------------------
+6. CÓMO EJECUTAR EL PROYECTO LOCALMENTE
+--------------------------------------------------------------------------------
+
+Paso 1: Configurar Variables de Entorno (.env)
+- En `/backend/.env`, definir:
+  `DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/semillero_utn?schema=public"`
+- En `/frontend/.env.local`, definir:
+  `NEXT_PUBLIC_BACKEND_URL="http://localhost:4000/api"`
+
+Paso 2: Levantar el Backend (NestJS)
+1. Abrir una terminal en `/backend/`
+2. Ejecutar: `npm install` (si es la primera vez)
+3. Ejecutar: `npx prisma db push` (sincronizar tablas con Postgres)
+4. Ejecutar: `npm run start:dev` (servidor de desarrollo backend en puerto 4000)
+
+Paso 3: Levantar el Frontend (Next.js)
+1. Abrir otra terminal en `/frontend/`
+2. Ejecutar: `npm install` (si es la primera vez)
+3. Ejecutar: `npm run dev` (servidor de desarrollo frontend en puerto 3000)
+================================================================================

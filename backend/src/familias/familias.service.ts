@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class FamiliasService {
@@ -52,11 +53,12 @@ export class FamiliasService {
 
     return this.prisma.$transaction(async (tx) => {
       const targetCedula = data.cedula || 'TEMP_' + Date.now();
+      const passwordHash = await bcrypt.hash(targetCedula, 10);
       const user = await tx.usuarios.create({
         data: {
           cedula: targetCedula,
           email: data.email,
-          password_hash: '$2b$10$wR1lBghQo9U17B576/Hjue/96slyD6ZcW6e4t2M56r1g2L6vS7npe', // hash de password123
+          password_hash: passwordHash,
           rol_id: 3, // 'familia'
           nombre: data.nombre,
           apellido: data.apellido,

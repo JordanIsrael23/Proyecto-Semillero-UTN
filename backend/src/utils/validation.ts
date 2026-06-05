@@ -42,3 +42,20 @@ export function validarCedulaEcuatoriana(cedula: string): boolean {
 
   return digitoVerificadorCalculado === digitoVerificadorInput;
 }
+
+/**
+ * Divide un nombre completo en nombre y apellido para compatibilidad con el frontend.
+ */
+export function splitNombreCompleto(nombreCompleto: string): { nombre: string; apellido: string } {
+  if (!nombreCompleto) {
+    return { nombre: '', apellido: '' };
+  }
+  const parts = nombreCompleto.trim().split(/\s+/);
+  if (parts.length === 1) {
+    return { nombre: parts[0], apellido: '' };
+  }
+  const nombre = parts[0];
+  const apellido = parts.slice(1).join(' ');
+  return { nombre, apellido };
+}
+

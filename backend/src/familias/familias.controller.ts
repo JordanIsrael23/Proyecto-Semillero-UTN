@@ -29,14 +29,17 @@ export class FamiliasController {
   @Post('estudiantes/:id/actividades-casa/seguimiento')
   async saveActividadCasaSeguimiento(
     @Param('id') estudianteId: string,
+    @Headers('x-user-id') userId: string,
     @Body() body: { actividad_id: string; realizada?: boolean; comentario_familia?: string; nota?: string }
   ) {
+    const activeUserId = userId || 'a0000000-0000-0000-0000-000000000003';
     return this.familiasService.saveActividadCasaSeguimiento({
       estudiante_id: estudianteId,
       actividad_id: body.actividad_id,
       realizada: body.realizada,
       comentario_familia: body.comentario_familia,
       nota: body.nota,
+      usuario_id: activeUserId,
     });
   }
 }

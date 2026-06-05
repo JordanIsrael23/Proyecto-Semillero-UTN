@@ -12,7 +12,7 @@ export class EstudiantesService {
       include: {
         familia_estudiante: {
           include: {
-            familias: {
+            perfil_familias: {
               include: {
                 usuarios: true,
               },
@@ -31,6 +31,21 @@ export class EstudiantesService {
     return {
       ...estudiante,
       fecha_nacimiento: formattedFechaNacimiento,
+      familia_estudiante: estudiante.familia_estudiante.map((fe) => {
+        const famUser = fe.perfil_familias.usuarios;
+        return {
+          parentesco: fe.parentesco,
+          es_representante_principal: fe.es_representante_principal,
+          familias: {
+            id: fe.perfil_familias.usuario_id,
+            usuario_id: fe.perfil_familias.usuario_id,
+            nombre: famUser.nombre,
+            apellido: famUser.apellido,
+            telefono: famUser.telefono,
+            direccion: fe.perfil_familias.direccion,
+          },
+        };
+      }),
     };
   }
 
@@ -79,6 +94,7 @@ export class EstudiantesService {
               familia_id: data.representante_id,
               estudiante_id: estudiante.id,
               parentesco: data.parentesco || 'Representante',
+              es_representante_principal: true,
             },
           });
         }
@@ -101,17 +117,20 @@ export class EstudiantesService {
               familia_id: data.representante_id,
               estudiante_id: estudiante.id,
               parentesco: data.parentesco || 'Representante',
+              es_representante_principal: true,
             },
           });
         }
       }
 
-      return estudiante;
+      return {
+        ...estudiante,
+      };
     });
   }
 
   async updateEstudiante(id: string, data: { nombre: string; apellido: string; grupo_id: string; fecha_nacimiento: string; activo?: boolean }) {
-    return this.prisma.estudiantes.update({
+    const estudiante = await this.prisma.estudiantes.update({
       where: { id },
       data: {
         nombre: data.nombre,
@@ -121,6 +140,10 @@ export class EstudiantesService {
         activo: data.activo !== undefined ? data.activo : true,
       },
     });
+
+    return {
+      ...estudiante,
+    };
   }
 
   async deleteEstudiante(id: string) {
@@ -149,7 +172,11 @@ export class EstudiantesService {
       include: {
         grupos: {
           include: {
-            docentes: true,
+            perfil_docentes: {
+              include: {
+                usuarios: true,
+              },
+            },
           },
         },
       },
@@ -179,11 +206,33 @@ export class EstudiantesService {
       },
     });
 
+    const docUser = estudiante.grupos.perfil_docentes.usuarios;
+
+    const mappedEstudiante = {
+      ...estudiante,
+      grupos: {
+        ...estudiante.grupos,
+        docentes: {
+          id: estudiante.grupos.perfil_docentes.usuario_id,
+          usuario_id: estudiante.grupos.perfil_docentes.usuario_id,
+          nombre: docUser.nombre,
+          apellido: docUser.apellido,
+          telefono: docUser.telefono,
+          especialidad: estudiante.grupos.perfil_docentes.especialidad,
+        },
+      },
+    };
+
+    const mappedTareasCasa = tareasCasa.map((t) => ({
+      ...t,
+      nota: t.nota_docente, // mapear para compatibilidad con el frontend
+    }));
+
     return {
-      estudiante,
+      estudiante: mappedEstudiante,
       evaluaciones,
       fichaMonitoreo,
-      tareasCasa,
+      tareasCasa: mappedTareasCasa,
     };
   }
 }

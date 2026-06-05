@@ -6,7 +6,7 @@ export class EvaluacionesService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async getDocenteByUsuarioId(usuarioId: string) {
-    const docente = await this.prisma.docentes.findUnique({
+    const docente = await this.prisma.perfil_docentes.findUnique({
       where: { usuario_id: usuarioId },
     });
     if (!docente) throw new NotFoundException('Docente no encontrado para este usuario.');
@@ -57,7 +57,7 @@ export class EvaluacionesService {
           criterio_id: data.criterio_id,
           nivel_logro_id: data.nivel_logro_id,
           unidad_didactica_id: data.unidad_didactica_id,
-          docente_id: docente.id,
+          docente_id: docente.usuario_id,
           observaciones: data.observaciones,
           version: nextVersion,
           activa: true,

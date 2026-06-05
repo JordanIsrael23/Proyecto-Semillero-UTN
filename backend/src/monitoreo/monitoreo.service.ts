@@ -6,7 +6,7 @@ export class MonitoreoService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async getDocenteByUsuarioId(usuarioId: string) {
-    const docente = await this.prisma.docentes.findUnique({
+    const docente = await this.prisma.perfil_docentes.findUnique({
       where: { usuario_id: usuarioId },
     });
     if (!docente) throw new NotFoundException('Docente no encontrado para este usuario.');
@@ -38,7 +38,6 @@ export class MonitoreoService {
           autorregulacion: data.autorregulacion,
           observaciones: data.observaciones,
           acciones_apoyo: data.acciones_apoyo,
-          fecha_actualizacion: new Date(),
         },
       });
     }
@@ -46,7 +45,7 @@ export class MonitoreoService {
     return this.prisma.fichas_monitoreo.create({
       data: {
         estudiante_id: estudianteId,
-        docente_id: docente.id,
+        docente_id: docente.usuario_id,
         clasificacion: data.clasificacion,
         seriacion: data.seriacion,
         asimilacion_acomodacion: data.asimilacion_acomodacion,

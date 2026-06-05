@@ -7,77 +7,87 @@ datasource db {
   provider = "postgresql"
 }
 
-model actividades {
-  id                           String                         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  unidad_id                    String                         @db.Uuid
-  titulo                       String                         @db.VarChar(255)
-  descripcion                  String
-  tipo                         tipo_actividad                 @default(clase)
-  recursos_enlaces             Json?                          @default("[]")
-  fecha_creacion               DateTime?                      @default(now()) @db.Timestamptz(6)
-  fecha_actualizacion          DateTime?                      @default(now()) @db.Timestamptz(6)
-  unidades_didacticas          unidades_didacticas            @relation(fields: [unidad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  actividades_casa_seguimiento actividades_casa_seguimiento[]
-
-  @@index([unidad_id], map: "idx_actividades_unidad")
+model roles {
+  id       Int        @id @default(autoincrement())
+  nombre   String     @unique @db.VarChar(50)
+  usuarios usuarios[]
 }
 
-model actividades_casa_seguimiento {
-  id                 String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  actividad_id       String      @db.Uuid
-  estudiante_id      String      @db.Uuid
-  realizada          Boolean     @default(false)
-  fecha_realizacion  DateTime?   @db.Timestamptz(6)
-  comentario_familia String?
-  nota               Float?
-  fecha_creacion     DateTime?   @default(now()) @db.Timestamptz(6)
-  actividades        actividades @relation(fields: [actividad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  estudiantes        estudiantes @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+model usuarios {
+  id                  String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  rol_id              Int
+  cedula              String            @unique @db.VarChar(10)
+  email               String            @unique @db.VarChar(255)
+  password_hash       String            @db.VarChar(255)
+  nombre              String            @db.VarChar(100)
+  apellido            String            @db.VarChar(100)
+  telefono            String?           @db.VarChar(20)
+  activo              Boolean           @default(true)
+  fecha_creacion      DateTime?         @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime?         @default(now()) @db.Timestamptz(6)
+  roles               roles             @relation(fields: [rol_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  perfil_docentes     perfil_docentes?
+  perfil_familias     perfil_familias?
+  auditoria_logs      auditoria_logs[]
 
-  @@index([estudiante_id], map: "idx_actividades_casa_estudiante")
+  @@index([rol_id], map: "idx_usuarios_rol")
+  @@index([email], map: "idx_usuarios_email")
 }
 
-model autoevaluaciones_docente {
-  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  docente_id                String                      @db.Uuid
-  unidad_didactica_id       String?                     @db.Uuid
-  reflexion                 String?
-  fecha_autoevaluacion      DateTime                    @default(dbgenerated("CURRENT_DATE")) @db.Date
-  fecha_creacion            DateTime?                   @default(now()) @db.Timestamptz(6)
-  docentes                  docentes                    @relation(fields: [docente_id], references: [id], onUpdate: NoAction)
-  unidades_didacticas       unidades_didacticas?        @relation(fields: [unidad_didactica_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  respuestas_autoevaluacion respuestas_autoevaluacion[]
-}
-
-model criterios_evaluacion {
-  id                    String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  codigo                String                  @unique @db.VarChar(20)
-  nombre                String                  @db.VarChar(100)
-  descripcion           String?
-  activo                Boolean                 @default(true)
-  fecha_creacion        DateTime?               @default(now()) @db.Timestamptz(6)
-  evaluaciones_criterio evaluaciones_criterio[]
-}
-
-model docentes {
-  id                       String                     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  usuario_id               String                     @unique @db.Uuid
-  nombre                   String                     @db.VarChar(100)
-  apellido                 String                     @db.VarChar(100)
-  telefono                 String?                    @db.VarChar(20)
-  fecha_creacion           DateTime?                  @default(now()) @db.Timestamptz(6)
+model perfil_docentes {
+  usuario_id               String                     @id @db.Uuid
+  especialidad             String                     @default("Educación Inicial") @db.VarChar(100)
   fecha_actualizacion      DateTime?                  @default(now()) @db.Timestamptz(6)
+  usuarios                 usuarios                   @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   autoevaluaciones_docente autoevaluaciones_docente[]
-  usuarios                 usuarios                   @relation(fields: [usuario_id], references: [id], onUpdate: NoAction)
   evaluaciones_criterio    evaluaciones_criterio[]
   fichas_monitoreo         fichas_monitoreo[]
   grupos                   grupos[]
   unidades_didacticas      unidades_didacticas[]
 }
 
+model perfil_familias {
+  usuario_id                   String                         @id @db.Uuid
+  direccion                    String?                        @db.VarChar(255)
+  fecha_actualizacion          DateTime?                      @default(now()) @db.Timestamptz(6)
+  usuarios                     usuarios                       @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  familia_estudiante           familia_estudiante[]
+  actividades_casa_seguimiento actividades_casa_seguimiento[]
+}
+
+model auditoria_logs {
+  id              BigInt    @id @default(autoincrement())
+  usuario_id      String?   @db.Uuid
+  accion          String    @db.VarChar(100)
+  tabla_afectada  String?   @db.VarChar(100)
+  registro_id     String?   @db.VarChar(100)
+  detalles_valores Json?
+  fecha_evento    DateTime? @default(now()) @db.Timestamptz(6)
+  usuarios        usuarios? @relation(fields: [usuario_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+}
+
+model configuraciones_sistema {
+  clave              String    @id @db.VarChar(100)
+  valor              String
+  descripcion        String?
+  fecha_modificacion DateTime? @default(now()) @db.Timestamptz(6)
+}
+
+model grupos {
+  id                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre              String          @db.VarChar(100)
+  periodo_academico   String          @db.VarChar(50)
+  docente_id          String          @db.Uuid
+  activo              Boolean         @default(true)
+  fecha_creacion      DateTime?       @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime?       @default(now()) @db.Timestamptz(6)
+  perfil_docentes     perfil_docentes @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  estudiantes         estudiantes[]
+}
+
 model estudiantes {
   id                           String                         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  cedula                       String                         @unique @db.VarChar(20)
+  cedula                       String                         @unique @db.VarChar(10)
   nombre                       String                         @db.VarChar(100)
   apellido                     String                         @db.VarChar(100)
   grupo_id                     String                         @db.Uuid
@@ -86,110 +96,24 @@ model estudiantes {
   fecha_creacion               DateTime?                      @default(now()) @db.Timestamptz(6)
   fecha_actualizacion          DateTime?                      @default(now()) @db.Timestamptz(6)
   actividades_casa_seguimiento actividades_casa_seguimiento[]
-  grupos                       grupos                         @relation(fields: [grupo_id], references: [id], onUpdate: NoAction)
+  grupos                       grupos                         @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
   evaluaciones_criterio        evaluaciones_criterio[]
   familia_estudiante           familia_estudiante[]
   fichas_monitoreo             fichas_monitoreo[]
+  metricas_sesion              metricas_sesion[]
 
   @@index([grupo_id], map: "idx_estudiantes_grupo")
-  @@index([cedula], map: "idx_estudiantes_cedula")
-}
-
-model evaluaciones_criterio {
-  id                   String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  estudiante_id        String               @db.Uuid
-  criterio_id          String               @db.Uuid
-  nivel_logro_id       String               @db.Uuid
-  unidad_didactica_id  String               @db.Uuid
-  docente_id           String               @db.Uuid
-  observaciones        String?
-  fecha_evaluacion     DateTime?            @default(now()) @db.Timestamptz(6)
-  version              Int                  @default(1)
-  activa               Boolean              @default(true)
-  fecha_creacion       DateTime?            @default(now()) @db.Timestamptz(6)
-  criterios_evaluacion criterios_evaluacion @relation(fields: [criterio_id], references: [id], onUpdate: NoAction)
-  docentes             docentes             @relation(fields: [docente_id], references: [id], onUpdate: NoAction)
-  estudiantes          estudiantes          @relation(fields: [estudiante_id], references: [id], onUpdate: NoAction)
-  niveles_logro        niveles_logro        @relation(fields: [nivel_logro_id], references: [id], onUpdate: NoAction)
-  unidades_didacticas  unidades_didacticas  @relation(fields: [unidad_didactica_id], references: [id], onUpdate: NoAction)
-
-  @@index([unidad_didactica_id], map: "idx_evaluaciones_criterio_unidad")
-  @@index([estudiante_id], map: "idx_evaluaciones_estudiante_activa", where: raw("(activa = true)"))
 }
 
 model familia_estudiante {
-  familia_id    String      @db.Uuid
-  estudiante_id String      @db.Uuid
-  parentesco    String      @db.VarChar(50)
-  estudiantes   estudiantes @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  familias      familias    @relation(fields: [familia_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  familia_id                 String          @db.Uuid
+  estudiante_id              String          @db.Uuid
+  parentesco                 String          @db.VarChar(50)
+  es_representante_principal Boolean         @default(true)
+  estudiantes                estudiantes     @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  perfil_familias            perfil_familias @relation(fields: [familia_id], references: [usuario_id], onDelete: Cascade, onUpdate: NoAction)
 
   @@id([familia_id, estudiante_id])
-  @@index([estudiante_id], map: "idx_familia_estudiante_estudiante")
-}
-
-model familias {
-  id                  String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  usuario_id          String               @unique @db.Uuid
-  nombre              String               @db.VarChar(100)
-  apellido            String               @db.VarChar(100)
-  telefono            String?              @db.VarChar(20)
-  fecha_creacion      DateTime?            @default(now()) @db.Timestamptz(6)
-  fecha_actualizacion DateTime?            @default(now()) @db.Timestamptz(6)
-  familia_estudiante  familia_estudiante[]
-  usuarios            usuarios             @relation(fields: [usuario_id], references: [id], onUpdate: NoAction)
-}
-
-model fichas_monitoreo {
-  id                      String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  estudiante_id           String      @db.Uuid
-  docente_id              String      @db.Uuid
-  clasificacion           String
-  seriacion               String
-  asimilacion_acomodacion String
-  justificacion_logica    String
-  autorregulacion         String
-  observaciones           String?
-  acciones_apoyo          String?
-  fecha_monitoreo         DateTime?   @default(now()) @db.Timestamptz(6)
-  fecha_creacion          DateTime?   @default(now()) @db.Timestamptz(6)
-  fecha_actualizacion     DateTime?   @default(now()) @db.Timestamptz(6)
-  docentes                docentes    @relation(fields: [docente_id], references: [id], onUpdate: NoAction)
-  estudiantes             estudiantes @relation(fields: [estudiante_id], references: [id], onUpdate: NoAction)
-
-  @@index([estudiante_id], map: "idx_fichas_monitoreo_estudiante")
-}
-
-model grupos {
-  id                  String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nombre              String        @db.VarChar(100)
-  docente_id          String        @db.Uuid
-  activo              Boolean       @default(true)
-  fecha_creacion      DateTime?     @default(now()) @db.Timestamptz(6)
-  fecha_actualizacion DateTime?     @default(now()) @db.Timestamptz(6)
-  estudiantes         estudiantes[]
-  docentes            docentes      @relation(fields: [docente_id], references: [id], onUpdate: NoAction)
-}
-
-model niveles_logro {
-  id                    String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  codigo                String                  @unique @db.VarChar(10)
-  nombre                String                  @db.VarChar(50)
-  orden                 Int
-  descripcion           String?
-  fecha_creacion        DateTime?               @default(now()) @db.Timestamptz(6)
-  evaluaciones_criterio evaluaciones_criterio[]
-}
-
-model respuestas_autoevaluacion {
-  id                       String                   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  autoevaluacion_id        String                   @db.Uuid
-  numero_pregunta          Int
-  respuesta                respuesta_autoevaluacion
-  autoevaluaciones_docente autoevaluaciones_docente @relation(fields: [autoevaluacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@unique([autoevaluacion_id, numero_pregunta], map: "unica_pregunta_por_evaluacion")
-  @@index([autoevaluacion_id], map: "idx_respuestas_autoevaluacion_master")
 }
 
 model unidades_didacticas {
@@ -208,23 +132,144 @@ model unidades_didacticas {
   actividades              actividades[]
   autoevaluaciones_docente autoevaluaciones_docente[]
   evaluaciones_criterio    evaluaciones_criterio[]
-  docentes                 docentes                   @relation(fields: [docente_id], references: [id], onUpdate: NoAction)
+  perfil_docentes          perfil_docentes            @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
 }
 
-model usuarios {
-  id                  String      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  cedula              String      @unique @db.VarChar(20)
-  email               String      @unique @db.VarChar(255)
-  password_hash       String      @db.VarChar(255)
-  rol                 rol_usuario
-  activo              Boolean     @default(true)
-  fecha_creacion      DateTime?   @default(now()) @db.Timestamptz(6)
-  fecha_actualizacion DateTime?   @default(now()) @db.Timestamptz(6)
-  docentes            docentes?
-  familias            familias?
+model actividades {
+  id                           String                         @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  unidad_id                    String                         @db.Uuid
+  titulo                       String                         @db.VarChar(255)
+  descripcion                  String
+  tipo                         tipo_actividad                 @default(clase)
+  recursos_enlaces             Json?                          @default("[]")
+  fecha_limite                 DateTime?                      @db.Timestamptz(6)
+  fecha_creacion               DateTime?                      @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion          DateTime?                      @default(now()) @db.Timestamptz(6)
+  unidades_didacticas          unidades_didacticas            @relation(fields: [unidad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  actividades_casa_seguimiento actividades_casa_seguimiento[]
+  metricas_sesion              metricas_sesion[]
 
-  @@index([email], map: "idx_usuarios_email")
-  @@index([cedula], map: "idx_usuarios_cedula")
+  @@index([unidad_id], map: "idx_actividades_unidad")
+}
+
+model actividades_casa_seguimiento {
+  id                          String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  actividad_id                String          @db.Uuid
+  estudiante_id               String          @db.Uuid
+  familia_id                  String          @db.Uuid
+  realizada                   Boolean         @default(false)
+  fecha_realizacion           DateTime?       @db.Timestamptz(6)
+  desempeno_hijo_percepcion   Int?
+  comentario_familia          String?
+  nota_docente                Float?
+  fecha_creacion              DateTime?       @default(now()) @db.Timestamptz(6)
+  actividades                 actividades     @relation(fields: [actividad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  estudiantes                 estudiantes     @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  perfil_familias             perfil_familias @relation(fields: [familia_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+}
+
+model criterios_evaluacion {
+  id                    String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  codigo                String                  @unique @db.VarChar(20)
+  nombre                String                  @db.VarChar(100)
+  descripcion           String?
+  activo                Boolean                 @default(true)
+  evaluaciones_criterio evaluaciones_criterio[]
+}
+
+model niveles_logro {
+  id                    String                  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  codigo                String                  @unique @db.VarChar(10)
+  nombre                String                  @db.VarChar(50)
+  orden                 Int
+  peso_valor            Int
+  descripcion           String?
+  evaluaciones_criterio evaluaciones_criterio[]
+}
+
+model evaluaciones_criterio {
+  id                   String               @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  estudiante_id        String               @db.Uuid
+  criterio_id          String               @db.Uuid
+  nivel_logro_id       String               @db.Uuid
+  unidad_didactica_id  String               @db.Uuid
+  docente_id           String               @db.Uuid
+  observaciones        String?
+  fecha_evaluacion     DateTime?            @default(now()) @db.Timestamptz(6)
+  version              Int                  @default(1)
+  activa               Boolean              @default(true)
+  es_publicada_familia Boolean              @default(true)
+  fecha_creacion       DateTime?            @default(now()) @db.Timestamptz(6)
+  criterios_evaluacion criterios_evaluacion @relation(fields: [criterio_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  perfil_docentes      perfil_docentes      @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  estudiantes          estudiantes          @relation(fields: [estudiante_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  niveles_logro        niveles_logro        @relation(fields: [nivel_logro_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  unidades_didacticas  unidades_didacticas  @relation(fields: [unidad_didactica_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+
+  @@index([unidad_didactica_id], map: "idx_evaluaciones_criterio_unidad")
+}
+
+model fichas_monitoreo {
+  id                      String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  estudiante_id           String          @db.Uuid
+  docente_id              String          @db.Uuid
+  clasificacion           String
+  seriacion               String
+  asimilacion_acomodacion String
+  justificacion_logica    String
+  autorregulacion         String
+  observaciones           String?
+  acciones_apoyo          String?
+  fecha_monitoreo         DateTime?       @default(now()) @db.Timestamptz(6)
+  perfil_docentes         perfil_docentes @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  estudiantes             estudiantes     @relation(fields: [estudiante_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+}
+
+model autoevaluaciones_docente {
+  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  docente_id                String                      @db.Uuid
+  unidad_didactica_id       String?                     @db.Uuid
+  reflexion                 String?
+  fecha_autoevaluacion      DateTime                    @default(dbgenerated("CURRENT_DATE")) @db.Date
+  perfil_docentes           perfil_docentes             @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  unidades_didacticas       unidades_didacticas?        @relation(fields: [unidad_didactica_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  respuestas_autoevaluacion respuestas_autoevaluacion[]
+}
+
+model respuestas_autoevaluacion {
+  id                       String                   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  autoevaluacion_id        String                   @db.Uuid
+  numero_pregunta          Int
+  respuesta                respuesta_autoevaluacion
+  autoevaluaciones_docente autoevaluaciones_docente @relation(fields: [autoevaluacion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@unique([autoevaluacion_id, numero_pregunta], map: "unica_pregunta_por_evaluacion")
+}
+
+model metricas_sesion {
+  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  actividad_id              String                      @db.Uuid
+  estudiante_id             String                      @db.Uuid
+  app_criterio              criterio_didactico
+  fecha_sesion              DateTime?                   @default(now()) @db.Timestamptz(6)
+  actividades               actividades                 @relation(fields: [actividad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  estudiantes               estudiantes                 @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  detalles_metricas_sesion  detalles_metricas_sesion[]
+
+  @@index([estudiante_id, app_criterio], map: "idx_metricas_estudiante_app")
+}
+
+model detalles_metricas_sesion {
+  id                    String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  metrica_sesion_id     String          @db.Uuid
+  duracion_sesion       String
+  intentos_por_elemento Int
+  tasa_acierto          Float
+  secuencia_decisiones  Json
+  uso_ayudas            Int             @default(0)
+  nivel_completado      Int
+  abandono              Boolean         @default(false)
+  metricas_sesion       metricas_sesion @relation(fields: [metrica_sesion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 enum estado_unidad {
@@ -239,13 +284,14 @@ enum respuesta_autoevaluacion {
   EP
 }
 
-enum rol_usuario {
-  admin
-  docente
-  familia
-}
-
 enum tipo_actividad {
   clase
   casa
+}
+
+enum criterio_didactico {
+  Caracterizar
+  Clasificar
+  Seriar
+  Rompecabezas
 }

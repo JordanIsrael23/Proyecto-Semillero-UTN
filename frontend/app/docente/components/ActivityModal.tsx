@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 interface ActivityModalProps {
   showActivityModal: boolean;
   setShowActivityModal: (val: boolean) => void;
   activityForm: any;
   setActivityForm: React.Dispatch<React.SetStateAction<any>>;
-  handleCreateActivity: (e: React.FormEvent) => void;
+  handleCreateActivity: (e: React.FormEvent, finalRecursos?: { titulo: string; url: string }[]) => void;
 }
 
 export const ActivityModal: React.FC<ActivityModalProps> = ({
@@ -15,6 +15,17 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
   setActivityForm,
   handleCreateActivity,
 }) => {
+  const [recursoTitulo, setRecursoTitulo] = useState("");
+  const [recursoUrl, setRecursoUrl] = useState("");
+
+  // Limpiar campos cuando se cierra/abre el modal
+  useEffect(() => {
+    if (!showActivityModal) {
+      setRecursoTitulo("");
+      setRecursoUrl("");
+    }
+  }, [showActivityModal]);
+
   if (!showActivityModal) return null;
 
   return (
@@ -30,7 +41,16 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           </button>
         </div>
 
-        <form onSubmit={handleCreateActivity} className="space-y-4">
+        <form
+          onSubmit={(e) => {
+            let finalRecursos = [...(activityForm.recursos || [])];
+            if (recursoTitulo.trim() && recursoUrl.trim()) {
+              finalRecursos.push({ titulo: recursoTitulo.trim(), url: recursoUrl.trim() });
+            }
+            handleCreateActivity(e, finalRecursos);
+          }}
+          className="space-y-4"
+        >
           <div className="space-y-1">
             <label className="text-xs font-bold text-on-surface-variant block">Título de la Actividad</label>
             <input
@@ -67,43 +87,68 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
           </div>
 
           {activityForm.tipo === "casa" && (
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-on-surface-variant block">Recursos Adicionales</label>
-              <button
-                type="button"
-                onClick={() => {
-                  const title = prompt("Nombre del recurso (ej: Vídeo de seriación):");
-                  const url = prompt("Enlace web (ej: https://...):");
-                  if (title && url) {
-                    setActivityForm((prev: any) => ({
-                      ...prev,
-                      recursos: [...prev.recursos, { titulo: title, url }]
-                    }));
-                  }
-                }}
-                className="w-full py-2 bg-surface-container-low hover:bg-surface-container border border-outline-variant/30 rounded-xl text-xs font-bold cursor-pointer text-primary"
-              >
-                + Vincular Archivo/Vídeo Enlace
-              </button>
-              <div className="max-h-28 overflow-y-auto space-y-1.5">
-                {activityForm.recursos.map((rec: any, i: number) => (
-                  <div key={i} className="flex justify-between items-center bg-surface-container-low border border-outline-variant/30 p-2 rounded-lg text-xs">
-                    <span className="truncate max-w-[200px] text-on-surface">📄 <strong>{rec.titulo}</strong></span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setActivityForm((prev: any) => ({
-                          ...prev,
-                          recursos: prev.recursos.filter((_: any, idx: number) => idx !== i)
-                        }));
-                      }}
-                      className="text-red-400 hover:text-red-300 font-bold"
-                    >
-                      Eliminar
-                    </button>
-                  </div>
-                ))}
+            <div className="space-y-3 border-t border-outline-variant/10 pt-3">
+              <label className="text-xs font-bold text-on-surface-variant block">Recursos Adicionales (Opcional)</label>
+
+              {/* Formulario en línea para añadir recursos */}
+              <div className="space-y-2 border border-outline-variant/20 rounded-xl p-3 bg-surface-container-low">
+                <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Nuevo Archivo o Enlace</span>
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Nombre del recurso (ej: Vídeo de seriación)"
+                    value={recursoTitulo}
+                    onChange={(e) => setRecursoTitulo(e.target.value)}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:border-primary"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Enlace web (ej: https://...)"
+                    value={recursoUrl}
+                    onChange={(e) => setRecursoUrl(e.target.value)}
+                    className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-3 py-1.5 text-xs text-on-surface focus:outline-none focus:border-primary"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (recursoTitulo.trim() && recursoUrl.trim()) {
+                      setActivityForm((prev: any) => ({
+                        ...prev,
+                        recursos: [...prev.recursos, { titulo: recursoTitulo.trim(), url: recursoUrl.trim() }]
+                      }));
+                      setRecursoTitulo("");
+                      setRecursoUrl("");
+                    }
+                  }}
+                  className="w-full py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 rounded-xl text-xs font-bold cursor-pointer text-primary transition-all"
+                >
+                  + Vincular Recurso
+                </button>
               </div>
+
+              {/* Lista de recursos agregados */}
+              {activityForm.recursos && activityForm.recursos.length > 0 && (
+                <div className="max-h-28 overflow-y-auto space-y-1.5">
+                  {activityForm.recursos.map((rec: any, i: number) => (
+                    <div key={i} className="flex justify-between items-center bg-surface-container-low border border-outline-variant/30 p-2 rounded-lg text-xs">
+                      <span className="truncate max-w-[200px] text-on-surface">📄 <strong>{rec.titulo}</strong></span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActivityForm((prev: any) => ({
+                            ...prev,
+                            recursos: prev.recursos.filter((_: any, idx: number) => idx !== i)
+                          }));
+                        }}
+                        className="text-red-400 hover:text-red-300 font-bold"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 

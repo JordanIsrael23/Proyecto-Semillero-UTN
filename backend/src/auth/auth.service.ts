@@ -1,11 +1,12 @@
 import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { validarCedulaEcuatoriana } from '../utils/validation';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) { }
+  constructor(private prisma: PrismaService, private jwtService: JwtService) { }
 
   async login(cedulaOrEmail: string, password_raw: string) {
     // Buscar el usuario por email o por cédula
@@ -79,7 +80,11 @@ export class AuthService {
       rol: rolName,
     };
 
+    const payload = { sub: user.id, cedula: user.cedula, rol: rolName };
+    const access_token = this.jwtService.sign(payload);
+
     return {
+      access_token,
       user: userInfo,
       perfil,
     };

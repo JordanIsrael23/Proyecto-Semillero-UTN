@@ -161,7 +161,7 @@ export default function FamiliaDashboard() {
     >
       {/* Toast de feedback – reemplaza window.alert() */}
       {feedback && (
-        <div className="fixed inset-x-0 top-6 z-50 flex justify-center px-4">
+        <div className="fixed inset-x-0 top-6 z-[9999] flex justify-center px-4">
           <div
             className="flex items-start gap-3 rounded-3xl border px-4 py-4 bg-surface-container-lowest text-on-surface shadow-xl shadow-black/10 max-w-sm w-full"
             style={{

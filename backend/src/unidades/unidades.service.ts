@@ -7,7 +7,7 @@ export class UnidadesService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async getDocenteByUsuarioId(usuarioId: string) {
-    const docente = await this.prisma.docentes.findUnique({
+    const docente = await this.prisma.perfil_docentes.findUnique({
       where: { usuario_id: usuarioId },
     });
     if (!docente) throw new NotFoundException('Docente no encontrado para este usuario.');
@@ -17,7 +17,7 @@ export class UnidadesService {
   async getUnidadesByDocente(usuarioId: string) {
     const docente = await this.getDocenteByUsuarioId(usuarioId);
     return this.prisma.unidades_didacticas.findMany({
-      where: { docente_id: docente.id },
+      where: { docente_id: docente.usuario_id },
       include: {
         actividades: true,
       },
@@ -36,7 +36,7 @@ export class UnidadesService {
         objetivos_aprendizaje: data.objetivos_aprendizaje,
         destrezas: data.destrezas,
         semanas_previstas: Number(data.semanas_previstas),
-        docente_id: docente.id,
+        docente_id: docente.usuario_id,
         estado: data.estado || 'borrador',
       },
     });

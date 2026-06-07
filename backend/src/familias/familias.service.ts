@@ -1,12 +1,13 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class FamiliasService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async getFamiliaByUsuarioId(usuarioId: string) {
-    const familia = await this.prisma.familias.findUnique({
+    const familia = await this.prisma.perfil_familias.findUnique({
       where: { usuario_id: usuarioId },
     });
     if (!familia) throw new NotFoundException('Familia/Representante no encontrado para este usuario.');
@@ -16,18 +17,18 @@ export class FamiliasService {
   async findFamiliaByCedula(cedula: string) {
     const usuario = await this.prisma.usuarios.findUnique({
       where: { cedula },
-      include: { familias: true },
+      include: { perfil_familias: true },
     });
-    if (!usuario || usuario.rol !== 'familia' || !usuario.familias) {
+    if (!usuario || usuario.rol_id !== 3 || !usuario.perfil_familias) {
       return null;
     }
     return {
-      id: usuario.familias.id,
+      id: usuario.perfil_familias.usuario_id,
       cedula: usuario.cedula,
       email: usuario.email,
-      nombre: usuario.familias.nombre,
-      apellido: usuario.familias.apellido,
-      telefono: usuario.familias.telefono,
+      nombre: usuario.nombre,
+      apellido: usuario.apellido,
+      telefono: usuario.telefono,
     };
   }
 
@@ -52,42 +53,55 @@ export class FamiliasService {
 
     return this.prisma.$transaction(async (tx) => {
       const targetCedula = data.cedula || 'TEMP_' + Date.now();
+      const passwordHash = await bcrypt.hash(targetCedula, 10);
       const user = await tx.usuarios.create({
         data: {
           cedula: targetCedula,
           email: data.email,
-          password_hash: '$2b$10$wR1lBghQo9U17B576/Hjue/96slyD6ZcW6e4t2M56r1g2L6vS7npe', // hash de password123
-          rol: 'familia',
+          password_hash: passwordHash,
+          rol_id: 3, // 'familia'
+          nombre: data.nombre,
+          apellido: data.apellido,
+          telefono: data.telefono || null,
           activo: true,
         },
       });
 
-      const familia = await tx.familias.create({
+      const pFamilia = await tx.perfil_familias.create({
         data: {
           usuario_id: user.id,
-          nombre: data.nombre,
-          apellido: data.apellido,
-          telefono: data.telefono || null,
+          direccion: '',
         },
         include: {
           usuarios: true,
         },
       });
 
-      return familia;
+      return {
+        id: pFamilia.usuario_id,
+        usuario_id: pFamilia.usuario_id,
+        nombre: data.nombre,
+        apellido: data.apellido,
+        telefono: user.telefono,
+        usuarios: pFamilia.usuarios,
+      };
     });
   }
 
   async getHijosByFamilia(usuarioId: string) {
     const familia = await this.getFamiliaByUsuarioId(usuarioId);
     const relaciones = await this.prisma.familia_estudiante.findMany({
-      where: { familia_id: familia.id },
+      where: { familia_id: familia.usuario_id },
       include: {
         estudiantes: {
           include: {
             grupos: {
               include: {
-                docentes: true,
+                perfil_docentes: {
+                  include: {
+                    usuarios: true,
+                  },
+                },
               },
             },
           },
@@ -95,12 +109,25 @@ export class FamiliasService {
       },
     });
 
-    return relaciones.map((rel) => ({
-      parentesco: rel.parentesco,
-      estudiante: rel.estudiantes,
-      grupo: rel.estudiantes.grupos,
-      docente: rel.estudiantes.grupos.docentes,
-    }));
+    return relaciones.map((rel) => {
+      const docUser = rel.estudiantes.grupos.perfil_docentes.usuarios;
+
+      return {
+        parentesco: rel.parentesco,
+        estudiante: {
+          ...rel.estudiantes,
+        },
+        grupo: rel.estudiantes.grupos,
+        docente: {
+          id: rel.estudiantes.grupos.perfil_docentes.usuario_id,
+          usuario_id: rel.estudiantes.grupos.perfil_docentes.usuario_id,
+          nombre: docUser.nombre,
+          apellido: docUser.apellido,
+          telefono: docUser.telefono,
+          especialidad: rel.estudiantes.grupos.perfil_docentes.especialidad,
+        },
+      };
+    });
   }
 
   async getActividadesCasaByEstudiante(estudianteId: string) {
@@ -137,12 +164,12 @@ export class FamiliasService {
         fecha_realizacion: seg ? seg.fecha_realizacion : null,
         comentario_familia: seg ? seg.comentario_familia : null,
         seguimiento_id: seg ? seg.id : null,
-        nota: seg && seg.nota !== null ? String(seg.nota) : null,
+        nota: seg && seg.nota_docente !== null ? String(seg.nota_docente) : null,
       };
     });
   }
 
-  async saveActividadCasaSeguimiento(data: { estudiante_id: string; actividad_id: string; realizada?: boolean; comentario_familia?: string; nota?: string }) {
+  async saveActividadCasaSeguimiento(data: { estudiante_id: string; actividad_id: string; realizada?: boolean; comentario_familia?: string; nota?: string; usuario_id?: string }) {
     const existing = await this.prisma.actividades_casa_seguimiento.findFirst({
       where: {
         estudiante_id: data.estudiante_id,
@@ -165,19 +192,44 @@ export class FamiliasService {
           realizada: data.realizada !== undefined ? data.realizada : existing.realizada,
           fecha_realizacion: data.realizada !== undefined ? (data.realizada ? new Date() : null) : existing.fecha_realizacion,
           comentario_familia: data.comentario_familia !== undefined ? data.comentario_familia : existing.comentario_familia,
-          nota: data.nota !== undefined ? parsedNota : existing.nota,
+          nota_docente: data.nota !== undefined ? parsedNota : existing.nota_docente,
         },
       });
+    }
+
+    // Resolver la familia_id para esta actividad
+    let familiaIdToSet = '';
+    if (data.usuario_id) {
+      const fam = await this.prisma.perfil_familias.findUnique({
+        where: { usuario_id: data.usuario_id },
+      });
+      if (fam) {
+        familiaIdToSet = fam.usuario_id;
+      }
+    }
+
+    if (!familiaIdToSet) {
+      const rel = await this.prisma.familia_estudiante.findFirst({
+        where: { estudiante_id: data.estudiante_id },
+        orderBy: { es_representante_principal: 'desc' },
+      });
+      if (rel) {
+        familiaIdToSet = rel.familia_id;
+      } else {
+        // Fallback default
+        familiaIdToSet = 'a0000000-0000-0000-0000-000000000003';
+      }
     }
 
     return this.prisma.actividades_casa_seguimiento.create({
       data: {
         estudiante_id: data.estudiante_id,
         actividad_id: data.actividad_id,
+        familia_id: familiaIdToSet,
         realizada: data.realizada || false,
         fecha_realizacion: data.realizada ? new Date() : null,
         comentario_familia: data.comentario_familia || null,
-        nota: parsedNota,
+        nota_docente: parsedNota,
       },
     });
   }

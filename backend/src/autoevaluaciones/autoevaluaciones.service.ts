@@ -7,7 +7,7 @@ export class AutoevaluacionesService {
   constructor(private readonly prisma: PrismaService) {}
 
   private async getDocenteByUsuarioId(usuarioId: string) {
-    const docente = await this.prisma.docentes.findUnique({
+    const docente = await this.prisma.perfil_docentes.findUnique({
       where: { usuario_id: usuarioId },
     });
     if (!docente) throw new NotFoundException('Docente no encontrado para este usuario.');
@@ -20,7 +20,7 @@ export class AutoevaluacionesService {
     return this.prisma.$transaction(async (tx) => {
       const autoeval = await tx.autoevaluaciones_docente.create({
         data: {
-          docente_id: docente.id,
+          docente_id: docente.usuario_id,
           unidad_didactica_id: data.unidad_didactica_id || null,
           reflexion: data.reflexion,
         },
@@ -47,7 +47,7 @@ export class AutoevaluacionesService {
     return this.prisma.autoevaluaciones_docente.findMany({
       where: { unidad_didactica_id: unidadId },
       include: { respuestas_autoevaluacion: true },
-      orderBy: { fecha_creacion: 'desc' },
+      orderBy: { fecha_autoevaluacion: 'desc' },
     });
   }
 }

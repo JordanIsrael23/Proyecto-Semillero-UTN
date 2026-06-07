@@ -684,9 +684,10 @@ export default function DocenteDashboard() {
   };
 
   // Agregar Actividad a Unidad
-  const handleCreateActivity = async (e: React.FormEvent) => {
+  const handleCreateActivity = async (e: React.FormEvent, finalRecursos?: { titulo: string; url: string }[]) => {
     e.preventDefault();
     try {
+      const recursosToSend = finalRecursos !== undefined ? finalRecursos : activityForm.recursos;
       const res = await fetch(`${BACKEND_URL}/unidades/${selectedUnit}/actividades`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -694,7 +695,7 @@ export default function DocenteDashboard() {
           titulo: activityForm.titulo,
           descripcion: activityForm.descripcion,
           tipo: activityForm.tipo,
-          recursos_enlaces: activityForm.recursos
+          recursos_enlaces: recursosToSend
         })
       });
 
@@ -913,7 +914,7 @@ ${data.tareasCasa.length === 0
       onLogout={handleLogout}
     >
       {feedback && (
-        <div className="fixed inset-x-0 top-6 z-50 flex justify-center px-4">
+        <div className="fixed inset-x-0 top-6 z-[9999] flex justify-center px-4">
           <div
             className="flex items-start gap-3 rounded-3xl border px-4 py-4 bg-surface-container-lowest text-on-surface shadow-xl shadow-black/10 max-w-sm w-full"
             style={{

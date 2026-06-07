@@ -5,7 +5,7 @@ import { validarCedulaEcuatoriana } from '../utils/validation';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async login(cedulaOrEmail: string, password_raw: string) {
     // Buscar el usuario por email o por cédula
@@ -27,14 +27,10 @@ export class AuthService {
     }
 
     // Verificar contraseña
-    // En el seed anterior y en el registro actual encriptamos con bcrypt.
-    // Nota: Si por alguna razón la contraseña es texto plano o un formato antiguo, fallará,
-    // pero con bcrypt.compare manejamos el login seguro estándar.
     let isPasswordValid = false;
     try {
       isPasswordValid = await bcrypt.compare(password_raw, user.password_hash);
     } catch (err) {
-      // Si falla bcrypt (por ejemplo, si el hash no es válido), lanzamos excepción
       throw new UnauthorizedException('Error al validar las credenciales.');
     }
 
@@ -44,18 +40,45 @@ export class AuthService {
 
     // Obtener detalles del perfil según el rol
     let perfil: any = null;
-    if (user.rol === 'docente') {
-      perfil = await this.prisma.docentes.findUnique({
+    if (user.rol_id === 2) { // docente
+      const pDocente = await this.prisma.perfil_docentes.findUnique({
         where: { usuario_id: user.id },
       });
-    } else if (user.rol === 'familia') {
-      perfil = await this.prisma.familias.findUnique({
+      if (pDocente) {
+        perfil = {
+          id: pDocente.usuario_id,
+          usuario_id: pDocente.usuario_id,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          telefono: user.telefono,
+          especialidad: pDocente.especialidad,
+        };
+      }
+    } else if (user.rol_id === 3) { // familia
+      const pFamilia = await this.prisma.perfil_familias.findUnique({
         where: { usuario_id: user.id },
       });
+      if (pFamilia) {
+        perfil = {
+          id: pFamilia.usuario_id,
+          usuario_id: pFamilia.usuario_id,
+          nombre: user.nombre,
+          apellido: user.apellido,
+          telefono: user.telefono,
+          direccion: pFamilia.direccion,
+        };
+      }
     }
 
     // Retornar información de sesión (sin el hash de contraseña)
-    const { password_hash, ...userInfo } = user;
+    const { password_hash, ...userInfoWithoutPassword } = user;
+    const rolName = user.rol_id === 1 ? 'admin' : user.rol_id === 2 ? 'docente' : 'familia';
+
+    const userInfo = {
+      ...userInfoWithoutPassword,
+      rol: rolName,
+    };
+
     return {
       user: userInfo,
       perfil,
@@ -97,6 +120,7 @@ export class AuthService {
 
     // Encriptar la contraseña con bcrypt
     const password_hash = await bcrypt.hash(data.password_raw, 10);
+    const rol_id = data.rol === 'docente' ? 2 : 3;
 
     // Crear el usuario y el perfil en una transacción
     return this.prisma.$transaction(async (tx) => {
@@ -105,33 +129,53 @@ export class AuthService {
           cedula: data.cedula,
           email: data.email,
           password_hash,
-          rol: data.rol,
+          rol_id: rol_id,
+          nombre: data.nombre,
+          apellido: data.apellido,
+          telefono: data.telefono || null,
           activo: true,
         },
       });
 
       let perfil: any = null;
       if (data.rol === 'docente') {
-        perfil = await tx.docentes.create({
+        const pDocente = await tx.perfil_docentes.create({
           data: {
             usuario_id: user.id,
-            nombre: data.nombre,
-            apellido: data.apellido,
-            telefono: data.telefono || null,
+            especialidad: 'Desarrollo Cognitivo Infantil',
           },
         });
+        perfil = {
+          id: pDocente.usuario_id,
+          usuario_id: pDocente.usuario_id,
+          nombre: data.nombre,
+          apellido: data.apellido,
+          telefono: user.telefono,
+          especialidad: pDocente.especialidad,
+        };
       } else if (data.rol === 'familia') {
-        perfil = await tx.familias.create({
+        const pFamilia = await tx.perfil_familias.create({
           data: {
             usuario_id: user.id,
-            nombre: data.nombre,
-            apellido: data.apellido,
-            telefono: data.telefono || null,
+            direccion: '',
           },
         });
+        perfil = {
+          id: pFamilia.usuario_id,
+          usuario_id: pFamilia.usuario_id,
+          nombre: data.nombre,
+          apellido: data.apellido,
+          telefono: user.telefono,
+          direccion: pFamilia.direccion,
+        };
       }
 
-      const { password_hash: _, ...userInfo } = user;
+      const { password_hash: _, ...userInfoWithoutPassword } = user;
+      const userInfo = {
+        ...userInfoWithoutPassword,
+        rol: data.rol,
+      };
+
       return {
         user: userInfo,
         perfil,

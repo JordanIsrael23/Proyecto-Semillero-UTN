@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense } from "react";
+import React, { Suspense, useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { NivelClasificacion, MetricasJuegoAPI } from "./types";
 
@@ -53,21 +53,45 @@ function CategorizacionGameCore() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Validación Estricta de Sesión
-  const sessionToken = searchParams.get("sessionToken");
-  const metricaSesionId = searchParams.get("metricaSesionId");
+  // LECTURA DE PARÁMETROS DE CONTEXTO ACTUALIZADA
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const [metricaSesionId, setMetricaSesionId] = useState<string | null>(null);
+  const [nombreNino, setNombreNino] = useState<string>('');
+  const [errorValidacion, setErrorValidacion] = useState<string | null>(null);
 
-  if (!sessionToken || !metricaSesionId) {
+  useEffect(() => {
+    // Mejor práctica: Mapear explícitamente los query params de la URL hacia las variables de estado
+    // separando la capa de presentación de la capa de red.
+    const token = searchParams.get('token');
+    const sessionId = searchParams.get('sessionId');
+    const nombre = searchParams.get('nombre');
+
+    if (!token || !sessionId) {
+      setErrorValidacion("Error de autorización: Faltan credenciales en la URL.");
+    } else {
+      setSessionToken(token);
+      setMetricaSesionId(sessionId);
+      // Fallback seguro en caso de que omitan el nombre en la URL
+      setNombreNino(nombre || 'Pequeño explorador'); 
+    }
+  }, [searchParams]);
+
+  if (errorValidacion) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-red-50 text-red-800 p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 text-center">
           <h2 className="text-2xl font-bold mb-4">Error de Autorización</h2>
           <p className="mb-4">
-            No se pudo validar el contexto de la sesión activa. Por favor, ingresa desde el flujo principal de acceso.
+            {errorValidacion}
           </p>
         </div>
       </div>
     );
+  }
+
+  // Prevención de renderizado prematuro sin sesión válida
+  if (!sessionToken || !metricaSesionId) {
+    return null;
   }
 
   /**
@@ -107,7 +131,8 @@ function CategorizacionGameCore() {
     <div className="min-h-screen bg-gray-50 p-8 text-gray-800">
       <div className="max-w-4xl mx-auto">
         <header className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Juego de Categorización</h1>
+          <h1 className="text-3xl font-bold mb-2">¡Hola, {nombreNino}!</h1>
+          <h2 className="text-2xl text-gray-700 font-semibold mb-2">Juego de Categorización</h2>
           <p className="text-gray-600">Instrucción: {nivelActual.instruccion}</p>
         </header>
 

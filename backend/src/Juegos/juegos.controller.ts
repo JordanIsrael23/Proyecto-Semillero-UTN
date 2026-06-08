@@ -1,11 +1,11 @@
 import {
-  Controller, Get, Post, Body, Param, UseGuards,
+  Controller, Post, Body, Param, UseGuards,
   UnauthorizedException, ForbiddenException,
   CanActivate, ExecutionContext, Injectable,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { JuegosService } from './juegos.service';
-import type { CrearSesionPayload, RegistrarDetallesPayload } from './juegos.service';
+import type { IniciarSesionPayload, RegistrarDetallesPayload } from './juegos.service';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'testSecretKey';
 
@@ -58,12 +58,6 @@ export class GameSessionGuard implements CanActivate {
         throw new ForbiddenException('Se requiere un session token de juego para este endpoint.');
       }
 
-      // Verificar que el token corresponda a la sesión solicitada en la URL
-      const metricaSesionId = request.params.metricaSesionId;
-      if (metricaSesionId && payload.sub !== metricaSesionId) {
-        throw new ForbiddenException('El session token no corresponde a esta sesión.');
-      }
-
       request.gameSession = payload;
     } catch (err) {
       if (err instanceof ForbiddenException) throw err;
@@ -82,23 +76,12 @@ export class JuegosController {
   /**
    * POST /api/juegos/sesion
    * Crea una sesión de juego. Solo para docentes autenticados.
-   * Retorna un sessionToken que el docente pasa a la app de juego.
+   * Retorna un sessionToken + contexto completo que el docente pasa a la app de juego.
    */
   @Post('sesion')
   @UseGuards(JwtAuthGuard)
-  async crearSesion(@Body() payload: CrearSesionPayload) {
-    return this.juegosService.crearSesion(payload);
-  }
-
-  /**
-   * GET /api/juegos/sesion/:metricaSesionId
-   * La app de juego obtiene el contexto de la sesión (nombre, criterio, etc.).
-   * Requiere el sessionToken generado al crear la sesión.
-   */
-  @Get('sesion/:metricaSesionId')
-  @UseGuards(GameSessionGuard)
-  async obtenerSesion(@Param('metricaSesionId') metricaSesionId: string) {
-    return this.juegosService.obtenerSesion(metricaSesionId);
+  async iniciarSesion(@Body() payload: IniciarSesionPayload) {
+    return this.juegosService.iniciarSesion(payload);
   }
 
   /**

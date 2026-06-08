@@ -3,11 +3,9 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma.service';
 import { criterio_didactico } from '@prisma/client';
 
-// Payload para crear una sesión de juego (llamado por el docente)
-export interface CrearSesionPayload {
-  actividadId: string;
-  estudianteId: string; // Puede ser UUID o cédula
-  appCriterio: criterio_didactico;
+// Payload para iniciar una sesión de juego (llamado por el docente)
+export interface IniciarSesionPayload {
+  metricaSesionId: string; // ID existente de la tabla metricas_sesion
 }
 
 // Payload para registrar los detalles del juego (llamado por la app de juego)
@@ -17,7 +15,7 @@ export interface RegistrarDetallesPayload {
   tasaAcierto: number;
   secuenciaDecisiones: any;
   usoAyudas: number;
-  nivelCompletado: number;
+  nivelDificultad: number;
   abandono: boolean;
 }
 
@@ -31,83 +29,19 @@ export class JuegosService {
   ) {}
 
   /**
-   * Crea una sesión de juego (metricas_sesion) y genera un sessionToken JWT
-   * para que la app de juego pueda consultar el contexto y enviar resultados.
+   * Busca una sesión de juego existente (metricas_sesion) por su ID
+   * y genera un sessionToken JWT con todo el contexto necesario
+   * para que la app de juego pueda enviar resultados.
    * Solo el docente autenticado puede llamar a este método.
    */
-  async crearSesion(payload: CrearSesionPayload) {
-    // Validar que actividadId sea un UUID válido
-    if (!UUID_REGEX.test(payload.actividadId)) {
-      throw new BadRequestException('El actividadId debe ser un UUID válido.');
-    }
-
-    // Resolver el estudianteId: puede ser UUID o cédula
-    let estudianteUuid = payload.estudianteId;
-    if (!UUID_REGEX.test(payload.estudianteId)) {
-      const estudiante = await this.prisma.estudiantes.findUnique({
-        where: { cedula: payload.estudianteId },
-      });
-      if (!estudiante) {
-        throw new NotFoundException('Estudiante no encontrado con la cédula proporcionada.');
-      }
-      estudianteUuid = estudiante.id;
-    }
-
-    // Verificar que la actividad existe y obtener sus datos
-    const actividad = await this.prisma.actividades.findUnique({
-      where: { id: payload.actividadId },
-      select: { id: true, titulo: true, descripcion: true },
-    });
-    if (!actividad) {
-      throw new NotFoundException('Actividad no encontrada.');
-    }
-
-    // Obtener datos del estudiante
-    const estudiante = await this.prisma.estudiantes.findUnique({
-      where: { id: estudianteUuid },
-      select: { id: true, nombre: true, apellido: true },
-    });
-    if (!estudiante) {
-      throw new NotFoundException('Estudiante no encontrado.');
-    }
-
-    // Crear el registro de metricas_sesion
-    const metricaSesion = await this.prisma.metricas_sesion.create({
-      data: {
-        actividad_id: payload.actividadId,
-        estudiante_id: estudianteUuid,
-        app_criterio: payload.appCriterio,
-      },
-    });
-
-    // Generar un sessionToken JWT de corta duración para la app de juego
-    const sessionToken = this.jwtService.sign(
-      { sub: metricaSesion.id, type: 'game_session' },
-      { expiresIn: '2h' },
-    );
-
-    return {
-      sessionToken,
-      metricaSesionId: metricaSesion.id,
-      nombreEstudiante: estudiante.nombre,
-      apellidoEstudiante: estudiante.apellido,
-      appCriterio: payload.appCriterio,
-      tituloActividad: actividad.titulo,
-      descripcionActividad: actividad.descripcion,
-    };
-  }
-
-  /**
-   * Obtiene el contexto de una sesión de juego.
-   * Llamado por la app de juego externa usando el sessionToken.
-   */
-  async obtenerSesion(metricaSesionId: string) {
-    if (!UUID_REGEX.test(metricaSesionId)) {
+  async iniciarSesion(payload: IniciarSesionPayload) {
+    if (!UUID_REGEX.test(payload.metricaSesionId)) {
       throw new BadRequestException('El metricaSesionId debe ser un UUID válido.');
     }
 
+    // Buscar la sesión existente con datos del estudiante y la actividad
     const sesion = await this.prisma.metricas_sesion.findUnique({
-      where: { id: metricaSesionId },
+      where: { id: payload.metricaSesionId },
       include: {
         estudiantes: {
           select: { nombre: true, apellido: true },
@@ -119,10 +53,17 @@ export class JuegosService {
     });
 
     if (!sesion) {
-      throw new NotFoundException('Sesión de juego no encontrada.');
+      throw new NotFoundException('Sesión de métricas no encontrada.');
     }
 
+    // Generar un sessionToken JWT de corta duración para la app de juego
+    const sessionToken = this.jwtService.sign(
+      { sub: sesion.id, type: 'game_session' },
+      { expiresIn: '2h' },
+    );
+
     return {
+      sessionToken,
       metricaSesionId: sesion.id,
       nombreEstudiante: sesion.estudiantes.nombre,
       apellidoEstudiante: sesion.estudiantes.apellido,
@@ -158,7 +99,7 @@ export class JuegosService {
         tasa_acierto: payload.tasaAcierto,
         secuencia_decisiones: payload.secuenciaDecisiones,
         uso_ayudas: payload.usoAyudas,
-        nivel_completado: payload.nivelCompletado,
+        nivel_dificultad: payload.nivelDificultad,
         abandono: payload.abandono,
       },
     });

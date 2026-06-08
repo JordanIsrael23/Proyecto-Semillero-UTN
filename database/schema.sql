@@ -248,7 +248,7 @@ CREATE TABLE detalles_metricas_sesion (
     tasa_acierto DOUBLE PRECISION NOT NULL,          
     secuencia_decisiones JSONB NOT NULL,             
     uso_ayudas INTEGER NOT NULL DEFAULT 0,           
-    nivel_completado INTEGER NOT NULL,               
+    nivel_dificultad INTEGER NOT NULL,               
     abandono BOOLEAN NOT NULL DEFAULT FALSE          
 );
 

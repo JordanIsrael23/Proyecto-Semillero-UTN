@@ -14,10 +14,24 @@ export class UnidadesService {
     return docente;
   }
 
-  async getUnidadesByDocente(usuarioId: string) {
+  async getUnidadesByDocente(usuarioId: string, grupoId?: string) {
     const docente = await this.getDocenteByUsuarioId(usuarioId);
+    if (grupoId) {
+      return this.prisma.unidades_didacticas.findMany({
+        where: {
+          grupo_id: grupoId,
+          grupos: { docente_id: docente.usuario_id },
+        },
+        include: {
+          actividades: true,
+        },
+        orderBy: { fecha_creacion: 'desc' },
+      });
+    }
     return this.prisma.unidades_didacticas.findMany({
-      where: { docente_id: docente.usuario_id },
+      where: {
+        grupos: { docente_id: docente.usuario_id },
+      },
       include: {
         actividades: true,
       },
@@ -25,8 +39,7 @@ export class UnidadesService {
     });
   }
 
-  async createUnidad(usuarioId: string, data: { titulo: string; resumen?: string; ambito: string; objetivos_generales?: string; objetivos_aprendizaje?: string; destrezas?: string; semanas_previstas: number; estado?: estado_unidad }) {
-    const docente = await this.getDocenteByUsuarioId(usuarioId);
+  async createUnidad(data: { titulo: string; resumen?: string; ambito: string; objetivos_generales?: string; objetivos_aprendizaje?: string; destrezas?: string; semanas_previstas: number; estado?: estado_unidad; grupo_id: string }) {
     return this.prisma.unidades_didacticas.create({
       data: {
         titulo: data.titulo,
@@ -36,7 +49,7 @@ export class UnidadesService {
         objetivos_aprendizaje: data.objetivos_aprendizaje,
         destrezas: data.destrezas,
         semanas_previstas: Number(data.semanas_previstas),
-        docente_id: docente.usuario_id,
+        grupo_id: data.grupo_id,
         estado: data.estado || 'borrador',
       },
     });
@@ -76,7 +89,7 @@ export class UnidadesService {
           objetivos_aprendizaje: original.objetivos_aprendizaje,
           destrezas: original.destrezas,
           semanas_previstas: original.semanas_previstas,
-          docente_id: original.docente_id,
+          grupo_id: original.grupo_id,
           estado: 'borrador',
         },
       });
@@ -97,7 +110,7 @@ export class UnidadesService {
     });
   }
 
-  async createActividad(unidadId: string, data: { titulo: string; descripcion: string; tipo: tipo_actividad; recursos_enlaces?: any }) {
+  async createActividad(unidadId: string, data: { titulo: string; descripcion: string; tipo: tipo_actividad; recursos_enlaces?: any; fecha_limite?: string }) {
     return this.prisma.actividades.create({
       data: {
         unidad_id: unidadId,
@@ -105,11 +118,12 @@ export class UnidadesService {
         descripcion: data.descripcion,
         tipo: data.tipo,
         recursos_enlaces: data.recursos_enlaces || [],
+        fecha_limite: data.fecha_limite ? new Date(data.fecha_limite) : null,
       },
     });
   }
 
-  async updateActividad(id: string, data: { titulo: string; descripcion: string; tipo: tipo_actividad; recursos_enlaces?: any }) {
+  async updateActividad(id: string, data: { titulo: string; descripcion: string; tipo: tipo_actividad; recursos_enlaces?: any; fecha_limite?: string }) {
     return this.prisma.actividades.update({
       where: { id },
       data: {
@@ -117,6 +131,7 @@ export class UnidadesService {
         descripcion: data.descripcion,
         tipo: data.tipo,
         recursos_enlaces: data.recursos_enlaces || [],
+        fecha_limite: data.fecha_limite ? new Date(data.fecha_limite) : null,
         fecha_actualizacion: new Date(),
       },
     });

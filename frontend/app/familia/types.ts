@@ -65,4 +65,5 @@ export interface ActividadCasa {
   fecha_realizacion?: string | null;
   comentario_familia?: string | null;
   nota?: string | null;
+  fecha_limite?: string | null;
 }

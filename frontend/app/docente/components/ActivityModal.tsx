@@ -86,6 +86,17 @@ export const ActivityModal: React.FC<ActivityModalProps> = ({
             </select>
           </div>
 
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-on-surface-variant block">Fecha y Hora Límite de Entrega</label>
+            <input
+              type="datetime-local"
+              required
+              value={activityForm.fecha_limite || ""}
+              onChange={(e) => setActivityForm({ ...activityForm, fecha_limite: e.target.value })}
+              className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary cursor-pointer"
+            />
+          </div>
+
           {activityForm.tipo === "casa" && (
             <div className="space-y-3 border-t border-outline-variant/10 pt-3">
               <label className="text-xs font-bold text-on-surface-variant block">Recursos Adicionales (Opcional)</label>

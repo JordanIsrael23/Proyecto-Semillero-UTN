@@ -53,6 +53,7 @@ export interface UnidadDidactica {
   destrezas?: string;
   semanas_previstas: number;
   estado: "borrador" | "activo" | "archivado";
+  grupo_id: string;
   actividades?: Actividad[];
 }
 
@@ -62,6 +63,7 @@ export interface Actividad {
   descripcion: string;
   tipo: "clase" | "casa";
   recursos_enlaces?: any;
+  fecha_limite?: string | null;
 }
 
 export interface Criterio {

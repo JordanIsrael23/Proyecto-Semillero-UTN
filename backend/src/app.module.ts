@@ -9,6 +9,7 @@ import { UnidadesModule } from './unidades/unidades.module';
 import { EvaluacionesModule } from './evaluaciones/evaluaciones.module';
 import { MonitoreoModule } from './monitoreo/monitoreo.module';
 import { AutoevaluacionesModule } from './autoevaluaciones/autoevaluaciones.module';
+import { JuegosModule } from './Juegos/juegos.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { AutoevaluacionesModule } from './autoevaluaciones/autoevaluaciones.modu
     EvaluacionesModule,
     MonitoreoModule,
     AutoevaluacionesModule,
+    JuegosModule,
   ],
 })
 export class AppModule {}

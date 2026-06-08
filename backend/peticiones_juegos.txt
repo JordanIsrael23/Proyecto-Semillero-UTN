@@ -1,0 +1,143 @@
+=== ARCHIVO DE PRUEBAS PARA LOS ENDPOINTS DE JUEGOS ===
+
+Este módulo maneja la integración con aplicaciones de juegos educativos externos.
+El flujo completo es:
+  1. El docente crea una sesión de juego (POST /api/juegos/sesion) → obtiene un sessionToken
+  2. La app de juego usa el sessionToken para obtener el contexto (GET /api/juegos/sesion/:id)
+  3. La app de juego envía los resultados (POST /api/juegos/sesion/:id/detalles)
+
+----------------------------------------------------
+0. LOGIN — Obtener Token de Docente
+----------------------------------------------------
+URL: POST http://localhost:4000/api/auth/login
+
+Headers:
+Content-Type: application/json
+
+Cuerpo (JSON):
+{
+  "cedulaOrEmail": "mrea@utn.edu.ec",
+  "password_raw": "password123"
+}
+
+Ejemplo cURL:
+curl -X POST "http://localhost:4000/api/auth/login" \
+     -H "Content-Type: application/json" \
+     -d '{
+           "cedulaOrEmail": "mrea@utn.edu.ec",
+           "password_raw": "password123"
+         }'
+
+Nota: Copia el campo "access_token" de la respuesta y úsalo como <TOKEN_DOCENTE> en el paso 1.
+
+----------------------------------------------------
+1. CREAR SESIÓN DE JUEGO (Docente)
+----------------------------------------------------
+URL: POST http://localhost:4000/api/juegos/sesion
+
+Headers:
+Content-Type: application/json
+Authorization: Bearer <TOKEN_DOCENTE>
+
+Cuerpo (JSON):
+{
+  "actividadId": "00000000-0000-0000-0000-000000000000",
+  "estudianteId": "1234567890",
+  "appCriterio": "Caracterizar"
+}
+
+Nota sobre "estudianteId": Puedes enviar la cédula del estudiante o su UUID interno.
+Nota sobre "appCriterio": Debe ser uno de: Caracterizar, Clasificar, Seriar, Rompecabezas.
+
+Ejemplo cURL:
+curl -X POST "http://localhost:4000/api/juegos/sesion" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <TOKEN_DOCENTE>" \
+     -d '{
+           "actividadId": "00000000-0000-0000-0000-000000000000",
+           "estudianteId": "1234567890",
+           "appCriterio": "Caracterizar"
+         }'
+
+Respuesta esperada:
+{
+  "sessionToken": "eyJhbG...",
+  "metricaSesionId": "uuid-generado",
+  "nombreEstudiante": "Juan",
+  "apellidoEstudiante": "Pérez",
+  "appCriterio": "Caracterizar",
+  "tituloActividad": "Título de la actividad",
+  "descripcionActividad": "Descripción de la actividad"
+}
+
+Nota: Copia el "sessionToken" y el "metricaSesionId" para los siguientes pasos.
+
+----------------------------------------------------
+2. OBTENER CONTEXTO DE SESIÓN (App de Juego)
+----------------------------------------------------
+URL: GET http://localhost:4000/api/juegos/sesion/<METRICA_SESION_ID>
+
+Headers:
+Authorization: Bearer <SESSION_TOKEN>
+
+Ejemplo cURL:
+curl -X GET "http://localhost:4000/api/juegos/sesion/<METRICA_SESION_ID>" \
+     -H "Authorization: Bearer <SESSION_TOKEN>"
+
+Respuesta esperada:
+{
+  "metricaSesionId": "uuid-de-la-sesion",
+  "nombreEstudiante": "Juan",
+  "apellidoEstudiante": "Pérez",
+  "appCriterio": "Caracterizar",
+  "tituloActividad": "Título de la actividad",
+  "descripcionActividad": "Descripción de la actividad"
+}
+
+----------------------------------------------------
+3. REGISTRAR RESULTADOS (App de Juego)
+----------------------------------------------------
+URL: POST http://localhost:4000/api/juegos/sesion/<METRICA_SESION_ID>/detalles
+
+Headers:
+Content-Type: application/json
+Authorization: Bearer <SESSION_TOKEN>
+
+Cuerpo (JSON):
+{
+  "duracionSesion": "00:15:00",
+  "intentosPorElemento": 4,
+  "tasaAcierto": 75.5,
+  "secuenciaDecisiones": {
+    "pantalla1": "correcto",
+    "pantalla2": "incorrecto",
+    "pantalla3": "correcto"
+  },
+  "usoAyudas": 2,
+  "nivelCompletado": 1,
+  "abandono": false
+}
+
+Ejemplo cURL:
+curl -X POST "http://localhost:4000/api/juegos/sesion/<METRICA_SESION_ID>/detalles" \
+     -H "Content-Type: application/json" \
+     -H "Authorization: Bearer <SESSION_TOKEN>" \
+     -d '{
+           "duracionSesion": "00:15:00",
+           "intentosPorElemento": 4,
+           "tasaAcierto": 75.5,
+           "secuenciaDecisiones": {"pantalla1":"correcto","pantalla2":"incorrecto"},
+           "usoAyudas": 2,
+           "nivelCompletado": 1,
+           "abandono": false
+         }'
+
+Respuesta esperada: El registro detalles_metricas_sesion creado con todos sus campos.
+
+----------------------------------------------------
+NOTAS DE SEGURIDAD
+----------------------------------------------------
+- El endpoint 1 requiere el JWT del docente (obtenido del login).
+- Los endpoints 2 y 3 requieren el sessionToken (generado en el paso 1).
+- El sessionToken expira en 2 horas y solo funciona para la sesión específica.
+- Si intentas usar un sessionToken con un metricaSesionId diferente, recibirás un error 403.

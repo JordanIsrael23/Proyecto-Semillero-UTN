@@ -1,5 +1,5 @@
 import React from "react";
-import { UnidadDidactica } from "../types";
+import { UnidadDidactica, Grupo } from "../types";
 
 interface PlanificacionTabProps {
   unidades: UnidadDidactica[];
@@ -9,6 +9,9 @@ interface PlanificacionTabProps {
   setSelectedUnit: (id: string) => void;
   setActivityForm: React.Dispatch<React.SetStateAction<any>>;
   setShowActivityModal: (val: boolean) => void;
+  selectedGroup: string;
+  setSelectedGroup: (val: string) => void;
+  grupos: Grupo[];
 }
 
 export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
@@ -19,6 +22,9 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
   setSelectedUnit,
   setActivityForm,
   setShowActivityModal,
+  selectedGroup,
+  setSelectedGroup,
+  grupos,
 }) => {
   return (
     <div className="space-y-6">
@@ -27,15 +33,28 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
           <h2 className="font-headline text-xl font-bold text-on-surface">Planificación de Actividades</h2>
           <p className="text-xs text-on-surface-variant mt-1">Gestiona unidades didácticas y asigna tareas.</p>
         </div>
-        <button
-          onClick={() => {
-            setUnitForm({ id: "", titulo: "", resumen: "", ambito: "Relaciones lógico-matemáticas", objetivos_generales: "", objetivos_aprendizaje: "", destrezas: "", semanas_previstas: 1, estado: "borrador" });
-            setShowUnitModal(true);
-          }}
-          className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer"
-        >
-          + Nueva Unidad Didáctica
-        </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <select
+            value={selectedGroup}
+            onChange={(e) => setSelectedGroup(e.target.value)}
+            className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[220px] cursor-pointer"
+          >
+            {grupos.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.nombre}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={() => {
+              setUnitForm({ id: "", titulo: "", resumen: "", ambito: "Relaciones lógico-matemáticas", objetivos_generales: "", objetivos_aprendizaje: "", destrezas: "", semanas_previstas: 1, estado: "borrador", grupo_id: selectedGroup });
+              setShowUnitModal(true);
+            }}
+            className="py-2.5 px-4 bg-primary hover:brightness-110 text-on-primary font-bold text-xs rounded-xl shadow-lg shadow-primary/20 transition-all cursor-pointer shrink-0"
+          >
+            + Nueva Unidad Didáctica
+          </button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -94,7 +113,8 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
                     objetivos_aprendizaje: unit.objetivos_aprendizaje || "",
                     destrezas: unit.destrezas || "",
                     semanas_previstas: unit.semanas_previstas,
-                    estado: unit.estado
+                    estado: unit.estado,
+                    grupo_id: unit.grupo_id
                   });
                   setShowUnitModal(true);
                 }}
@@ -111,7 +131,7 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
               <button
                 onClick={() => {
                   setSelectedUnit(unit.id);
-                  setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [] });
+                  setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [], fecha_limite: "" });
                   setShowActivityModal(true);
                 }}
                 className="py-2 px-3 bg-primary hover:brightness-110 text-on-primary rounded-xl text-xs font-bold transition-all cursor-pointer"

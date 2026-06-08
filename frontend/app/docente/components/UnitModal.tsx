@@ -6,6 +6,7 @@ interface UnitModalProps {
   unitForm: any;
   setUnitForm: React.Dispatch<React.SetStateAction<any>>;
   handleSaveUnit: (e: React.FormEvent) => void;
+  grupos: any[];
 }
 
 export const UnitModal: React.FC<UnitModalProps> = ({
@@ -14,6 +15,7 @@ export const UnitModal: React.FC<UnitModalProps> = ({
   unitForm,
   setUnitForm,
   handleSaveUnit,
+  grupos,
 }) => {
   if (!showUnitModal) return null;
 
@@ -34,6 +36,23 @@ export const UnitModal: React.FC<UnitModalProps> = ({
 
         <form onSubmit={handleSaveUnit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div className="space-y-1 md:col-span-2">
+              <label className="text-xs font-bold text-on-surface-variant block">Grupo / Aula Destinataria</label>
+              <select
+                required
+                value={unitForm.grupo_id || ""}
+                onChange={(e) => setUnitForm({ ...unitForm, grupo_id: e.target.value })}
+                className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary h-[38px] cursor-pointer"
+              >
+                <option value="" disabled>Seleccione un grupo...</option>
+                {grupos.map((g: any) => (
+                  <option key={g.id} value={g.id}>
+                    {g.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="space-y-1">
               <label className="text-xs font-bold text-on-surface-variant block">Título de la Unidad</label>

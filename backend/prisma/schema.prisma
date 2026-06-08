@@ -43,7 +43,6 @@ model perfil_docentes {
   evaluaciones_criterio    evaluaciones_criterio[]
   fichas_monitoreo         fichas_monitoreo[]
   grupos                   grupos[]
-  unidades_didacticas      unidades_didacticas[]
 }
 
 model perfil_familias {
@@ -74,15 +73,16 @@ model configuraciones_sistema {
 }
 
 model grupos {
-  id                  String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  nombre              String          @db.VarChar(100)
-  periodo_academico   String          @db.VarChar(50)
-  docente_id          String          @db.Uuid
-  activo              Boolean         @default(true)
-  fecha_creacion      DateTime?       @default(now()) @db.Timestamptz(6)
-  fecha_actualizacion DateTime?       @default(now()) @db.Timestamptz(6)
-  perfil_docentes     perfil_docentes @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  nombre              String                @db.VarChar(100)
+  periodo_academico   String                @db.VarChar(50)
+  docente_id          String                @db.Uuid
+  activo              Boolean               @default(true)
+  fecha_creacion      DateTime?             @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime?             @default(now()) @db.Timestamptz(6)
+  perfil_docentes     perfil_docentes       @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
   estudiantes         estudiantes[]
+  unidades_didacticas unidades_didacticas[]
 }
 
 model estudiantes {
@@ -125,14 +125,14 @@ model unidades_didacticas {
   objetivos_aprendizaje    String?
   destrezas                String?
   semanas_previstas        Int                        @default(1)
-  docente_id               String                     @db.Uuid
+  grupo_id                 String                     @db.Uuid
   estado                   estado_unidad              @default(borrador)
   fecha_creacion           DateTime?                  @default(now()) @db.Timestamptz(6)
   fecha_actualizacion      DateTime?                  @default(now()) @db.Timestamptz(6)
   actividades              actividades[]
   autoevaluaciones_docente autoevaluaciones_docente[]
   evaluaciones_criterio    evaluaciones_criterio[]
-  perfil_docentes          perfil_docentes            @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  grupos                   grupos                     @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
 }
 
 model actividades {

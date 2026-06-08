@@ -243,7 +243,7 @@ CREATE TABLE metricas_sesion (
 CREATE TABLE detalles_metricas_sesion (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     metrica_sesion_id UUID NOT NULL REFERENCES metricas_sesion(id) ON DELETE CASCADE,
-    duracion_sesion INTERVAL NOT NULL,               
+    duracion_sesion VARCHAR(50) NOT NULL,               
     intentos_por_elemento INTEGER NOT NULL,          
     tasa_acierto DOUBLE PRECISION NOT NULL,          
     secuencia_decisiones JSONB NOT NULL,             

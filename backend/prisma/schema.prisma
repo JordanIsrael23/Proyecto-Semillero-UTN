@@ -14,21 +14,21 @@ model roles {
 }
 
 model usuarios {
-  id                  String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  id                  String           @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   rol_id              Int
-  cedula              String            @unique @db.VarChar(10)
-  email               String            @unique @db.VarChar(255)
-  password_hash       String            @db.VarChar(255)
-  nombre              String            @db.VarChar(100)
-  apellido            String            @db.VarChar(100)
-  telefono            String?           @db.VarChar(20)
-  activo              Boolean           @default(true)
-  fecha_creacion      DateTime?         @default(now()) @db.Timestamptz(6)
-  fecha_actualizacion DateTime?         @default(now()) @db.Timestamptz(6)
-  roles               roles             @relation(fields: [rol_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  cedula              String           @unique @db.VarChar(10)
+  email               String           @unique @db.VarChar(255)
+  password_hash       String           @db.VarChar(255)
+  nombre              String           @db.VarChar(100)
+  apellido            String           @db.VarChar(100)
+  telefono            String?          @db.VarChar(20)
+  activo              Boolean          @default(true)
+  fecha_creacion      DateTime?        @default(now()) @db.Timestamptz(6)
+  fecha_actualizacion DateTime?        @default(now()) @db.Timestamptz(6)
+  auditoria_logs      auditoria_logs[]
   perfil_docentes     perfil_docentes?
   perfil_familias     perfil_familias?
-  auditoria_logs      auditoria_logs[]
+  roles               roles            @relation(fields: [rol_id], references: [id], onUpdate: NoAction)
 
   @@index([rol_id], map: "idx_usuarios_rol")
   @@index([email], map: "idx_usuarios_email")
@@ -36,33 +36,33 @@ model usuarios {
 
 model perfil_docentes {
   usuario_id               String                     @id @db.Uuid
-  especialidad             String                     @default("Educación Inicial") @db.VarChar(100)
+  especialidad             String?                    @default("Educación Inicial") @db.VarChar(100)
   fecha_actualizacion      DateTime?                  @default(now()) @db.Timestamptz(6)
-  usuarios                 usuarios                   @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   autoevaluaciones_docente autoevaluaciones_docente[]
   evaluaciones_criterio    evaluaciones_criterio[]
   fichas_monitoreo         fichas_monitoreo[]
   grupos                   grupos[]
+  usuarios                 usuarios                   @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model perfil_familias {
   usuario_id                   String                         @id @db.Uuid
   direccion                    String?                        @db.VarChar(255)
   fecha_actualizacion          DateTime?                      @default(now()) @db.Timestamptz(6)
-  usuarios                     usuarios                       @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  familia_estudiante           familia_estudiante[]
   actividades_casa_seguimiento actividades_casa_seguimiento[]
+  familia_estudiante           familia_estudiante[]
+  usuarios                     usuarios                       @relation(fields: [usuario_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model auditoria_logs {
-  id              BigInt    @id @default(autoincrement())
-  usuario_id      String?   @db.Uuid
-  accion          String    @db.VarChar(100)
-  tabla_afectada  String?   @db.VarChar(100)
-  registro_id     String?   @db.VarChar(100)
+  id               BigInt    @id @default(autoincrement())
+  usuario_id       String?   @db.Uuid
+  accion           String    @db.VarChar(100)
+  tabla_afectada   String?   @db.VarChar(100)
+  registro_id      String?   @db.VarChar(100)
   detalles_valores Json?
-  fecha_evento    DateTime? @default(now()) @db.Timestamptz(6)
-  usuarios        usuarios? @relation(fields: [usuario_id], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  fecha_evento     DateTime? @default(now()) @db.Timestamptz(6)
+  usuarios         usuarios? @relation(fields: [usuario_id], references: [id], onUpdate: NoAction)
 }
 
 model configuraciones_sistema {
@@ -80,8 +80,8 @@ model grupos {
   activo              Boolean               @default(true)
   fecha_creacion      DateTime?             @default(now()) @db.Timestamptz(6)
   fecha_actualizacion DateTime?             @default(now()) @db.Timestamptz(6)
-  perfil_docentes     perfil_docentes       @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
   estudiantes         estudiantes[]
+  perfil_docentes     perfil_docentes       @relation(fields: [docente_id], references: [usuario_id], onUpdate: NoAction)
   unidades_didacticas unidades_didacticas[]
 }
 
@@ -96,7 +96,7 @@ model estudiantes {
   fecha_creacion               DateTime?                      @default(now()) @db.Timestamptz(6)
   fecha_actualizacion          DateTime?                      @default(now()) @db.Timestamptz(6)
   actividades_casa_seguimiento actividades_casa_seguimiento[]
-  grupos                       grupos                         @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  grupos                       grupos                         @relation(fields: [grupo_id], references: [id], onUpdate: NoAction)
   evaluaciones_criterio        evaluaciones_criterio[]
   familia_estudiante           familia_estudiante[]
   fichas_monitoreo             fichas_monitoreo[]
@@ -132,7 +132,7 @@ model unidades_didacticas {
   actividades              actividades[]
   autoevaluaciones_docente autoevaluaciones_docente[]
   evaluaciones_criterio    evaluaciones_criterio[]
-  grupos                   grupos                     @relation(fields: [grupo_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  grupos                   grupos                     @relation(fields: [grupo_id], references: [id], onUpdate: NoAction)
 }
 
 model actividades {
@@ -153,19 +153,19 @@ model actividades {
 }
 
 model actividades_casa_seguimiento {
-  id                          String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  actividad_id                String          @db.Uuid
-  estudiante_id               String          @db.Uuid
-  familia_id                  String          @db.Uuid
-  realizada                   Boolean         @default(false)
-  fecha_realizacion           DateTime?       @db.Timestamptz(6)
-  desempeno_hijo_percepcion   Int?
-  comentario_familia          String?
-  nota_docente                Float?
-  fecha_creacion              DateTime?       @default(now()) @db.Timestamptz(6)
-  actividades                 actividades     @relation(fields: [actividad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  estudiantes                 estudiantes     @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  perfil_familias             perfil_familias @relation(fields: [familia_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  id                        String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  actividad_id              String          @db.Uuid
+  estudiante_id             String          @db.Uuid
+  familia_id                String          @db.Uuid
+  realizada                 Boolean         @default(false)
+  fecha_realizacion         DateTime?       @db.Timestamptz(6)
+  desempeno_hijo_percepcion Int?
+  comentario_familia        String?
+  nota_docente              Float?
+  fecha_creacion            DateTime?       @default(now()) @db.Timestamptz(6)
+  actividades               actividades     @relation(fields: [actividad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  estudiantes               estudiantes     @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  perfil_familias           perfil_familias @relation(fields: [familia_id], references: [usuario_id], onUpdate: NoAction)
 }
 
 model criterios_evaluacion {
@@ -200,13 +200,11 @@ model evaluaciones_criterio {
   activa               Boolean              @default(true)
   es_publicada_familia Boolean              @default(true)
   fecha_creacion       DateTime?            @default(now()) @db.Timestamptz(6)
-  criterios_evaluacion criterios_evaluacion @relation(fields: [criterio_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  perfil_docentes      perfil_docentes      @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
-  estudiantes          estudiantes          @relation(fields: [estudiante_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  niveles_logro        niveles_logro        @relation(fields: [nivel_logro_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  unidades_didacticas  unidades_didacticas  @relation(fields: [unidad_didactica_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
-
-  @@index([unidad_didactica_id], map: "idx_evaluaciones_criterio_unidad")
+  criterios_evaluacion criterios_evaluacion @relation(fields: [criterio_id], references: [id], onUpdate: NoAction)
+  perfil_docentes      perfil_docentes      @relation(fields: [docente_id], references: [usuario_id], onUpdate: NoAction)
+  estudiantes          estudiantes          @relation(fields: [estudiante_id], references: [id], onUpdate: NoAction)
+  niveles_logro        niveles_logro        @relation(fields: [nivel_logro_id], references: [id], onUpdate: NoAction)
+  unidades_didacticas  unidades_didacticas  @relation(fields: [unidad_didactica_id], references: [id], onUpdate: NoAction)
 }
 
 model fichas_monitoreo {
@@ -221,8 +219,8 @@ model fichas_monitoreo {
   observaciones           String?
   acciones_apoyo          String?
   fecha_monitoreo         DateTime?       @default(now()) @db.Timestamptz(6)
-  perfil_docentes         perfil_docentes @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
-  estudiantes             estudiantes     @relation(fields: [estudiante_id], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  perfil_docentes         perfil_docentes @relation(fields: [docente_id], references: [usuario_id], onUpdate: NoAction)
+  estudiantes             estudiantes     @relation(fields: [estudiante_id], references: [id], onUpdate: NoAction)
 }
 
 model autoevaluaciones_docente {
@@ -231,7 +229,7 @@ model autoevaluaciones_docente {
   unidad_didactica_id       String?                     @db.Uuid
   reflexion                 String?
   fecha_autoevaluacion      DateTime                    @default(dbgenerated("CURRENT_DATE")) @db.Date
-  perfil_docentes           perfil_docentes             @relation(fields: [docente_id], references: [usuario_id], onDelete: Restrict, onUpdate: NoAction)
+  perfil_docentes           perfil_docentes             @relation(fields: [docente_id], references: [usuario_id], onUpdate: NoAction)
   unidades_didacticas       unidades_didacticas?        @relation(fields: [unidad_didactica_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   respuestas_autoevaluacion respuestas_autoevaluacion[]
 }
@@ -247,14 +245,14 @@ model respuestas_autoevaluacion {
 }
 
 model metricas_sesion {
-  id                        String                      @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  actividad_id              String                      @db.Uuid
-  estudiante_id             String                      @db.Uuid
-  app_criterio              criterio_didactico
-  fecha_sesion              DateTime?                   @default(now()) @db.Timestamptz(6)
-  actividades               actividades                 @relation(fields: [actividad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  estudiantes               estudiantes                 @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  detalles_metricas_sesion  detalles_metricas_sesion[]
+  id                       String                     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  actividad_id             String                     @db.Uuid
+  estudiante_id            String                     @db.Uuid
+  app_criterio             criterio_didactico
+  fecha_sesion             DateTime?                  @default(now()) @db.Timestamptz(6)
+  detalles_metricas_sesion detalles_metricas_sesion[]
+  actividades              actividades                @relation(fields: [actividad_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  estudiantes              estudiantes                @relation(fields: [estudiante_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([estudiante_id, app_criterio], map: "idx_metricas_estudiante_app")
 }
@@ -262,12 +260,12 @@ model metricas_sesion {
 model detalles_metricas_sesion {
   id                    String          @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   metrica_sesion_id     String          @db.Uuid
-  duracion_sesion       String
+  duracion_sesion       String          @db.VarChar(50)
   intentos_por_elemento Int
   tasa_acierto          Float
   secuencia_decisiones  Json
   uso_ayudas            Int             @default(0)
-  nivel_completado      Int
+  nivel_dificultad      Int
   abandono              Boolean         @default(false)
   metricas_sesion       metricas_sesion @relation(fields: [metrica_sesion_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }

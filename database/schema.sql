@@ -280,7 +280,8 @@ INSERT INTO configuraciones_sistema (clave, valor, descripcion) VALUES
 INSERT INTO usuarios (id, rol_id, cedula, email, password_hash, nombre, apellido, telefono) VALUES
 ('a0000000-0000-0000-0000-000000000001', 1, '1003612345', 'admin.utn@utn.edu.ec', '$2b$10$ABxZdC/RFqQ2Ucu33GlEnu9eA5.xhWnR9/Cm35ftC5N.3KXt53fLO', 'Carlos', 'Andrade Vaca', '0990000000'),
 ('a0000000-0000-0000-0000-000000000002', 2, '1004954321', 'mrea@utn.edu.ec', '$2b$10$ABxZdC/RFqQ2Ucu33GlEnu9eA5.xhWnR9/Cm35ftC5N.3KXt53fLO', 'Margarita', 'Reascos', '0991234567'),
-('a0000000-0000-0000-0000-000000000003', 3, '1725619876', 'padre.demo@gmail.com', '$2b$10$ABxZdC/RFqQ2Ucu33GlEnu9eA5.xhWnR9/Cm35ftC5N.3KXt53fLO', 'Juan', 'Pérez Gómez', '0987654321');
+('a0000000-0000-0000-0000-000000000003', 3, '1725619876', 'padre.demo@gmail.com', '$2b$10$ABxZdC/RFqQ2Ucu33GlEnu9eA5.xhWnR9/Cm35ftC5N.3KXt53fLO', 'Juan', 'Pérez Gómez', '0987654321'),
+('a0000000-0000-0000-0000-000000000009', 1, '1725619884', 'kaiser@gmail.com', '$2b$10$AgAqVbsxIKFs.mBN3df6zOxZNsxiIBnGnyPjF2Co.gdyyRXP/XJea', 'Kaiser', 'Admin', '0999999999');
 
 -- Crear Perfiles Vinculados
 INSERT INTO perfil_docentes (usuario_id, especialidad) VALUES 

@@ -25,6 +25,8 @@ export default function LoginPage() {
           router.replace("/docente");
         } else if (session.user?.rol === "familia") {
           router.replace("/familia");
+        } else if (session.user?.rol === "admin") {
+          router.replace("/admin");
         }
       } catch {
         localStorage.removeItem("user_session");
@@ -55,6 +57,8 @@ export default function LoginPage() {
         router.replace("/docente");
       } else if (data.user?.rol === "familia") {
         router.replace("/familia");
+      } else if (data.user?.rol === "admin") {
+        router.replace("/admin");
       } else {
         setError("Rol no reconocido en el sistema.");
         localStorage.removeItem("user_session");

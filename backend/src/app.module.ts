@@ -11,6 +11,7 @@ import { MonitoreoModule } from './monitoreo/monitoreo.module';
 import { AutoevaluacionesModule } from './autoevaluaciones/autoevaluaciones.module';
 import { JuegosModule } from './Juegos/juegos.module';
 import { AdminModule } from './admin/admin.module';
+import { AppController } from './app.controller';
 
 @Module({
   imports: [
@@ -27,5 +28,6 @@ import { AdminModule } from './admin/admin.module';
     JuegosModule,
     AdminModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}

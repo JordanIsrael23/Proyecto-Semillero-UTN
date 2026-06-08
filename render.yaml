@@ -1,0 +1,26 @@
+services:
+  # 1. Servicio Web para el Backend (NestJS + Prisma)
+  - type: web
+    name: semillero-utn-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm run start:prod
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: PORT
+        value: 4000
+
+  # 2. Servicio Web para el Frontend (Next.js)
+  - type: web
+    name: semillero-utn-frontend
+    runtime: node
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_BACKEND_URL
+        sync: false

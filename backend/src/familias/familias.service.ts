@@ -141,6 +141,7 @@ export class FamiliasService {
         tipo: 'casa',
         unidades_didacticas: {
           estado: 'activo',
+          grupo_id: estudiante.grupo_id,
         },
       },
       include: {
@@ -159,6 +160,7 @@ export class FamiliasService {
         titulo: act.titulo,
         descripcion: act.descripcion,
         recursos_enlaces: act.recursos_enlaces,
+        fecha_limite: act.fecha_limite,
         unidad_titulo: act.unidades_didacticas.titulo,
         realizada: seg ? seg.realizada : false,
         fecha_realizacion: seg ? seg.fecha_realizacion : null,

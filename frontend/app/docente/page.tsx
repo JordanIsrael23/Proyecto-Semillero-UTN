@@ -116,14 +116,16 @@ export default function DocenteDashboard() {
     objetivos_aprendizaje: "",
     destrezas: "",
     semanas_previstas: 1,
-    estado: "borrador"
+    estado: "borrador",
+    grupo_id: ""
   });
 
   const [activityForm, setActivityForm] = useState({
     titulo: "",
     descripcion: "",
     tipo: "casa" as "clase" | "casa",
-    recursos: [] as { titulo: string; url: string }[]
+    recursos: [] as { titulo: string; url: string }[],
+    fecha_limite: ""
   });
 
   useEffect(() => {
@@ -220,20 +222,9 @@ export default function DocenteDashboard() {
         }
       })
       .catch((e) => console.error("Error al cargar grupos:", e));
-
-    // Unidades del docente
-    fetch(`${BACKEND_URL}/docente/unidades`, { headers: { "x-user-id": session.user.id } })
-      .then((res) => res.json())
-      .then((data) => {
-        setUnidades(data);
-        if (data.length > 0) {
-          setSelectedUnit(data[0].id);
-        }
-      })
-      .catch((e) => console.error("Error al cargar unidades:", e));
   }, [session]);
 
-  // 3. Cargar estudiantes cuando cambia el grupo seleccionado
+  // 3. Cargar estudiantes y datos cuando cambia el grupo seleccionado
   useEffect(() => {
     if (!selectedGroup) return;
     fetch(`${BACKEND_URL}/grupos/${selectedGroup}/estudiantes`)
@@ -253,7 +244,20 @@ export default function DocenteDashboard() {
       .then((res) => res.json())
       .then((data) => setMetricasGrupales(data))
       .catch((e) => console.error("Error al cargar consolidados:", e));
-  }, [selectedGroup]);
+
+    // Cargar unidades del grupo seleccionado
+    fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } })
+      .then((res) => res.json())
+      .then((data) => {
+        setUnidades(data);
+        if (data && data.length > 0) {
+          setSelectedUnit(data[0].id);
+        } else {
+          setSelectedUnit("");
+        }
+      })
+      .catch((e) => console.error("Error al cargar unidades del grupo:", e));
+  }, [selectedGroup, session]);
 
   // 4. Cargar ficha de monitoreo del alumno seleccionado
   useEffect(() => {
@@ -653,11 +657,12 @@ export default function DocenteDashboard() {
         objetivos_aprendizaje: "",
         destrezas: "",
         semanas_previstas: 1,
-        estado: "borrador"
+        estado: "borrador",
+        grupo_id: ""
       });
 
       // Recargar unidades
-      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades`, { headers: { "x-user-id": session?.user.id || "" } });
+      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
       const unitsData = await unitsRes.json();
       setUnidades(unitsData);
     } catch (err: any) {
@@ -674,7 +679,7 @@ export default function DocenteDashboard() {
       });
       if (!res.ok) throw new Error("No se pudo clonar la unidad.");
 
-      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades`, { headers: { "x-user-id": session?.user.id || "" } });
+      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
       const unitsData = await unitsRes.json();
       setUnidades(unitsData);
       setFeedback({ message: "Unidad clonada como borrador.", type: "success" });
@@ -695,18 +700,19 @@ export default function DocenteDashboard() {
           titulo: activityForm.titulo,
           descripcion: activityForm.descripcion,
           tipo: activityForm.tipo,
-          recursos_enlaces: recursosToSend
+          recursos_enlaces: recursosToSend,
+          fecha_limite: activityForm.fecha_limite ? new Date(activityForm.fecha_limite).toISOString() : null
         })
       });
 
       if (!res.ok) throw new Error("Error al crear actividad.");
 
       setShowActivityModal(false);
-      setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [] });
+      setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [], fecha_limite: "" });
       setFeedback({ message: "Actividad añadida con éxito.", type: "success" });
 
       // Recargar unidades
-      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades`, { headers: { "x-user-id": session?.user.id || "" } });
+      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
       const unitsData = await unitsRes.json();
       setUnidades(unitsData);
     } catch (err: any) {
@@ -1057,6 +1063,9 @@ ${data.tareasCasa.length === 0
             setSelectedUnit={setSelectedUnit}
             setActivityForm={setActivityForm}
             setShowActivityModal={setShowActivityModal}
+            selectedGroup={selectedGroup}
+            setSelectedGroup={setSelectedGroup}
+            grupos={grupos}
           />
         )}
 
@@ -1153,6 +1162,7 @@ ${data.tareasCasa.length === 0
         unitForm={unitForm}
         setUnitForm={setUnitForm}
         handleSaveUnit={handleSaveUnit}
+        grupos={grupos}
       />
 
       {/* Modal Agregar Actividad */}

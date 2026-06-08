@@ -130,7 +130,7 @@ CREATE TABLE unidades_didacticas (
     objetivos_aprendizaje TEXT,
     destrezas TEXT,
     semanas_previstas INTEGER NOT NULL DEFAULT 1,
-    docente_id UUID NOT NULL REFERENCES perfil_docentes(usuario_id) ON DELETE RESTRICT,
+    grupo_id UUID NOT NULL REFERENCES grupos(id) ON DELETE RESTRICT,
     estado ESTADO_UNIDAD NOT NULL DEFAULT 'borrador',
     fecha_creacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     fecha_actualizacion TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -278,9 +278,9 @@ INSERT INTO configuraciones_sistema (clave, valor, descripcion) VALUES
 
 -- Insertar Usuarios con Cédulas Ecuatorianas Válidas (10 dígitos con campos de Nombre y Apellido separados)
 INSERT INTO usuarios (id, rol_id, cedula, email, password_hash, nombre, apellido, telefono) VALUES
-('a0000000-0000-0000-0000-000000000001', 1, '1003612345', 'admin.utn@utn.edu.ec', '$2b$10$sbwmYbQcTq4ygko89s0CX.', 'Carlos', 'Andrade Vaca', '0990000000'),
-('a0000000-0000-0000-0000-000000000002', 2, '1004954321', 'mrea@utn.edu.ec', '$2b$10$sbwmYbQcTq4ygko89s0CX.', 'Margarita', 'Reascos', '0991234567'),
-('a0000000-0000-0000-0000-000000000003', 3, '1725619876', 'padre.demo@gmail.com', '$2b$10$sbwmYbQcTq4ygko89s0CX.', 'Juan', 'Pérez Gómez', '0987654321');
+('a0000000-0000-0000-0000-000000000001', 1, '1003612345', 'admin.utn@utn.edu.ec', '$2b$10$ABxZdC/RFqQ2Ucu33GlEnu9eA5.xhWnR9/Cm35ftC5N.3KXt53fLO', 'Carlos', 'Andrade Vaca', '0990000000'),
+('a0000000-0000-0000-0000-000000000002', 2, '1004954321', 'mrea@utn.edu.ec', '$2b$10$ABxZdC/RFqQ2Ucu33GlEnu9eA5.xhWnR9/Cm35ftC5N.3KXt53fLO', 'Margarita', 'Reascos', '0991234567'),
+('a0000000-0000-0000-0000-000000000003', 3, '1725619876', 'padre.demo@gmail.com', '$2b$10$ABxZdC/RFqQ2Ucu33GlEnu9eA5.xhWnR9/Cm35ftC5N.3KXt53fLO', 'Juan', 'Pérez Gómez', '0987654321');
 
 -- Crear Perfiles Vinculados
 INSERT INTO perfil_docentes (usuario_id, especialidad) VALUES 
@@ -302,8 +302,8 @@ INSERT INTO familia_estudiante (familia_id, estudiante_id, parentesco, es_repres
 ('a0000000-0000-0000-0000-000000000003', 'e5555555-5555-5555-5555-555555555555', 'Padre', true);
 
 -- Insertar Planificación Curricular y Actividad con Fecha Límite
-INSERT INTO unidades_didacticas (id, titulo, resumen, ambito, objetivos_generales, docente_id, estado) VALUES
-('c7777777-7777-7777-7777-777777777777', 'Unidad 1: Autocuidado y Personas Seguras', 'Comprensión y clasificación del entorno protector del menor.', 'Convivencia y Entorno', 'Desarrollar el criterio de clasificación en base a personas seguras y de riesgo.', 'a0000000-0000-0000-0000-000000000002', 'activo');
+INSERT INTO unidades_didacticas (id, titulo, resumen, ambito, objetivos_generales, grupo_id, estado) VALUES
+('c7777777-7777-7777-7777-777777777777', 'Unidad 1: Autocuidado y Personas Seguras', 'Comprensión y clasificación del entorno protector del menor.', 'Convivencia y Entorno', 'Desarrollar el criterio de clasificación en base a personas seguras y de riesgo.', 'b4444444-4444-4444-4444-444444444444', 'activo');
 
 INSERT INTO actividades (id, unidad_id, titulo, descripcion, tipo, recursos_enlaces, fecha_limite) VALUES
 ('ac222222-2222-2222-2222-222222222222', 'c7777777-7777-7777-7777-777777777777', 'App 2 — ¿Dónde va? (Clasificar)', 'Identificar en la App móvil las personas que representan entornos seguros.', 'casa', '[{"titulo": "Vídeo Instructivo", "url": "https://www.youtube.com/watch?v=demo123"}]'::jsonb, '2026-06-25 18:00:00-05');

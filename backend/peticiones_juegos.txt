@@ -3,101 +3,13 @@
   Proyecto Semilleros UTN · Backend
 ================================================================================
 
-ÍNDICE
-  1. Descripción general
-  2. Flujo de integración
-  3. Autenticación y seguridad
-  4. Endpoint 1: Iniciar sesión de juego (Plataforma Docente)
-  5. Endpoint 2: Registrar resultados (Aplicación de Juego)
-  6. Referencia de campos
-  7. Códigos de error comunes
-
-================================================================================
-1. DESCRIPCIÓN GENERAL
-================================================================================
-
-Esta API permite la comunicación entre la plataforma docente y las aplicaciones
-de juegos educativos externos (Caracterizar, Clasificar, Seriar, Rompecabezas).
-
-Base URL: http://localhost:4000
-
-La integración funciona en dos pasos:
-  • La plataforma docente INICIA una sesión de juego y obtiene un token temporal.
-  • La app de juego RECIBE ese token y, al finalizar la partida, ENVÍA los
-    resultados de vuelta a la API.
-
-================================================================================
-2. FLUJO DE INTEGRACIÓN
-================================================================================
-
-  ┌──────────────┐                    ┌──────────┐                    ┌──────────────┐
-  │  Plataforma  │                    │  Backend │                    │  App Juego   │
-  │   Docente    │                    │   API    │                    │  (externa)   │
-  └──────┬───────┘                    └────┬─────┘                    └──────┬───────┘
-         │                                 │                                 │
-         │  1. POST /api/juegos/sesion     │                                 │
-         │  (con JWT del docente)          │                                 │
-         │────────────────────────────────>│                                 │
-         │                                 │                                 │
-         │  Respuesta: sessionToken,       │                                 │
-         │  metricaSesionId, nombre,       │                                 │
-         │  criterio, titulo, descripcion  │                                 │
-         │<────────────────────────────────│                                 │
-         │                                 │                                 │
-         │  2. Lanza el juego pasándole:   │                                 │
-         │     sessionToken +              │                                 │
-         │     metricaSesionId + contexto  │                                 │
-         │────────────────────────────────────────────────────────────────────>
-         │                                 │                                 │
-         │                                 │  3. POST /api/juegos/sesion     │
-         │                                 │     /{metricaSesionId}/detalles │
-         │                                 │  (con sessionToken)             │
-         │                                 │<────────────────────────────────│
-         │                                 │                                 │
-         │                                 │  Respuesta: registro creado     │
-         │                                 │────────────────────────────────>│
-         │                                 │                                 │
-
-================================================================================
-3. AUTENTICACIÓN Y SEGURIDAD
-================================================================================
-
-La API usa DOS tipos de tokens JWT. Cada endpoint requiere uno específico:
-
-  ┌─────────────────────┬─────────────────────────────────────────────────────┐
-  │ Token               │ Descripción                                       │
-  ├─────────────────────┼─────────────────────────────────────────────────────┤
-  │ JWT Docente          │ Se obtiene al hacer login en la plataforma.        │
-  │ (access_token)       │ Válido por 1 hora.                                 │
-  │                     │ Usado SOLO para: POST /api/juegos/sesion           │
-  ├─────────────────────┼─────────────────────────────────────────────────────┤
-  │ Session Token       │ Se genera al iniciar una sesión de juego.          │
-  │ (sessionToken)       │ Válido por 2 horas.                                │
-  │                     │ Usado SOLO para: POST .../detalles                 │
-  │                     │ Es específico para UNA sesión de juego.            │
-  └─────────────────────┴─────────────────────────────────────────────────────┘
-
-  Ambos tokens se envían en el header Authorization:
-    Authorization: Bearer <TOKEN_AQUI>
-
 ================================================================================
 4. ENDPOINT 1: INICIAR SESIÓN DE JUEGO
-   (Lo usa la Plataforma Docente)
 ================================================================================
-
+Esto es lo que nosotros les mandamos a ustedes para que usen
   URL:     POST http://localhost:4000/api/juegos/sesion
-  Auth:    Bearer <JWT_DOCENTE>    (obtenido del login)
+  Auth:    Bearer <JWT>   
 
-  BODY (JSON):
-  {
-    "metricaSesionId": "6a1f9325-af8e-4c5c-8eec-12446a2a45f0"
-  }
-
-  Donde:
-    • metricaSesionId  →  UUID del registro existente en la tabla metricas_sesion.
-                          Este registro debe haberse creado previamente en la BD.
-
-  RESPUESTA EXITOSA (200):
   {
     "sessionToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6...",
     "metricaSesionId": "6a1f9325-af8e-4c5c-8eec-12446a2a45f0",
@@ -108,16 +20,13 @@ La API usa DOS tipos de tokens JWT. Cada endpoint requiere uno específico:
     "descripcionActividad": "Clasifica los objetos por color y forma"
   }
 
-  La plataforma debe pasar TODA esta información a la app de juego.
-  La app de juego necesita al menos: sessionToken y metricaSesionId.
 
 ================================================================================
 5. ENDPOINT 2: REGISTRAR RESULTADOS DEL JUEGO
-   (Lo usa la App de Juego externa)
 ================================================================================
-
+Esto es lo que ustedes nos mandan a nosotros
   URL:     POST http://localhost:4000/api/juegos/sesion/{metricaSesionId}/detalles
-  Auth:    Bearer <SESSION_TOKEN>  (recibido de la plataforma docente)
+  Auth:    Bearer <SESSION_TOKEN>  
 
   Ejemplo de URL real:
     POST http://localhost:4000/api/juegos/sesion/6a1f9325-af8e-4c5c-8eec-12446a2a45f0/detalles

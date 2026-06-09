@@ -105,7 +105,11 @@ export default function DocenteDashboard() {
 
   // Modal de confirmación (reemplaza window.confirm)
   const [confirmModal, setConfirmModal] = useState<{
+    title?: string;
     message: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    variant?: "success" | "error" | "warning" | "info" | "danger";
     onConfirm: () => void;
   } | null>(null);
 
@@ -737,22 +741,58 @@ export default function DocenteDashboard() {
 
   // Eliminar Actividad
   const handleDeleteActivity = async (activityId: string) => {
-    if (!confirm("¿Está seguro de que desea eliminar esta actividad?")) return;
-    try {
-      const res = await fetch(`${BACKEND_URL}/actividades/${activityId}`, {
-        method: "DELETE"
-      });
+    setConfirmModal({
+      title: "Eliminar Actividad",
+      message: "¿Está seguro de que desea eliminar esta actividad?",
+      confirmLabel: "Eliminar",
+      cancelLabel: "Cancelar",
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${BACKEND_URL}/actividades/${activityId}`, {
+            method: "DELETE"
+          });
 
-      if (!res.ok) throw new Error("Error al eliminar la actividad.");
-      setFeedback({ message: "Actividad eliminada con éxito.", type: "success" });
+          if (!res.ok) throw new Error("Error al eliminar la actividad.");
+          setFeedback({ message: "Actividad eliminada con éxito.", type: "success" });
 
-      // Recargar unidades
-      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
-      const unitsData = await unitsRes.json();
-      setUnidades(unitsData);
-    } catch (err: any) {
-      setFeedback({ message: err.message || "Error al eliminar la actividad.", type: "error" });
-    }
+          // Recargar unidades
+          const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
+          const unitsData = await unitsRes.json();
+          setUnidades(unitsData);
+        } catch (err: any) {
+          setFeedback({ message: err.message || "Error al eliminar la actividad.", type: "error" });
+        }
+      }
+    });
+  };
+
+  // Eliminar Unidad Didáctica
+  const handleDeleteUnit = async (unitId: string) => {
+    setConfirmModal({
+      title: "Eliminar Unidad Didáctica",
+      message: "¿Está seguro de que desea eliminar esta unidad didáctica? Se eliminarán también todas sus actividades y evaluaciones registradas.",
+      confirmLabel: "Eliminar",
+      cancelLabel: "Cancelar",
+      variant: "danger",
+      onConfirm: async () => {
+        try {
+          const res = await fetch(`${BACKEND_URL}/unidades/${unitId}`, {
+            method: "DELETE"
+          });
+
+          if (!res.ok) throw new Error("Error al eliminar la unidad didáctica.");
+          setFeedback({ message: "Unidad didáctica eliminada con éxito.", type: "success" });
+
+          // Recargar unidades
+          const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
+          const unitsData = await unitsRes.json();
+          setUnidades(unitsData);
+        } catch (err: any) {
+          setFeedback({ message: err.message || "Error al eliminar la unidad didáctica.", type: "error" });
+        }
+      }
+    });
   };
 
   // Rejilla de evaluaciones
@@ -1103,6 +1143,7 @@ ${data.tareasCasa.length === 0
             grupos={grupos}
             handleDeleteActivity={handleDeleteActivity}
             setIsActivityReadOnly={setIsActivityReadOnly}
+            handleDeleteUnit={handleDeleteUnit}
           />
         )}
 
@@ -1239,12 +1280,15 @@ ${data.tareasCasa.length === 0
       <AppModal
         open={!!confirmModal}
         type="confirm"
-        variant="danger"
-        title="Confirmar acción"
+        variant={confirmModal?.variant ?? "danger"}
+        title={confirmModal?.title ?? "Confirmar acción"}
         message={confirmModal?.message ?? ""}
-        confirmLabel="Sí, dar de baja"
-        cancelLabel="Cancelar"
-        onConfirm={() => confirmModal?.onConfirm()}
+        confirmLabel={confirmModal?.confirmLabel ?? "Sí, dar de baja"}
+        cancelLabel={confirmModal?.cancelLabel ?? "Cancelar"}
+        onConfirm={() => {
+          if (confirmModal?.onConfirm) confirmModal.onConfirm();
+          setConfirmModal(null);
+        }}
         onClose={() => setConfirmModal(null)}
       />
 

@@ -10,7 +10,15 @@ interface AlumnosTabProps {
   setShowStudentModal: (val: boolean) => void;
   handleOpenGradeTasksModal: (est: Estudiante) => void;
   handleDownloadInforme: (estId: string) => void;
-  setConfirmModal: (val: { message: string; onConfirm: () => void } | null) => void;
+  setConfirmModal: (val: {
+    title?: string;
+    message: string;
+    confirmLabel?: string;
+    cancelLabel?: string;
+    variant?: "success" | "error" | "warning" | "info" | "danger";
+    onConfirm: () => void;
+  } | null) => void;
+
   setFeedback: (val: { message: string; type: "success" | "error" } | null) => void;
   BACKEND_URL: string;
   setEstudiantes: React.Dispatch<React.SetStateAction<Estudiante[]>>;

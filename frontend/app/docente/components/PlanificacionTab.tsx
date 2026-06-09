@@ -12,6 +12,8 @@ interface PlanificacionTabProps {
   selectedGroup: string;
   setSelectedGroup: (val: string) => void;
   grupos: Grupo[];
+  handleDeleteActivity: (id: string) => void;
+  setIsActivityReadOnly: (val: boolean) => void;
 }
 
 export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
@@ -25,6 +27,8 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
   selectedGroup,
   setSelectedGroup,
   grupos,
+  handleDeleteActivity,
+  setIsActivityReadOnly,
 }) => {
   return (
     <div className="space-y-6">
@@ -86,14 +90,66 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
               {unit.actividades && unit.actividades.length > 0 && (
                 <div className="border-t border-outline-variant/20 pt-4 mt-4">
                   <p className="text-xs font-bold text-on-surface-variant/80 uppercase tracking-wider mb-2">Actividades vinculadas:</p>
-                  <ul className="space-y-1.5 text-xs text-on-surface-variant">
+                  <ul className="space-y-2 text-xs text-on-surface-variant">
                     {unit.actividades.map((act) => (
-                      <li key={act.id} className="flex items-center gap-2">
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${act.tipo === "casa" ? "bg-highlight-orange/10 text-highlight-orange" : "bg-primary/10 text-primary"
-                          }`}>
-                          {act.tipo}
-                        </span>
-                        <span className="font-semibold">{act.titulo}</span>
+                      <li key={act.id} className="flex items-center justify-between bg-surface-container-lowest/50 hover:bg-surface-container-lowest p-2 rounded-xl border border-outline-variant/10 group transition-all">
+                        <div className="flex items-center gap-2">
+                          <span className={`px-1.5 py-0.5 rounded text-[10px] font-extrabold uppercase ${act.tipo === "casa" ? "bg-highlight-orange/10 text-highlight-orange" : "bg-primary/10 text-primary"
+                            }`}>
+                            {act.tipo}
+                          </span>
+                          <span className="font-semibold">{act.titulo}</span>
+                        </div>
+                        <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            title="Ver detalles"
+                            onClick={() => {
+                              setSelectedUnit(unit.id);
+                              setActivityForm({
+                                id: act.id,
+                                titulo: act.titulo,
+                                descripcion: act.descripcion || "",
+                                tipo: act.tipo,
+                                recursos: act.recursos_enlaces || [],
+                                fecha_limite: act.fecha_limite ? new Date(act.fecha_limite).toISOString().substring(0, 16) : ""
+                              });
+                              setIsActivityReadOnly(true);
+                              setShowActivityModal(true);
+                            }}
+                            className="p-1 hover:bg-primary/10 text-primary hover:text-primary rounded cursor-pointer transition-colors"
+                          >
+                            👁️
+                          </button>
+                          <button
+                            type="button"
+                            title="Editar actividad"
+                            onClick={() => {
+                              setSelectedUnit(unit.id);
+                              setActivityForm({
+                                id: act.id,
+                                titulo: act.titulo,
+                                descripcion: act.descripcion || "",
+                                tipo: act.tipo,
+                                recursos: act.recursos_enlaces || [],
+                                fecha_limite: act.fecha_limite ? new Date(act.fecha_limite).toISOString().substring(0, 16) : ""
+                              });
+                              setIsActivityReadOnly(false);
+                              setShowActivityModal(true);
+                            }}
+                            className="p-1 hover:bg-primary/10 text-primary hover:text-primary rounded cursor-pointer transition-colors"
+                          >
+                            ✏️
+                          </button>
+                          <button
+                            type="button"
+                            title="Borrar actividad"
+                            onClick={() => handleDeleteActivity(act.id)}
+                            className="p-1 hover:bg-red-500/10 text-red-400 hover:text-red-300 rounded cursor-pointer transition-colors"
+                          >
+                            🗑️
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -132,6 +188,7 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
                 onClick={() => {
                   setSelectedUnit(unit.id);
                   setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [], fecha_limite: "" });
+                  setIsActivityReadOnly(false);
                   setShowActivityModal(true);
                 }}
                 className="py-2 px-3 bg-primary hover:brightness-110 text-on-primary rounded-xl text-xs font-bold transition-all cursor-pointer"

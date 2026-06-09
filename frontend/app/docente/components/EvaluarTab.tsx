@@ -1,5 +1,4 @@
-import React from "react";
-import { Estudiante, UnidadDidactica, Criterio, NivelLogro } from "../types";
+import { Estudiante, UnidadDidactica, Criterio, NivelLogro, Grupo } from "../types";
 
 interface EvaluarTabProps {
   selectedUnit: string;
@@ -14,6 +13,9 @@ interface EvaluarTabProps {
   niveles: NivelLogro[];
   handleGradeCriterio: (criterioId: string, nivelId: string) => void;
   handleGradeObsChange: (criterioId: string, obs: string) => void;
+  selectedGroup: string;
+  setSelectedGroup: (val: string) => void;
+  grupos: Grupo[];
 }
 
 export const EvaluarTab: React.FC<EvaluarTabProps> = ({
@@ -29,6 +31,9 @@ export const EvaluarTab: React.FC<EvaluarTabProps> = ({
   niveles,
   handleGradeCriterio,
   handleGradeObsChange,
+  selectedGroup,
+  setSelectedGroup,
+  grupos,
 }) => {
   return (
     <div className="space-y-6">
@@ -37,18 +42,35 @@ export const EvaluarTab: React.FC<EvaluarTabProps> = ({
           <h2 className="font-headline text-xl font-bold text-on-surface">Registro de Evaluaciones</h2>
           <p className="text-xs text-on-surface-variant mt-1">Evalúa de forma ágil mediante la rúbrica cognitiva.</p>
         </div>
-        <select
-          value={selectedUnit}
-          onChange={(e) => setSelectedUnit(e.target.value)}
-          className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
-        >
-          <option value="">-- Selecciona Unidad --</option>
-          {unidades.filter(u => u.estado === 'activo').map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.titulo}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <select
+            value={selectedGroup}
+            onChange={(e) => {
+              setSelectedGroup(e.target.value);
+              setSelectedStudent(null);
+              setSelectedUnit("");
+            }}
+            className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[200px] cursor-pointer"
+          >
+            {grupos.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.nombre}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedUnit}
+            onChange={(e) => setSelectedUnit(e.target.value)}
+            className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[220px] cursor-pointer"
+          >
+            <option value="">-- Selecciona Unidad --</option>
+            {unidades.filter(u => u.estado === 'activo').map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.titulo}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Selector horizontal de Estudiante */}

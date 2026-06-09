@@ -56,7 +56,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                 nombre: "",
                 apellido: "",
                 email: "",
-                telefono: ""
+                telefono: "",
+                direccion: ""
               });
               setLastSearchedStudentCedula("");
               setLastSearchedRepCedula("");
@@ -136,7 +137,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-on-surface-variant block">Parentesco con el Representante</label>
+                <label className="text-xs font-bold text-on-surface-variant block">Relación Representante-&gt;Estudiante</label>
                 <select
                   value={studentForm.parentesco}
                   onChange={(e) => setStudentForm({ ...studentForm, parentesco: e.target.value })}
@@ -220,6 +221,18 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
                 />
               </div>
+
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-on-surface-variant block">Dirección de Domicilio</label>
+                <input
+                  type="text"
+                  disabled={isRepresentativeAutofilled}
+                  placeholder="Ej: Sector El Olivo"
+                  value={representativeForm.direccion || ""}
+                  onChange={(e) => setRepresentativeForm({ ...representativeForm, direccion: e.target.value })}
+                  className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
+                />
+              </div>
             </div>
 
           </div>
@@ -244,7 +257,8 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   nombre: "",
                   apellido: "",
                   email: "",
-                  telefono: ""
+                  telefono: "",
+                  direccion: ""
                 });
                 setLastSearchedStudentCedula("");
                 setLastSearchedRepCedula("");

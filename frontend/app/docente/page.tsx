@@ -87,7 +87,8 @@ export default function DocenteDashboard() {
     nombre: "",
     apellido: "",
     email: "",
-    telefono: ""
+    telefono: "",
+    direccion: ""
   });
 
   const [isStudentAutofilled, setIsStudentAutofilled] = useState(false);
@@ -314,7 +315,8 @@ export default function DocenteDashboard() {
                   nombre: rep.nombre,
                   apellido: rep.apellido,
                   email: rep.usuarios?.email || "",
-                  telefono: rep.telefono || ""
+                  telefono: rep.telefono || "",
+                  direccion: rep.direccion || ""
                 });
                 setIsRepresentativeAutofilled(true);
                 setStudentForm(prev => ({
@@ -347,7 +349,8 @@ export default function DocenteDashboard() {
               nombre: "",
               apellido: "",
               email: "",
-              telefono: ""
+              telefono: "",
+              direccion: ""
             });
             setStudentForm(prev => ({
               ...prev,
@@ -378,7 +381,8 @@ export default function DocenteDashboard() {
                 nombre: data.nombre,
                 apellido: data.apellido,
                 email: data.email,
-                telefono: data.telefono || ""
+                telefono: data.telefono || "",
+                direccion: data.direccion || ""
               });
               setIsRepresentativeAutofilled(true);
               setStudentForm(prev => ({
@@ -400,7 +404,8 @@ export default function DocenteDashboard() {
             nombre: "",
             apellido: "",
             email: "",
-            telefono: ""
+            telefono: "",
+            direccion: ""
           }));
           setStudentForm(prev => ({
             ...prev,
@@ -480,7 +485,8 @@ export default function DocenteDashboard() {
             nombre: representativeForm.nombre,
             apellido: representativeForm.apellido,
             email: representativeForm.email,
-            telefono: representativeForm.telefono || undefined
+            telefono: representativeForm.telefono || undefined,
+            direccion: representativeForm.direccion || ""
           })
         });
 
@@ -540,7 +546,8 @@ export default function DocenteDashboard() {
         nombre: "",
         apellido: "",
         email: "",
-        telefono: ""
+        telefono: "",
+        direccion: ""
       });
       setIsStudentAutofilled(false);
       setIsRepresentativeAutofilled(false);

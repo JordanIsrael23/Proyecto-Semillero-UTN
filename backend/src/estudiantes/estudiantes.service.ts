@@ -43,6 +43,10 @@ export class EstudiantesService {
             apellido: famUser.apellido,
             telefono: famUser.telefono,
             direccion: fe.perfil_familias.direccion,
+            usuarios: {
+              email: famUser.email,
+              cedula: famUser.cedula,
+            },
           },
         };
       }),

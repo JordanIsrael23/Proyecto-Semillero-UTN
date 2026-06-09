@@ -80,6 +80,10 @@ export class GruposService {
               apellido: famUser.apellido,
               telefono: famUser.telefono,
               direccion: fe.perfil_familias.direccion,
+              usuarios: {
+                email: famUser.email,
+                cedula: famUser.cedula,
+              },
             },
           };
         }),

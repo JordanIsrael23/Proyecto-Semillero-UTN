@@ -29,10 +29,11 @@ export class FamiliasService {
       nombre: usuario.nombre,
       apellido: usuario.apellido,
       telefono: usuario.telefono,
+      direccion: usuario.perfil_familias.direccion,
     };
   }
 
-  async createFamilia(data: { cedula?: string; email: string; nombre: string; apellido: string; telefono?: string }) {
+  async createFamilia(data: { cedula?: string; email: string; nombre: string; apellido: string; telefono?: string; direccion?: string }) {
     // Verificar si el correo ya existe
     const existingEmail = await this.prisma.usuarios.findUnique({
       where: { email: data.email },
@@ -70,7 +71,7 @@ export class FamiliasService {
       const pFamilia = await tx.perfil_familias.create({
         data: {
           usuario_id: user.id,
-          direccion: '',
+          direccion: data.direccion || '',
         },
         include: {
           usuarios: true,

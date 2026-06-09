@@ -50,4 +50,10 @@ export class UnidadesController {
   async deleteActividad(@Param('id') id: string) {
     return this.unidadesService.deleteActividad(id);
   }
+
+  @Delete('unidades/:id')
+  async deleteUnidad(@Param('id') id: string) {
+    return this.unidadesService.deleteUnidad(id);
+  }
 }
+

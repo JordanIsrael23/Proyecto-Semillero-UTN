@@ -14,6 +14,7 @@ interface PlanificacionTabProps {
   grupos: Grupo[];
   handleDeleteActivity: (id: string) => void;
   setIsActivityReadOnly: (val: boolean) => void;
+  handleDeleteUnit: (id: string) => void;
 }
 
 export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
@@ -29,6 +30,7 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
   grupos,
   handleDeleteActivity,
   setIsActivityReadOnly,
+  handleDeleteUnit,
 }) => {
   return (
     <div className="space-y-6">
@@ -183,6 +185,13 @@ export const PlanificacionTab: React.FC<PlanificacionTabProps> = ({
                 className="flex-1 py-2 bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface border border-outline-variant/30 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 Clonar
+              </button>
+              <button
+                onClick={() => handleDeleteUnit(unit.id)}
+                className="py-2 px-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 border border-red-500/20 rounded-xl text-xs font-bold transition-all cursor-pointer"
+                title="Eliminar Unidad"
+              >
+                🗑️
               </button>
               <button
                 onClick={() => {

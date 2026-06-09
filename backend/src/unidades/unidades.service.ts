@@ -140,4 +140,18 @@ export class UnidadesService {
   async deleteActividad(id: string) {
     return this.prisma.actividades.delete({ where: { id } });
   }
+
+  async deleteUnidad(id: string) {
+    return this.prisma.$transaction(async (tx) => {
+      // Delete associated evaluations first
+      await tx.evaluaciones_criterio.deleteMany({
+        where: { unidad_didactica_id: id },
+      });
+      // Delete the unit itself
+      return tx.unidades_didacticas.delete({
+        where: { id },
+      });
+    });
+  }
 }
+

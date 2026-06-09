@@ -67,6 +67,7 @@ export default function DocenteDashboard() {
   const [showGroupModal, setShowGroupModal] = useState(false);
   const [showUnitModal, setShowUnitModal] = useState(false);
   const [showActivityModal, setShowActivityModal] = useState(false);
+  const [isActivityReadOnly, setIsActivityReadOnly] = useState(false);
   const [feedback, setFeedback] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const [groupForm, setGroupForm] = useState({
@@ -122,6 +123,7 @@ export default function DocenteDashboard() {
   });
 
   const [activityForm, setActivityForm] = useState({
+    id: "",
     titulo: "",
     descripcion: "",
     tipo: "casa" as "clase" | "casa",
@@ -695,13 +697,19 @@ export default function DocenteDashboard() {
     }
   };
 
-  // Agregar Actividad a Unidad
-  const handleCreateActivity = async (e: React.FormEvent, finalRecursos?: { titulo: string; url: string }[]) => {
+  // Guardar (Crear o Editar) Actividad a Unidad
+  const handleSaveActivity = async (e: React.FormEvent, finalRecursos?: { titulo: string; url: string }[]) => {
     e.preventDefault();
     try {
       const recursosToSend = finalRecursos !== undefined ? finalRecursos : activityForm.recursos;
-      const res = await fetch(`${BACKEND_URL}/unidades/${selectedUnit}/actividades`, {
-        method: "POST",
+      const isEdit = !!activityForm.id;
+      const url = isEdit
+        ? `${BACKEND_URL}/actividades/${activityForm.id}`
+        : `${BACKEND_URL}/unidades/${selectedUnit}/actividades`;
+      const method = isEdit ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method: method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           titulo: activityForm.titulo,
@@ -712,18 +720,38 @@ export default function DocenteDashboard() {
         })
       });
 
-      if (!res.ok) throw new Error("Error al crear actividad.");
+      if (!res.ok) throw new Error(isEdit ? "Error al actualizar la actividad." : "Error al crear la actividad.");
 
       setShowActivityModal(false);
-      setActivityForm({ titulo: "", descripcion: "", tipo: "casa", recursos: [], fecha_limite: "" });
-      setFeedback({ message: "Actividad añadida con éxito.", type: "success" });
+      setActivityForm({ id: "", titulo: "", descripcion: "", tipo: "casa", recursos: [], fecha_limite: "" });
+      setFeedback({ message: isEdit ? "Actividad actualizada con éxito." : "Actividad añadida con éxito.", type: "success" });
 
       // Recargar unidades
       const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
       const unitsData = await unitsRes.json();
       setUnidades(unitsData);
     } catch (err: any) {
-      setFeedback({ message: err.message || "Error al crear la actividad.", type: "error" });
+      setFeedback({ message: err.message || "Error al guardar la actividad.", type: "error" });
+    }
+  };
+
+  // Eliminar Actividad
+  const handleDeleteActivity = async (activityId: string) => {
+    if (!confirm("¿Está seguro de que desea eliminar esta actividad?")) return;
+    try {
+      const res = await fetch(`${BACKEND_URL}/actividades/${activityId}`, {
+        method: "DELETE"
+      });
+
+      if (!res.ok) throw new Error("Error al eliminar la actividad.");
+      setFeedback({ message: "Actividad eliminada con éxito.", type: "success" });
+
+      // Recargar unidades
+      const unitsRes = await fetch(`${BACKEND_URL}/docente/unidades?grupoId=${selectedGroup}`, { headers: { "x-user-id": session?.user.id || "" } });
+      const unitsData = await unitsRes.json();
+      setUnidades(unitsData);
+    } catch (err: any) {
+      setFeedback({ message: err.message || "Error al eliminar la actividad.", type: "error" });
     }
   };
 
@@ -1073,6 +1101,8 @@ ${data.tareasCasa.length === 0
             selectedGroup={selectedGroup}
             setSelectedGroup={setSelectedGroup}
             grupos={grupos}
+            handleDeleteActivity={handleDeleteActivity}
+            setIsActivityReadOnly={setIsActivityReadOnly}
           />
         )}
 
@@ -1091,6 +1121,9 @@ ${data.tareasCasa.length === 0
             niveles={niveles}
             handleGradeCriterio={handleGradeCriterio}
             handleGradeObsChange={handleGradeObsChange}
+            selectedGroup={selectedGroup}
+            setSelectedGroup={setSelectedGroup}
+            grupos={grupos}
           />
         )}
 
@@ -1103,6 +1136,9 @@ ${data.tareasCasa.length === 0
             fichaMonitoreo={fichaMonitoreo}
             setFichaMonitoreo={setFichaMonitoreo}
             handleSaveFicha={handleSaveFicha}
+            selectedGroup={selectedGroup}
+            setSelectedGroup={setSelectedGroup}
+            grupos={grupos}
           />
         )}
 
@@ -1117,6 +1153,9 @@ ${data.tareasCasa.length === 0
             autoevaluacionReflexion={autoevaluacionReflexion}
             setAutoevaluacionReflexion={setAutoevaluacionReflexion}
             handleSaveAutoevaluacion={handleSaveAutoevaluacion}
+            selectedGroup={selectedGroup}
+            setSelectedGroup={setSelectedGroup}
+            grupos={grupos}
           />
         )}
 
@@ -1178,7 +1217,8 @@ ${data.tareasCasa.length === 0
         setShowActivityModal={setShowActivityModal}
         activityForm={activityForm}
         setActivityForm={setActivityForm}
-        handleCreateActivity={handleCreateActivity}
+        handleCreateActivity={handleSaveActivity}
+        isReadOnly={isActivityReadOnly}
       />
 
       {/* Modal Calificar Tareas */}

@@ -1,5 +1,4 @@
-import React from "react";
-import { UnidadDidactica } from "../types";
+import { UnidadDidactica, Grupo } from "../types";
 
 interface AutoevaluacionTabProps {
   selectedUnit: string;
@@ -10,6 +9,9 @@ interface AutoevaluacionTabProps {
   autoevaluacionReflexion: string;
   setAutoevaluacionReflexion: (val: string) => void;
   handleSaveAutoevaluacion: (e: React.FormEvent) => void;
+  selectedGroup: string;
+  setSelectedGroup: (val: string) => void;
+  grupos: Grupo[];
 }
 
 export const AutoevaluacionTab: React.FC<AutoevaluacionTabProps> = ({
@@ -21,6 +23,9 @@ export const AutoevaluacionTab: React.FC<AutoevaluacionTabProps> = ({
   autoevaluacionReflexion,
   setAutoevaluacionReflexion,
   handleSaveAutoevaluacion,
+  selectedGroup,
+  setSelectedGroup,
+  grupos,
 }) => {
   return (
     <div className="space-y-6">
@@ -29,18 +34,34 @@ export const AutoevaluacionTab: React.FC<AutoevaluacionTabProps> = ({
           <h2 className="font-headline text-xl font-bold text-on-surface">Autoevaluación Docente</h2>
           <p className="text-xs text-on-surface-variant mt-1">Reflexiona y evalúa tu práctica en la unidad didáctica.</p>
         </div>
-        <select
-          value={selectedUnit}
-          onChange={(e) => setSelectedUnit(e.target.value)}
-          className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[250px]"
-        >
-          <option value="">-- Selecciona Unidad --</option>
-          {unidades.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.titulo}
-            </option>
-          ))}
-        </select>
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+          <select
+            value={selectedGroup}
+            onChange={(e) => {
+              setSelectedGroup(e.target.value);
+              setSelectedUnit("");
+            }}
+            className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[200px] cursor-pointer"
+          >
+            {grupos.map((g) => (
+              <option key={g.id} value={g.id}>
+                {g.nombre}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedUnit}
+            onChange={(e) => setSelectedUnit(e.target.value)}
+            className="bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary w-full sm:w-[220px] cursor-pointer"
+          >
+            <option value="">-- Selecciona Unidad --</option>
+            {unidades.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.titulo}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {selectedUnit ? (

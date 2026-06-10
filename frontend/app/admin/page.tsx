@@ -12,6 +12,7 @@ import UsuariosTab from "./components/UsuariosTab";
 import DatabaseTab from "./components/DatabaseTab";
 import UserModal from "./components/UserModal";
 import GenericEditModal from "./components/GenericEditModal";
+import AjustesTab from "../components/AjustesTab";
 
 const ADMIN_NAV = [
   { id: "dashboard", label: "Inicio", icon: "dashboard" },
@@ -555,6 +556,7 @@ export default function AdminDashboard() {
           onDeleteRecord={handleDeleteRecord}
         />
       )}
+      {activeTab === "ajustes" && <AjustesTab session={session} />}
 
       {/* MODAL GESTIÓN DE USUARIOS */}
       <UserModal

@@ -25,6 +25,7 @@ import { EvaluarTab } from "./components/EvaluarTab";
 import { MonitoreoTab } from "./components/MonitoreoTab";
 import { AutoevaluacionTab } from "./components/AutoevaluacionTab";
 import { ConsolidadoTab } from "./components/ConsolidadoTab";
+import AjustesTab from "../components/AjustesTab";
 import { GroupModal } from "./components/GroupModal";
 import { StudentModal } from "./components/StudentModal";
 import { UnitModal } from "./components/UnitModal";
@@ -1209,6 +1210,9 @@ ${data.tareasCasa.length === 0
             metricasGrupales={metricasGrupales}
           />
         )}
+
+        {/* TAB AJUSTES */}
+        {activeTab === "ajustes" && <AjustesTab session={session} />}
 
       </div>
 

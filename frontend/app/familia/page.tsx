@@ -9,6 +9,7 @@ import ProgresoTab from "./components/ProgresoTab";
 import HistorialTab from "./components/HistorialTab";
 import TareasTab from "./components/TareasTab";
 import PerfilTab from "./components/PerfilTab";
+import AjustesTab from "../components/AjustesTab";
 import { UsuarioSession, HijoRel, EvaluacionCriterio, FichaMonitoreo, ActividadCasa } from "./types";
 
 const FAMILIA_NAV = [
@@ -261,7 +262,7 @@ export default function FamiliaDashboard() {
           />
         )}
 
-        {activeTab !== "inicio" && (
+        {activeTab !== "inicio" && activeTab !== "ajustes" && (
           <div className="space-y-6">
 
             {/* Header de la sección */}
@@ -344,6 +345,9 @@ export default function FamiliaDashboard() {
 
           </div>
         )}
+
+        {/* TAB AJUSTES */}
+        {activeTab === "ajustes" && <AjustesTab session={session} />}
       </div>
     </DashboardShell>
   );

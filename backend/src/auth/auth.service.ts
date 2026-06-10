@@ -187,4 +187,59 @@ export class AuthService {
       };
     });
   }
+
+  async updateProfile(userId: string, data: any) {
+    const { nombre, apellido, email, telefono, direccion, especialidad, password_raw } = data;
+    
+    // Check if email is taken by another user
+    if (email) {
+      const existing = await this.prisma.usuarios.findFirst({
+        where: { email, id: { not: userId } }
+      });
+      if (existing) throw new BadRequestException('El correo ya está en uso');
+    }
+
+    const user = await this.prisma.usuarios.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    const updateData: any = {};
+    if (nombre) updateData.nombre = nombre;
+    if (apellido) updateData.apellido = apellido;
+    if (email) updateData.email = email;
+    if (telefono !== undefined) updateData.telefono = telefono || null;
+    
+    if (password_raw) {
+      updateData.password_hash = await bcrypt.hash(password_raw, 10);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.usuarios.update({
+        where: { id: userId },
+        data: updateData,
+      });
+
+      let perfil: any = null;
+      if (user.rol_id === 2 && especialidad !== undefined) {
+        perfil = await tx.perfil_docentes.upsert({
+          where: { usuario_id: userId },
+          create: { usuario_id: userId, especialidad },
+          update: { especialidad },
+        });
+      } else if (user.rol_id === 3 && direccion !== undefined) {
+        perfil = await tx.perfil_familias.upsert({
+          where: { usuario_id: userId },
+          create: { usuario_id: userId, direccion },
+          update: { direccion },
+        });
+      }
+
+      const { password_hash, ...userInfoWithoutPassword } = updatedUser;
+      const rolName = user.rol_id === 1 ? 'admin' : user.rol_id === 2 ? 'docente' : 'familia';
+
+      return {
+        user: { ...userInfoWithoutPassword, rol: rolName },
+        perfil,
+      };
+    });
+  }
 }

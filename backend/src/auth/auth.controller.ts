@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Put, Body, Headers, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 
 @Controller('api/auth')
@@ -24,5 +24,16 @@ export class AuthController {
     }
   ) {
     return this.authService.register(body);
+  }
+
+  @Put('perfil')
+  async updateProfile(
+    @Headers('x-user-id') userId: string,
+    @Body() body: any
+  ) {
+    if (!userId) {
+      throw new UnauthorizedException('Falta cabecera x-user-id');
+    }
+    return this.authService.updateProfile(userId, body);
   }
 }

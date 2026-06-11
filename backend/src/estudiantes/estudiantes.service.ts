@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
-import { validarCedulaEcuatoriana } from '../utils/validation';
+import { validarCedulaEcuatoriana, validarSoloLetrasYEspacios } from '../utils/validation';
 
 @Injectable()
 export class EstudiantesService {
@@ -65,6 +65,22 @@ export class EstudiantesService {
     // Validar formato y dígito verificador de la cédula ecuatoriana del estudiante
     if (!validarCedulaEcuatoriana(data.cedula)) {
       throw new BadRequestException('La cédula del estudiante no es una cédula ecuatoriana válida.');
+    }
+
+    // Validar que nombre y apellido contengan solo letras y espacios
+    if (!validarSoloLetrasYEspacios(data.nombre)) {
+      throw new BadRequestException('El nombre del estudiante contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (!validarSoloLetrasYEspacios(data.apellido)) {
+      throw new BadRequestException('El apellido del estudiante contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+
+    // Validar que la cédula del estudiante no corresponda a la de un usuario registrado
+    const userWithSameCedula = await this.prisma.usuarios.findUnique({
+      where: { cedula: data.cedula },
+    });
+    if (userWithSameCedula) {
+      throw new BadRequestException('La cédula ingresada pertenece a un usuario/representante registrado y no puede asignarse a un estudiante.');
     }
 
     // Validar cédula única en estudiantes
@@ -134,6 +150,13 @@ export class EstudiantesService {
   }
 
   async updateEstudiante(id: string, data: { nombre: string; apellido: string; grupo_id: string; fecha_nacimiento: string; activo?: boolean }) {
+    if (data.nombre && !validarSoloLetrasYEspacios(data.nombre)) {
+      throw new BadRequestException('El nombre del estudiante contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (data.apellido && !validarSoloLetrasYEspacios(data.apellido)) {
+      throw new BadRequestException('El apellido del estudiante contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+
     const estudiante = await this.prisma.estudiantes.update({
       where: { id },
       data: {

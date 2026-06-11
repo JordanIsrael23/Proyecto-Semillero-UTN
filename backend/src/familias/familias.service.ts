@@ -1,6 +1,7 @@
 import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
+import { validarCedulaEcuatoriana, validarSoloLetrasYEspacios, validarSoloNumeros } from '../utils/validation';
 
 @Injectable()
 export class FamiliasService {
@@ -34,6 +35,16 @@ export class FamiliasService {
   }
 
   async createFamilia(data: { cedula?: string; email: string; nombre: string; apellido: string; telefono?: string; direccion?: string }) {
+    if (data.nombre && !validarSoloLetrasYEspacios(data.nombre)) {
+      throw new BadRequestException('El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (data.apellido && !validarSoloLetrasYEspacios(data.apellido)) {
+      throw new BadRequestException('El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (data.telefono && !validarSoloNumeros(data.telefono)) {
+      throw new BadRequestException('El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.');
+    }
+
     // Verificar si el correo ya existe
     const existingEmail = await this.prisma.usuarios.findUnique({
       where: { email: data.email },
@@ -42,13 +53,24 @@ export class FamiliasService {
       throw new BadRequestException('El correo electrónico ya está registrado.');
     }
 
-    // Si se provee cédula, verificar si la cédula ya existe
+    // Si se provee cédula, verificar si la cédula ya existe o es de estudiante
     if (data.cedula) {
+      if (!validarCedulaEcuatoriana(data.cedula)) {
+        throw new BadRequestException('La cédula del representante no es una cédula ecuatoriana válida.');
+      }
+
       const existingCedula = await this.prisma.usuarios.findUnique({
         where: { cedula: data.cedula },
       });
       if (existingCedula) {
         throw new BadRequestException('La cédula del representante ya está registrada.');
+      }
+
+      const isStudentCedula = await this.prisma.estudiantes.findUnique({
+        where: { cedula: data.cedula },
+      });
+      if (isStudentCedula) {
+        throw new BadRequestException('La cédula ingresada pertenece a un estudiante y no puede registrarse como representante.');
       }
     }
 

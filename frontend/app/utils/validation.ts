@@ -42,3 +42,18 @@ export function validarCedulaEcuatoriana(cedula: string): boolean {
 
   return digitoVerificadorCalculado === digitoVerificadorInput;
 }
+
+/**
+ * Valida si una cadena de texto contiene únicamente letras y espacios.
+ * Admite caracteres en español como tildes (áéíóúÁÉÍÓÚ), diéresis (üÜ) y eñes (ñÑ).
+ */
+export function validarSoloLetrasYEspacios(texto: string): boolean {
+  return /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(texto);
+}
+
+/**
+ * Valida si una cadena de texto contiene únicamente números (dígitos).
+ */
+export function validarSoloNumeros(texto: string): boolean {
+  return /^\d+$/.test(texto);
+}

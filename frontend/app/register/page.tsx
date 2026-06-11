@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { validarCedulaEcuatoriana } from "../utils/validation";
+import { validarCedulaEcuatoriana, validarSoloLetrasYEspacios, validarSoloNumeros } from "../utils/validation";
 import BrandLogo from "../components/BrandLogo";
 import MaterialIcon from "../components/MaterialIcon";
 import ThemeToggle from "../components/ThemeToggle";
@@ -31,6 +31,24 @@ export default function RegisterPage() {
 
     if (!validarCedulaEcuatoriana(cedula)) {
       setError("La cédula ingresada no es válida para la República del Ecuador.");
+      setLoading(false);
+      return;
+    }
+
+    if (!validarSoloLetrasYEspacios(nombre)) {
+      setError("El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.");
+      setLoading(false);
+      return;
+    }
+
+    if (!validarSoloLetrasYEspacios(apellido)) {
+      setError("El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.");
+      setLoading(false);
+      return;
+    }
+
+    if (telefono && !validarSoloNumeros(telefono)) {
+      setError("El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.");
       setLoading(false);
       return;
     }
@@ -136,13 +154,13 @@ export default function RegisterPage() {
                     <label htmlFor="nombre" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       Nombres
                     </label>
-                    <input id="nombre" type="text" required value={nombre} onChange={(e) => setNombre(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: Juan Carlos" />
+                    <input id="nombre" type="text" required value={nombre} onChange={(e) => setNombre(e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, ""))} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: Juan Carlos" />
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="apellido" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       Apellidos
                     </label>
-                    <input id="apellido" type="text" required value={apellido} onChange={(e) => setApellido(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: Pérez Gómez" />
+                    <input id="apellido" type="text" required value={apellido} onChange={(e) => setApellido(e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, ""))} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: Pérez Gómez" />
                   </div>
                 </div>
 
@@ -157,7 +175,7 @@ export default function RegisterPage() {
                     <label htmlFor="telefono" className="block text-xs font-bold uppercase tracking-wider text-on-surface-variant">
                       Teléfono
                     </label>
-                    <input id="telefono" type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value)} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: 0998765432" />
+                    <input id="telefono" type="tel" value={telefono} onChange={(e) => setTelefono(e.target.value.replace(/\D/g, ""))} className="ds-input w-full px-4 py-3 text-sm" placeholder="Ej: 0998765432" />
                   </div>
                 </div>
 

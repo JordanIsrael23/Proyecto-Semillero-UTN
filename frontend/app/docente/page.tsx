@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { validarCedulaEcuatoriana } from "../utils/validation";
+import { validarCedulaEcuatoriana, validarSoloLetrasYEspacios, validarSoloNumeros } from "../utils/validation";
 import DashboardWelcome from "../components/DashboardWelcome";
 import DashboardShell from "../components/DashboardShell";
 import AppModal from "../components/AppModal";

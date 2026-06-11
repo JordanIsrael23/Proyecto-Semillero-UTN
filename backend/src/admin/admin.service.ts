@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma.service';
 import * as bcrypt from 'bcrypt';
-import { validarCedulaEcuatoriana } from '../utils/validation';
+import { validarCedulaEcuatoriana, validarSoloLetrasYEspacios, validarSoloNumeros } from '../utils/validation';
 
 const ALLOWED_TABLES = [
   'roles',
@@ -56,6 +56,23 @@ export class AdminService {
       throw new BadRequestException('La cédula ingresada no es una cédula ecuatoriana válida.');
     }
 
+    if (nombre && !validarSoloLetrasYEspacios(nombre)) {
+      throw new BadRequestException('El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (apellido && !validarSoloLetrasYEspacios(apellido)) {
+      throw new BadRequestException('El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (telefono && !validarSoloNumeros(telefono)) {
+      throw new BadRequestException('El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.');
+    }
+
+    const isStudentCedula = await this.prisma.estudiantes.findUnique({
+      where: { cedula },
+    });
+    if (isStudentCedula) {
+      throw new BadRequestException('La cédula ingresada pertenece a un estudiante y no puede registrarse como usuario.');
+    }
+
     const existing = await this.prisma.usuarios.findFirst({
       where: { OR: [{ email }, { cedula }] },
     });
@@ -105,6 +122,23 @@ export class AdminService {
 
     if (!validarCedulaEcuatoriana(cedula)) {
       throw new BadRequestException('La cédula ingresada no es una cédula ecuatoriana válida.');
+    }
+
+    if (nombre && !validarSoloLetrasYEspacios(nombre)) {
+      throw new BadRequestException('El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (apellido && !validarSoloLetrasYEspacios(apellido)) {
+      throw new BadRequestException('El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (telefono && !validarSoloNumeros(telefono)) {
+      throw new BadRequestException('El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.');
+    }
+
+    const isStudentCedula = await this.prisma.estudiantes.findUnique({
+      where: { cedula },
+    });
+    if (isStudentCedula) {
+      throw new BadRequestException('La cédula ingresada pertenece a un estudiante y no puede asignarse a un usuario.');
     }
 
     const existing = await this.prisma.usuarios.findFirst({

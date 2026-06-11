@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { PrismaService } from '../prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { validarCedulaEcuatoriana } from '../utils/validation';
+import { validarCedulaEcuatoriana, validarSoloLetrasYEspacios, validarSoloNumeros } from '../utils/validation';
 
 @Injectable()
 export class AuthService {
@@ -104,6 +104,27 @@ export class AuthService {
       throw new BadRequestException('La cédula ingresada no es una cédula ecuatoriana válida.');
     }
 
+    // Validar que nombre y apellido contengan solo letras y espacios
+    if (!validarSoloLetrasYEspacios(data.nombre)) {
+      throw new BadRequestException('El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (!validarSoloLetrasYEspacios(data.apellido)) {
+      throw new BadRequestException('El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+
+    // Validar que el teléfono contenga solo números
+    if (data.telefono && !validarSoloNumeros(data.telefono)) {
+      throw new BadRequestException('El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.');
+    }
+
+    // Validar que la cédula del usuario no corresponda a la de un estudiante registrado
+    const isStudentCedula = await this.prisma.estudiantes.findUnique({
+      where: { cedula: data.cedula },
+    });
+    if (isStudentCedula) {
+      throw new BadRequestException('La cédula ingresada pertenece a un estudiante y no puede registrarse como usuario.');
+    }
+
     // Validar si la cédula o el email ya existen
     const existingUser = await this.prisma.usuarios.findFirst({
       where: {
@@ -187,9 +208,18 @@ export class AuthService {
       };
     });
   }
-
   async updateProfile(userId: string, data: any) {
     const { nombre, apellido, email, telefono, direccion, especialidad, password_raw } = data;
+    
+    if (nombre && !validarSoloLetrasYEspacios(nombre)) {
+      throw new BadRequestException('El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (apellido && !validarSoloLetrasYEspacios(apellido)) {
+      throw new BadRequestException('El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (telefono && !validarSoloNumeros(telefono)) {
+      throw new BadRequestException('El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.');
+    }
     
     // Check if email is taken by another user
     if (email) {

@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/
 import { PrismaService } from '../prisma.service';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { validarCedulaEcuatoriana } from '../utils/validation';
+import { validarCedulaEcuatoriana, validarSoloLetrasYEspacios, validarSoloNumeros } from '../utils/validation';
 
 @Injectable()
 export class AuthService {
@@ -104,6 +104,27 @@ export class AuthService {
       throw new BadRequestException('La cédula ingresada no es una cédula ecuatoriana válida.');
     }
 
+    // Validar que nombre y apellido contengan solo letras y espacios
+    if (!validarSoloLetrasYEspacios(data.nombre)) {
+      throw new BadRequestException('El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (!validarSoloLetrasYEspacios(data.apellido)) {
+      throw new BadRequestException('El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+
+    // Validar que el teléfono contenga solo números
+    if (data.telefono && !validarSoloNumeros(data.telefono)) {
+      throw new BadRequestException('El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.');
+    }
+
+    // Validar que la cédula del usuario no corresponda a la de un estudiante registrado
+    const isStudentCedula = await this.prisma.estudiantes.findUnique({
+      where: { cedula: data.cedula },
+    });
+    if (isStudentCedula) {
+      throw new BadRequestException('La cédula ingresada pertenece a un estudiante y no puede registrarse como usuario.');
+    }
+
     // Validar si la cédula o el email ya existen
     const existingUser = await this.prisma.usuarios.findFirst({
       where: {
@@ -183,6 +204,70 @@ export class AuthService {
 
       return {
         user: userInfo,
+        perfil,
+      };
+    });
+  }
+  async updateProfile(userId: string, data: any) {
+    const { nombre, apellido, email, telefono, direccion, especialidad, password_raw } = data;
+    
+    if (nombre && !validarSoloLetrasYEspacios(nombre)) {
+      throw new BadRequestException('El nombre ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (apellido && !validarSoloLetrasYEspacios(apellido)) {
+      throw new BadRequestException('El apellido ingresado contiene caracteres no permitidos. Solo se permiten letras y espacios.');
+    }
+    if (telefono && !validarSoloNumeros(telefono)) {
+      throw new BadRequestException('El número de teléfono ingresado contiene caracteres no permitidos. Solo se permiten números.');
+    }
+    
+    // Check if email is taken by another user
+    if (email) {
+      const existing = await this.prisma.usuarios.findFirst({
+        where: { email, id: { not: userId } }
+      });
+      if (existing) throw new BadRequestException('El correo ya está en uso');
+    }
+
+    const user = await this.prisma.usuarios.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('Usuario no encontrado');
+
+    const updateData: any = {};
+    if (nombre) updateData.nombre = nombre;
+    if (apellido) updateData.apellido = apellido;
+    if (email) updateData.email = email;
+    if (telefono !== undefined) updateData.telefono = telefono || null;
+    
+    if (password_raw) {
+      updateData.password_hash = await bcrypt.hash(password_raw, 10);
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const updatedUser = await tx.usuarios.update({
+        where: { id: userId },
+        data: updateData,
+      });
+
+      let perfil: any = null;
+      if (user.rol_id === 2 && especialidad !== undefined) {
+        perfil = await tx.perfil_docentes.upsert({
+          where: { usuario_id: userId },
+          create: { usuario_id: userId, especialidad },
+          update: { especialidad },
+        });
+      } else if (user.rol_id === 3 && direccion !== undefined) {
+        perfil = await tx.perfil_familias.upsert({
+          where: { usuario_id: userId },
+          create: { usuario_id: userId, direccion },
+          update: { direccion },
+        });
+      }
+
+      const { password_hash, ...userInfoWithoutPassword } = updatedUser;
+      const rolName = user.rol_id === 1 ? 'admin' : user.rol_id === 2 ? 'docente' : 'familia';
+
+      return {
+        user: { ...userInfoWithoutPassword, rol: rolName },
         perfil,
       };
     });

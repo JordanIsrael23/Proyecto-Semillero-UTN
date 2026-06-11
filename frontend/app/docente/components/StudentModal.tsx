@@ -102,7 +102,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   required
                   disabled={isStudentAutofilled}
                   value={studentForm.nombre}
-                  onChange={(e) => setStudentForm({ ...studentForm, nombre: e.target.value })}
+                  onChange={(e) => setStudentForm({ ...studentForm, nombre: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, "") })}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
                 />
               </div>
@@ -114,7 +114,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   required
                   disabled={isStudentAutofilled}
                   value={studentForm.apellido}
-                  onChange={(e) => setStudentForm({ ...studentForm, apellido: e.target.value })}
+                  onChange={(e) => setStudentForm({ ...studentForm, apellido: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, "") })}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
                 />
               </div>
@@ -181,7 +181,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   required
                   disabled={isRepresentativeAutofilled}
                   value={representativeForm.nombre}
-                  onChange={(e) => setRepresentativeForm({ ...representativeForm, nombre: e.target.value })}
+                  onChange={(e) => setRepresentativeForm({ ...representativeForm, nombre: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, "") })}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
                 />
               </div>
@@ -193,7 +193,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   required
                   disabled={isRepresentativeAutofilled}
                   value={representativeForm.apellido}
-                  onChange={(e) => setRepresentativeForm({ ...representativeForm, apellido: e.target.value })}
+                  onChange={(e) => setRepresentativeForm({ ...representativeForm, apellido: e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, "") })}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
                 />
               </div>
@@ -217,7 +217,7 @@ export const StudentModal: React.FC<StudentModalProps> = ({
                   type="tel"
                   disabled={isRepresentativeAutofilled}
                   value={representativeForm.telefono}
-                  onChange={(e) => setRepresentativeForm({ ...representativeForm, telefono: e.target.value })}
+                  onChange={(e) => setRepresentativeForm({ ...representativeForm, telefono: e.target.value.replace(/\D/g, "") })}
                   className="w-full bg-surface-container-low border border-outline-variant/30 rounded-xl px-4 py-2 text-sm text-on-surface focus:outline-none focus:border-primary disabled:opacity-75 disabled:bg-surface-container"
                 />
               </div>

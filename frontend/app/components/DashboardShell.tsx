@@ -114,7 +114,12 @@ export default function DashboardShell({
       <div className="mt-auto space-y-1 border-t border-outline-variant/30 pt-6">
         <button
           type="button"
-          className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-on-surface-variant transition-colors duration-200 hover:bg-primary-container/10 hover:text-primary"
+          onClick={() => handleNavClick("ajustes")}
+          className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-colors duration-200 ${
+            activeTab === "ajustes"
+              ? "bg-primary text-on-primary active-nav-glow"
+              : "text-on-surface-variant hover:bg-primary-container/10 hover:text-primary"
+          }`}
         >
           <MaterialIcon name="settings" className="text-xl" />
           <span>Ajustes</span>
